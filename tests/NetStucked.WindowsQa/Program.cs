@@ -30,11 +30,15 @@ namespace NetStucked.WindowsQa;
 internal static class Program
 {
     private static int _exitCode;
+    private static string? _expectedAvailableVersion;
+    private static string? _expectedCurrentVersion;
     [STAThread]
     public static int Main(string[] args)
     {
         string output = Path.GetFullPath(args.FirstOrDefault() ?? "artifacts/windows-qa");
         int soakSeconds = args.Length > 1 ? int.Parse(args[1]) : 0;
+        _expectedAvailableVersion = args.Length > 3 ? args[3] : null;
+        _expectedCurrentVersion = args.Length > 4 ? args[4] : null;
         if (args.Length > 2)
         {
             string published = Path.GetFullPath(args[2]);
@@ -325,6 +329,30 @@ internal static class Program
         // This is a real public read; API errors remain visible as failures rather than up-to-date claims.
         await vm.Updates.CheckCommand.ExecuteAsync(null);
         Require(!vm.Updates.IsChecking && vm.Updates.LastChecked != "Not checked yet", "Manual GitHub check completes and records its actual outcome");
+        if (_expectedAvailableVersion is not null)
+        {
+            Require(vm.Updates.CurrentVersion == _expectedCurrentVersion, "Live release check runs the requested published application version");
+            Require(vm.Updates.StatusTitle != "Unable to check for updates", "Live public GitHub request succeeds");
+            var download = Descendants<Button>((DependencyObject)window.Content).Single(b => AutomationProperties.GetName(b) == "Open available GitHub release for manual installation");
+            if (_expectedAvailableVersion == "none")
+            {
+                Require(vm.Updates.Available is null && vm.Updates.StatusTitle == "No newer published version" && !download.IsEnabled, "Current test build has no newer public update and disables installation action");
+                Require(vm.Updates.PreviousVersion == "Previous documented version: v0.2.0", "Test build records the published 0.2.0 recovery version");
+            }
+            else
+            {
+                Require(vm.Updates.Available?.Version.ToString() == _expectedAvailableVersion && vm.Updates.Badge == "Patch update", "Published 0.2.0 discovers the actual 0.2.1 patch release");
+                Require(vm.Updates.Available?.InstallerPage is not null && vm.Updates.OpenReleaseCommand.CanExecute(null) && download.IsEnabled, "Actual release installer enables the manual download button");
+                Require(vm.Updates.Notes.Contains("TEST BUILD") && vm.Updates.Notes.Contains("Changes from 0.2.0"), "Actual GitHub notes identify the test purpose and changes");
+            }
+            await File.WriteAllTextAsync(Path.Combine(output, "live-release-check.json"), JsonSerializer.Serialize(new
+            {
+                vm.Updates.CurrentVersion, AvailableVersion = vm.Updates.Available?.Version.ToString(),
+                ReleasePage = vm.Updates.Available?.Page, InstallerPage = vm.Updates.Available?.InstallerPage,
+                vm.Updates.Badge, vm.Updates.DownloadLabel, DownloadButtonEnabled = download.IsEnabled,
+                vm.Updates.PreviousVersion, vm.Updates.LastChecked, Source = "Actual public GitHub API; no fixture", InstallerExecuted = false
+            }, new JsonSerializerOptions { WriteIndented = true }));
+        }
         await File.WriteAllTextAsync(Path.Combine(output, "github-check.txt"), $"{vm.Updates.StatusTitle}\n{vm.Updates.StatusDetails}\n{vm.Updates.LastChecked}\n");
         Render(window, output, "Updates", 1536, 1024, 1); Render(window, output, "Updates-narrow", 1280, 800, 1);
         vm.Updates.RecoveryCommand.Execute(null); Require(vm.Updates.ShowRecoveryGuide, "Rollback opens manual recovery instructions");

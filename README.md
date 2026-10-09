@@ -16,7 +16,14 @@ pwsh -File scripts/Publish.ps1
 
 Inno Setup 6 is needed only to compile the installer. Preferences/logs are per-user under `%LOCALAPPDATA%\NetStucked`. No administrator privilege or .NET installation is required for the self-contained application. Choose only targets you are authorized to diagnose. ICMP loss does not establish that a remote host or service is offline.
 
-See [0.2.0 behavior](docs/FEATURES_0.2.0.md), `docs/FEATURE_SPEC.md`, `docs/NETWORK_BEHAVIOR.md`, `docs/DEVELOPMENT.md` and [current QA](docs/QA_0.2.0.md). Dashboard, Network Info and automatic download/install/rollback remain deferred. No commit, push or release publication is performed by this implementation.
+See [0.2.0 behavior](docs/FEATURES_0.2.0.md), `docs/FEATURE_SPEC.md`, `docs/NETWORK_BEHAVIOR.md`, `docs/DEVELOPMENT.md` and [current QA](docs/QA_0.2.0.md). Dashboard, Network Info and automatic download/install/rollback remain deferred.
+
+## Published versions
+
+- [0.2.0](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.2.0) is the regular GitHub Latest release and the version on `main`.
+- [0.2.1 TEST BUILD](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.2.1) exercises manual Updates & Recovery. It changes version metadata and release history only and is maintained on `release-test/0.2.1`. It is a normal SemVer release, explicitly labeled TEST BUILD and not marked Latest, so the checker shipped in 0.2.0 can discover it.
+
+Both releases include a self-contained Windows x64 portable ZIP, Inno Setup installer, SHA-256 files and package/build manifests. Start 0.2.0, open Updates and choose Check for Updates to discover 0.2.1. Installation and returning to 0.2.0 are manual. See [publication and test evidence](docs/GITHUB_RELEASE_REPORT_2026-10-09.md). Installers are unsigned; actual machine install/upgrade/uninstall/downgrade has not been exercised by this task.
 
 ## Current verification and runnable output
 
@@ -24,4 +31,4 @@ The user-requested UI revision includes compact probe dialogs, named address tem
 
 Run `artifacts/port-test/0.2.0/final/publish/NetStucked.exe`, keeping its entire directory together, or extract `artifacts/port-test/0.2.0/final/NetStucked-0.2.0-win-x64-portable.zip`. Previous 0.1.0 packages remain under `artifacts/ui-refresh/final`. The SDK used on this machine is `C:\Users\PK\.codex\cache\netstucked-tools\dotnet\dotnet.exe`; use its full path until .NET 10 is on PATH. The portable application contains its runtime. Charts, future pages and automatic updates remain unavailable.
 
-Release build and 115 tests pass. Exact published application assemblies have real Windows WPF/ICMP/TCP and self-contained executable checks. See [the current QA report](docs/QA_0.2.0.md) for simultaneous polling and measured UI timing. Remote multi-hop networking/TCP, human GUI/monitor-DPI/accessibility acceptance, Windows 11 and installer compile/install/uninstall remain **NOT TESTED**. ISCC is unavailable; no installer EXE is produced. The live GitHub check currently finds no published stable release, so installation buttons do not invent one.
+Release builds and 115 tests pass for both versions. Exact published application assemblies have real Windows WPF/ICMP/TCP and self-contained executable checks. Both installers compiled successfully on GitHub's Windows runner from the tested portable package, with hashes verified after download. See [the original local QA report](docs/QA_0.2.0.md) for simultaneous polling and measured UI timing and [the publication report](docs/GITHUB_RELEASE_REPORT_2026-10-09.md) for current release evidence. Remote multi-hop networking/TCP, human GUI/monitor-DPI/accessibility acceptance, Windows 11 and actual install/upgrade/uninstall/downgrade remain **NOT TESTED**.

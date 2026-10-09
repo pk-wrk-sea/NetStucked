@@ -1,5 +1,7 @@
 # NetStucked 0.2.0 QA — 2026-10-09
 
+This report preserves the original local-development evidence before publication. Later GitHub release, installer compilation and real release-menu checks are recorded in [the publication report](GITHUB_RELEASE_REPORT_2026-10-09.md).
+
 Host: Windows 10 Pro x64, .NET SDK 10.0.401, self-contained runtime 10.0.12. Source version, executable metadata, page/sidebar version and installer version definition all derive from `Directory.Build.props` (0.2.0). This is a local development package; no commit, push, tag or GitHub release was created.
 
 ## Verified
