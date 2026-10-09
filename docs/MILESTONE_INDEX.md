@@ -1,13 +1,17 @@
 # Milestone index — 2026-10-09
 
-Current product: **0.4.0 development**, published Latest. Stable target: **1.0.0**. No milestone below is marked fully complete merely because code or a release exists. Approval, implementation and verification are separate in [IMPLEMENTATION_STATUS](IMPLEMENTATION_STATUS.md).
+Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump and GitHub publication are explicitly requested. See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
+
+Published baseline verified here: **0.4.0**; current source includes the separately authorized **0.4.1** follow-up, with an isolated audit build and **196 passing tests**. Stable target: **1.0.0**. No milestone is fully complete merely because code/release exists. [IMPLEMENTATION_STATUS](IMPLEMENTATION_STATUS.md) distinguishes subjects, approval and verification.
+
+At this audit's final API read, 0.4.1 is a staged GitHub **Draft**, not a released public updater build. Read the subsequent publication report if the separate release task completes later.
 
 ## Pre-stable implementation milestones
 
 | ID / document | Proposed or actual version | Design/scope status | Implementation / remaining work |
 |---|---|---|---|
-| [M00 Foundation/Ping/Trace](milestones/M00_FOUNDATION.md) | Historical 0.1.0, retained in 0.4.0 | Approved canonical UI + revisions | Implemented/released; current 176 tests PASS; human/remote/clean Windows acceptance open — next approved task |
-| [M01 Network Info/Wi-Fi candidate](milestones/M01_NETWORK_INFO.md) | 0.5.0 proposed | Concept / Wi-Fi mockup pending | Network Info placeholder; Wi-Fi absent; UI BLOCKED |
+| [M00 Foundation/Ping/Trace](milestones/M00_FOUNDATION.md) | Historical 0.1.0, retained in 0.4.x | Approved canonical UI + revisions | Implemented; baseline 176/captured 0.4.1 196 tests PASS; human/remote/clean Windows acceptance open — next approved task |
+| [M01 Network Info/Wi-Fi](milestones/M01_NETWORK_INFO.md) | 0.5.0 proposed; working version unchanged | Wi-Fi compact table approved 2026-10-09; broader read-only UI pending | Wi-Fi implemented and automated-tested locally; hardware acceptance blocked by stopped WLAN service; broader routes/neighbors pending |
 | [M02 DNS/TCP/HTTP diagnostics](milestones/M02_DIAGNOSTICS.md) | 0.6.0 proposed | Ports approved; new tool UI pending | TCP/UDP delivered; DNS record/HTTP/TLS absent |
 | [M03 Health profiles](milestones/M03_HEALTH_PROFILES.md) | 0.7.0 proposed | Concept / UI pending | Not implemented |
 | [M04 Local monitoring](milestones/M04_LOCAL_MONITORING.md) | 0.8.0 proposed | Mockup — Awaiting Approval | Not implemented; missing mockup reference |

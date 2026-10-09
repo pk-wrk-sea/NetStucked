@@ -36,6 +36,7 @@ internal static partial class Program
     public static int Main(string[] args)
     {
         if (args.FirstOrDefault() == "--export-brand") return ExportBrand(Path.GetFullPath(args[1]));
+        if (args.FirstOrDefault() == "--wifi-read") return ReadWifiNativeAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--wan-metadata") return ReadWanMetadataAsync(args[1], Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--verify-installer") return VerifyPublishedInstallerAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
         string output = Path.GetFullPath(args.FirstOrDefault() ?? "artifacts/windows-qa");
@@ -79,7 +80,8 @@ internal static partial class Program
         var dialogs = new QaDialogs();
         var measured = new MeasuredRealProbe();
         var measuredTcp = new MeasuredRealTcp();
-        await using var provider = App.ConfigureServices(store, dialogs, services => { services.AddSingleton<IIcmpProbe>(measured); services.AddSingleton<ITcpProbe>(measuredTcp); });
+        var wifi = new QaWifi();
+        await using var provider = App.ConfigureServices(store, dialogs, services => { services.AddSingleton<IIcmpProbe>(measured); services.AddSingleton<ITcpProbe>(measuredTcp); services.AddSingleton<IWifiService>(wifi); services.AddSingleton<IWifiCredentialVault, QaVault>(); });
         provider.GetRequiredService<ThemeService>();
         var vm = provider.GetRequiredService<MainViewModel>();
         var window = provider.GetRequiredService<MainWindow>();
@@ -162,7 +164,8 @@ internal static partial class Program
         Require(Descendants<DataGridColumnHeader>(restoredGrid).Any(h => Equals(h.Column?.Header, "Lost") && h.IsVisible), "Visible Lost column remains realized after configuring columns and resizing");
         Render(window, output, "LivePing-configured-settled", 1536, 1024, 1);
         vm.NavigateCommand.Execute("Dashboard"); Require(vm.CurrentPage is PlaceholderViewModel, "Dashboard remains neutral placeholder");
-        vm.NavigateCommand.Execute("Network Info"); Require(vm.CurrentPage is PlaceholderViewModel, "Network Info remains neutral placeholder");
+        try { await CheckNetworkInfoAsync(window, vm, wifi, output); }
+        catch (Exception ex) { Console.Error.WriteLine("Network Info QA: " + ex); await vm.ShutdownAsync(); throw; }
 
         if (soakSeconds > 0)
         {
@@ -347,7 +350,7 @@ internal static partial class Program
                 Require(vm.Updates.Available is null && vm.Updates.StatusTitle == "No newer published version" && download.IsEnabled && vm.Updates.InstallLabel == "Reinstall v" + vm.Updates.CurrentVersion, "Current test build offers Reinstall and reports no newer public update");
                 vm.Updates.SelectedBuild = vm.Updates.Builds.Single(b => b.Version.ToString() == "0.3.0");
                 Require(vm.Updates.InstallLabel == "Recover v0.3.0" && vm.Updates.InstallCommand.CanExecute(null) && download.IsEnabled, "Actual test build can select the published 0.3.0 installer for Recovery");
-                string previous = vm.Updates.CurrentVersion == "0.4.2" ? "0.4.1" : vm.Updates.CurrentVersion == "0.4.1" ? "0.4.0" : "0.3.0";
+                string previous = vm.Updates.CurrentVersion == "0.5.0" ? "0.4.2" : vm.Updates.CurrentVersion == "0.4.2" ? "0.4.1" : vm.Updates.CurrentVersion == "0.4.1" ? "0.4.0" : "0.3.0";
                 Require(vm.Updates.PreviousVersion == "Previous documented version: v" + previous, "Current build records its actual documented recovery version");
             }
             else

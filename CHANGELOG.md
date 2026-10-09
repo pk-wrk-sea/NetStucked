@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0 — 2026-10-09
+
+- Replace Network Info's placeholder with the approved compact saved-WLAN-profile table and current Light/Dark theme; add adapter selection, explicit scan/connect/disconnect, nonsecret descriptions/auto-connect, confirmed deletion and safe IT-profile import/secret-free export.
+- Use Windows WLAN/EAP/certificate authentication, Personal key editing and supported PEAP user credentials; optional additional secrets stay in Windows Credential Manager. No plaintext preferences/logs/exports or fabricated Wi-Fi profiles.
+- Add configured source-aware Gateway ICMP IPv4/IPv6, adapter-bound DNS/TCP/HTTP checks, cancellation/readiness, network-transition notices and bounded connection/test history with measured CSV results. HTTP retains TLS validation and never follows redirects/submits portal credentials.
+- Integrate with all 0.4.2 diagnostics fixes, including selectable Wi-Fi tables and awaited Wi-Fi shutdown before update/recovery. Real Wi-Fi authentication still requires hardware acceptance; see `docs/QA_0.5.0.md`.
+
+## Unreleased — milestone documentation (2026-10-09)
+
+- Consolidate product vision, feature/navigation and approval/decision records, dependencies/security and an evidence-based implementation audit, separating published packages from working follow-ups.
+- Prepare M00–M09, post-stable A01–A09 and On Hold B01–B05 specifications and the next approved acceptance task; reconcile proposed versions without changing application metadata.
+- Synchronize repository instructions/skill and roadmap links. This planning task adds no product behavior, GitHub milestone, commit or release; existing concurrent defect changes are preserved.
+
 ## 0.4.2 — 2026-10-09
 
 - Pace Live Ping at up to 128 native sends/s and reserve separate aggregate Traceroute slots/rate, preventing Ping from occupying trace capacity. Preview effective large-scope intervals.

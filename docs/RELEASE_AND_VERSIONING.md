@@ -1,6 +1,8 @@
 # Release and versioning register
 
-`Directory.Build.props` is authoritative and currently says **0.4.0**. Assembly/file/informational metadata, generated Windows manifest and Inno version derive from it. Use SemVer numeric ordering and `vX.Y.Z` tags. Proposed milestone versions do not change application metadata. Keep changes in CHANGELOG and bundled release history factual; documentation-only work uses an Unreleased documentation entry, not a fabricated release.
+Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump and GitHub publication are explicitly requested. See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
+
+`Directory.Build.props` is authoritative and now says **0.4.1** for a separately authorized concurrent defect follow-up. The latest public release verified during this audit's release read is **0.4.0**. Local metadata/notes do not establish 0.4.1 publication. Assembly/file/informational metadata, generated manifest and Inno version derive from the central version. Use numeric SemVer and `vX.Y.Z` tags. Proposed versions do not change metadata; documentation-only work uses an Unreleased entry.
 
 ## Public release state
 
@@ -10,6 +12,10 @@
 - 0.2.x releases/downloads and six old Actions artifacts: retired under explicit user instruction after verified local backups. Keep source tags/history. Do not recreate or rewrite them as part of planning.
 
 The update catalog begins at 0.3.0. Published tags/assets are immutable except the specific already-executed 0.2.x retirement authorization. Publication is not evidence of stable acceptance. Installers remain unsigned; machine install/upgrade/recovery/uninstall and Windows 11 acceptance are NOT TESTED.
+
+The 0.4.1 source follow-up is in [FEATURES_0.4.1](FEATURES_0.4.1.md)/[QA_0.4.1](QA_0.4.1.md). This milestone task independently built/tested its captured 103-file snapshot (196 PASS) but performs no public packaging/mutation. A subsequent 0.4.1 tag/asset/CI report must be checked before upgrading this record to Released.
+
+At the final read-only API check of this audit, **0.4.1 is Draft**, while **0.4.0 remains Latest**. Draft assets are preparation, not public update eligibility. The concurrent release task may publish later; its actual publication report supersedes this timestamped snapshot.
 
 ## Packaging and release gates
 

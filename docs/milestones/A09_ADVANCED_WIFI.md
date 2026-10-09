@@ -10,7 +10,7 @@ Advanced Wi-Fi / Enterprise EAP enhancements. See retained requirements in [feat
 
 ## 3. Approval, implementation and verification
 
-Mockup — Awaiting Approval for base Wi-Fi; advanced Enterprise/EAP is a future candidate, not implemented. See [actual audit](../IMPLEMENTATION_STATUS.md) and [UI approval register](../UI_APPROVAL_REGISTER.md). None of the outstanding checks below are implied complete by documentation.
+Base Wi-Fi compact-table UI was subsequently approved and implemented on 2026-10-09. Existing/IT-imported Enterprise profiles, supported PEAP-MSCHAPv2 user credentials and Windows-managed EAP-TLS are available in that slice; actual hardware authentication remains NOT TESTED. Expanded EAP configuration/certificate provisioning is still a future candidate. See [Wi-Fi scope](../FEATURES_WIFI_2026-10-09.md) and [QA](../QA_WIFI_2026-10-09.md). A09 is not complete.
 
 ## 4. User problem
 
@@ -33,7 +33,7 @@ These checkboxes track remaining milestone acceptance, not just code presence.
 
 ## 7. UI and UX
 
-BLOCKED pending approved base and advanced Wi-Fi designs. Advanced profile/security editor must not obscure Windows-managed trust decisions.
+Approved base layout is implemented; an expanded advanced EAP/certificate-provisioning editor still needs approval. Preserve Windows-managed trust decisions and never infer advanced support from a successful loopback diagnostic.
 
 ## 8. Architecture and module ownership
 

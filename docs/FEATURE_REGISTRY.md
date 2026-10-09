@@ -1,14 +1,16 @@
 # Feature and navigation registry
 
+Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump and GitHub publication are explicitly requested. See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
+
 Use this canonical inventory with [approval evidence](UI_APPROVAL_REGISTER.md) and the [actual code audit](IMPLEMENTATION_STATUS.md). “Selected/proposed requirements” from the planning brief are not final approval of a page or an implementation commitment.
 
 | ID | Feature / retained requirements | Design approval | Implementation | Verification | Milestone |
 |---|---|---|---|---|---|
 | F00-P | Live Ping: individual IPv4/IPv6/names, bounded IPv4 CIDR, descriptions/templates, independent ICMP, interval/timeout/payload, Sent/Received/Lost/Loss/RTT, filter/sort/columns, selected history, CSV, pause/resume/Stop | Approved + named revisions | Implemented/released | Build/tests + prior loopback/WPF PASS; human/remote acceptance open | M00 |
 | F00-T | IPv4 ICMP trace: real TTL discovery/polling, per-hop statistics/jitter/loss, meaningful route events/CSV, five sessions, shared manual/WAN descriptions | Approved + named revisions | Implemented/released; IPv6/TCP/UDP trace absent | Build/tests + prior loopback/WPF PASS; remote route matrix open | M00 |
-| F01 | Network Info: adapters, IPv4/IPv6/prefix/mask, gateway/DNS/DHCP/MAC/speed, routes, neighbors/ARP, metrics | Concept; UI pending | Placeholder only | NOT TESTED | M01 |
-| F02 | Wi-Fi Manager inside Network Info: saved cards, scan/select adapter, connect/disconnect, add/edit/delete, SSID/signal/IP/Gateway/DNS, service tests/logs; WPA2/3 Personal and staged Enterprise/EAP/cert support where validated | Mockup — Awaiting Approval; local reference missing | Not implemented | NOT TESTED | M01 candidate + A09 |
-| F03 | Diagnostics: dedicated DNS A/AAAA/CNAME/MX/TXT/PTR/SRV, TCP/UDP ports, HTTP/HTTPS, TLS certificates, troubleshooting | TCP/UDP Approved; other tools Concept/UI pending | Port Test implemented/released; dedicated DNS/HTTP/TLS absent | Port build/tests/prior loopback PASS; future tools NOT TESTED | M02 |
+| F01 | Network Info: adapters, IPv4/IPv6/prefix/mask, gateway/DNS/DHCP/MAC/speed, routes, neighbors/ARP, metrics | Broader read-only UI still pending | Wi-Fi slice provides adapter/IP/gateway/DNS; routes/neighbors/remaining adapter facts pending | Native hardware read blocked by stopped WLAN service; no route acceptance | M01 partial |
+| F02 | Wi-Fi Manager inside Network Info: compact saved profile table, explicit scan/adapter/connect/disconnect, profile CRUD/import/export, Windows security, SSID/signal/IP/Gateway/DNS, configured Connect & Test/history | Approved human 2026-10-09 reference with explicit table override | Integrated into 0.5.0; Native WLAN, Windows-managed EAP/TLS, optional Credential Manager, bounded source-aware service tests | Automated/owned loopback/WPF checks PASS; real Wi-Fi/Enterprise hardware NOT TESTED | M01 Wi-Fi slice in 0.5.0; broader M01 and hardware acceptance open |
+| F03 | Diagnostics: dedicated DNS records, TCP/UDP ports, HTTP/HTTPS/TLS, troubleshooting; current Port ranges and configurable payload | TCP/UDP Approved including 0.4.1 clarification; other tools Concept/UI pending | Port Test implemented; desktop continuous/multiple-target, Core retains single-pass; dedicated DNS/HTTP/TLS absent | Captured 0.4.1 build/196 tests PASS; published 0.4.0 evidence separate; future tools NOT TESTED | M02 |
 | F03-H | Target-oriented health check and diagnostic/network profiles; preserve independent protocol findings | Concept; UI pending | Not implemented | NOT TESTED | M03 |
 | F04 | Local Monitoring, hybrid-ready: ICMP + TCP secondary, compact groups/table, thresholds/incidents, dedupe/cooldown, maintenance, tray, Windows notification/sound, availability/latency | Mockup — Awaiting Approval; reference missing | Not implemented | NOT TESTED | M04 |
 | F05 | Terminal/Remote Access: real terminal emulator, SSH/password/key/host verification, tabs/split panes/saved sessions/reconnect, explicitly authorized Telnet, serial COM, logs/snippets/SFTP/copy-paste | Mockup — Awaiting Approval; reference missing; post-stable | Not implemented | NOT TESTED | A01 |
@@ -22,8 +24,10 @@ Use this canonical inventory with [approval evidence](UI_APPROVAL_REGISTER.md) a
 | F13 | GitHub selected-build Updates & Recovery: SemVer/current version, public notes/catalog, streamed verified download/progress/cancel, explicit action/trust acknowledgement, settings backup, isolated helper/restart/recovery | Approved 0.3.0 | Implemented/released; no background installation | Build/tests + prior public-download/helper checks PASS; machine acceptance open | M07 |
 | F14 | Commercial licensing: Freemium tiers, per-user/two-device proposal, signed offline entitlement/30-day proposal, license API/portal/annual prepaid/renewal/recovery, PromptPay QR/gateway/webhooks/activation | Future Idea / On Hold | Not implemented | NOT TESTED | B01–B05 |
 | F15 | Dashboard/notifications/operational summary | Concept; final UI pending | Dashboard placeholder; tool activity indicators exist | Dashboard NOT TESTED | M06 |
-| F16 | Appearance/branding/compact operational UI | Approved 0.4.0 | Implemented/released | Prior WPF/native checks PASS; human acceptance open | M00 retained + M08 acceptance |
+| F16 | Appearance/branding/compact operational UI including caption/caret/toolbar/spacing follow-up | Approved 0.4.0 + 0.4.1 | Implemented; public baseline 0.4.0 | Prior WPF/native + separate 0.4.1 QA PASS; human acceptance open | M00 retained + M08 acceptance |
 | F17 | Shared central collector/team monitoring | Future candidate, no approved protocol or service | Not implemented | NOT TESTED | A08 |
+
+TCP Probe Packet Size is application payload, default 32 and range 0–1400 bytes in 0.4.1. Connect/send completion does not prove an application response. UDP silence stays inconclusive. See [approved follow-up](FEATURES_0.4.1.md); its source version is not itself evidence of publication.
 
 ## Proposed product navigation versus current application
 
@@ -32,7 +36,7 @@ Use this canonical inventory with [approval evidence](UI_APPROVAL_REGISTER.md) a
 | 1 Dashboard | Neutral placeholder |
 | 2 Live Ping | Functional |
 | 3 Traceroute | Functional |
-| 4 Network Info | Placeholder; future Wi-Fi Manager belongs here |
+| 4 Network Info | Implemented approved Wi-Fi Manager slice; read-only route/neighbor UI remains pending |
 | 5 Diagnostics | Proposed grouping; current **Port Test** stays its approved separate menu |
 | 6 Network Monitoring | Future; not a functional current menu |
 | 7 Terminal / Remote Access | Post-stable candidate |

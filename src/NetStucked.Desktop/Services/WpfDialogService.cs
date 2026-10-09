@@ -9,7 +9,7 @@ using NetStucked.Core;
 
 namespace NetStucked.Desktop.Services;
 
-public sealed class WpfDialogService : IDesktopDialogs
+public sealed partial class WpfDialogService : IDesktopDialogs
 {
     public async Task<string?> LoadTargetsAsync()
     {

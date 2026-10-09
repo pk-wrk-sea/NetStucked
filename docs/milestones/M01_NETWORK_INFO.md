@@ -1,8 +1,8 @@
-# M01 — Network Info and separate Wi-Fi candidate
+# M01 — Network Info and approved Wi-Fi slice
 
 ## 1. Milestone and version
 
-**M01** / 0.5.0 proposed (brief originally 0.2.0). Planning snapshot 2026-10-09; not a version bump or publication instruction. [Milestone index](../MILESTONE_INDEX.md).
+**M01** / 0.5.0 approved Wi-Fi release slice (brief originally 0.2.0). The later human request explicitly authorizes integrating Wi-Fi with 0.4.2 and publishing a new version. [Milestone index](../MILESTONE_INDEX.md).
 
 ## 2. Feature title
 
@@ -10,7 +10,7 @@ Network Info and separate Wi-Fi candidate. See retained requirements in [feature
 
 ## 3. Approval, implementation and verification
 
-Concept / Planned. Network Info is a placeholder. Wi-Fi mockup reported, not located or approved. No feature implementation/verification/release. See [actual audit](../IMPLEMENTATION_STATUS.md) and [UI approval register](../UI_APPROVAL_REGISTER.md). None of the outstanding checks below are implied complete by documentation.
+The human's subsequent 2026-10-09 instruction approves Wi-Fi Profile Manager inside Network Info with a compact table replacing individual cards. Reference is now preserved as `design/references/WiFiProfiles_APPROVED_2026-10-09.png`; [scope](../FEATURES_WIFI_2026-10-09.md), [guide](../WIFI_PROFILE_MANAGER.md), [QA](../QA_WIFI_2026-10-09.md). This slice is integrated into 0.5.0; exact combined release verification is recorded in [QA_0.5.0](../QA_0.5.0.md). Actual WLAN hardware/authentication acceptance is blocked by stopped WLAN AutoConfig on the development machine. Broader read-only route/neighbor/adapter-facts scope remains pending; M01 is partially implemented, not complete.
 
 ## 4. User problem
 
@@ -18,7 +18,7 @@ Engineers need local adapter/routing context to explain how remote diagnostics l
 
 ## 5. Scope and non-goals
 
-Scope: Read-only adapter/IP/prefix/gateway/DNS/DHCP/MAC/speed/route/neighbor/metric inspection first. Track Wi-Fi Manager separately under Network Info, never as a new top-level menu.
+Approved current scope: Native WLAN adapter/profile reads, explicit scan/connect/disconnect/profile management, Windows-protected security, connection IPv4/IPv6/gateway/DNS/signal, network transitions and configured source-aware Connect & Test/history. Wi-Fi stays inside Network Info. Broader read-only adapter/prefix/mask/DHCP/MAC/speed/routes/neighbors/metrics remains proposed and is not implied implemented.
 
 Non-goals: No PC-health widgets, route mutation, automatic adapter switching or unapproved Wi-Fi connection/credential operations. Advanced Enterprise Wi-Fi is A09.
 
@@ -34,7 +34,7 @@ These checkboxes track remaining milestone acceptance, not just code presence.
 
 ## 7. UI and UX
 
-BLOCKED until Network Info UI is approved or a functional-only prototype authorized. Locate Wi-Fi mockup first; proposed compact profile cards inherit the current theme. Fictional profile names are examples only.
+Wi-Fi UI is approved with a compact sortable/configurable table, adapter toolbar, connection/history panels and right-side details/security/services in the existing theme. Actual WPF Light/Dark/1280/1536/scaling checks exist. Fictional profile names occur only in test fixtures. Approval does not extend to missing route/neighbor pages.
 
 ## 8. Architecture and module ownership
 
@@ -72,7 +72,8 @@ Fixture-test normalized adapter/route/neighbor mapping and missing values. Windo
 
 ## 16. Definition of Done
 
-- [ ] First Network Info UI and read-only scope explicitly approved.
+- [x] Wi-Fi slice UI explicitly approved and implemented using the compact-table override.
+- [ ] Broader read-only route/neighbor UI and remaining adapter-fact scope approved/implemented.
 - [ ] Read-only facts and source timestamps implemented and automated-tested.
 - [ ] Real Windows adapter/routing acceptance and regression build/tests pass.
 - [ ] Wi-Fi candidate independently approved/tested or explicitly deferred; no false completion claim.
@@ -85,17 +86,17 @@ Scoped implementation (only when authorized), meaningful automated tests, actual
 
 ## 18. Risks and blockers
 
-No final UI reference. WLAN/EAP feature support and permissions must be validated; a saved-profile mockup is not implementation authority.
+Wi-Fi reference/explicit authorization located; hardware acceptance remains blocked. Wider routing/neighbor UI remains unapproved. WLAN/EAP/policy/location/driver support needs real Windows lab validation; fixture-based UI and owned-loopback tests do not substitute for it.
 
 ## 19. Approval requirements
 
-Approve read-only UI first. Obtain separate approval for Wi-Fi profile mutation/connection and Enterprise authentication; do not combine pending candidates into one approved milestone.
+The current instruction approves explicit Wi-Fi mutation/connection and Windows-managed authentication in the app. Development must not change the working machine's connection/services without a designated authorized lab. Expanded EAP editors/certificate provisioning and broader Network Info UI require additional scope approval.
 
 ## 20. Ready-to-copy Codex task prompt
 
 ```text
 Work on NetStucked M01: Network Info and separate Wi-Fi candidate.
-This is an unapproved candidate. Start implementation only after explicit scope approval and approved UI (or explicit functional-only prototype authority).
+The Wi-Fi compact-table slice is approved and locally implemented. Verify existing code first; use an explicitly designated Wi-Fi lab for real mutation/authentication QA. Do not rebuild it as a placeholder or assume broader route/neighbor UI approval.
 Read AGENTS.md, .agents/skills/netstucked-development/SKILL.md,
 docs/milestones/M01_NETWORK_INFO.md, docs/IMPLEMENTATION_STATUS.md,
 docs/UI_APPROVAL_REGISTER.md, docs/ARCHITECTURE.md,

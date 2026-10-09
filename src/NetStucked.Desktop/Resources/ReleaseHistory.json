@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.5.0",
+    "Date": "2026-10-09",
+    "Notes": "• Added Network Info Wi-Fi Profile Manager with compact searchable/configurable Windows profile tables, explicit scan/connect/disconnect and safe import/export.\n• Windows-managed Personal/EAP/certificate authentication; optional PEAP app credentials use Windows Credential Manager.\n• Configured source-aware Gateway/DNS/TCP/HTTP Connect & Test, bounded measured history and network transition notices.\n• Retains all 0.4.2 diagnostics fixes; Wi-Fi tables support selectable text and update preparation drains Wi-Fi work.\n• Actual Wi-Fi/Enterprise hardware authentication still requires acceptance on a Wi-Fi-capable machine."
+  },
+  {
     "Version": "0.4.2",
     "Date": "2026-10-09",
     "Notes": "• Pace Live Ping at up to 128 sends/s and reserve separate Traceroute capacity; large scopes run at a safe effective interval.\n• Warn explains current RTT, missing replies or recent loss; cumulative loss remains accurate.\n• Added actual Reply IP Address to Ping results and Host / Reply IP Address to history.\n• Select and copy text in table cells and headers, or copy/select complete visible tables; Port Test retains configurable columns.\n• Optional per-session TCP checks on responding hop IPs, with common/custom ports and actual successful ports in results."

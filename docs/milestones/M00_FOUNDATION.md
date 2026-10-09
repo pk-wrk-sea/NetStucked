@@ -10,7 +10,7 @@ Foundation and approved Live Ping / Traceroute. See retained requirements in [fe
 
 ## 3. Approval, implementation and verification
 
-Design Approved (canonical PNGs + recorded revisions). Implemented and released through 0.4.0. Fresh build/176 tests PASS; prior WPF/loopback/native checks PASS. Full acceptance remains OPEN. See [actual audit](../IMPLEMENTATION_STATUS.md) and [UI approval register](../UI_APPROVAL_REGISTER.md). None of the outstanding checks below are implied complete by documentation.
+Design Approved (canonical PNGs + recorded revisions). Implemented/released through verified 0.4.0, with a separate approved 0.4.1 follow-up. Baseline build/176 and captured 0.4.1 build/196 tests PASS; prior WPF/loopback/native checks PASS. Full acceptance remains OPEN. See [actual audit](../IMPLEMENTATION_STATUS.md) and [UI approval register](../UI_APPROVAL_REGISTER.md). Outstanding checks are not implied complete by documentation.
 
 ## 4. User problem
 
@@ -73,7 +73,7 @@ Current 176 tests PASS. Add only necessary regressions for discovered defects; u
 
 ## 16. Definition of Done
 
-- [x] Existing implementation and fresh Release build/176 automated tests remain passing.
+- [x] Baseline Release build/176 tests and isolated captured 0.4.1 build/196 tests pass; subjects/evidence are recorded separately.
 - [x] Historical exact-package WPF/native/loopback and Inno compilation evidence is linked without being relabeled as manual acceptance.
 - [ ] Current-package longer soak and authorized remote-route acceptance are recorded.
 - [ ] Human monitor-DPI/accessibility and clean Windows 10/11 acceptance are completed, or explicitly scoped/deferred by the human.
@@ -104,7 +104,7 @@ docs/UI_APPROVAL_REGISTER.md, docs/ARCHITECTURE.md,
 docs/SECURITY_AND_DATA_POLICY.md, docs/FEATURE_DEPENDENCIES.md,
 and the directly required milestone documents.
 For retained/current UI and release behavior also read:
-docs/APPROVED_UI_SCOPE.md, docs/UI_REVISION_2026-10-08.md, docs/FEATURES_0.2.0.md, docs/FEATURES_0.3.0.md, docs/FEATURES_0.4.0.md, docs/QA_REPORT.md.
+docs/APPROVED_UI_SCOPE.md, docs/UI_REVISION_2026-10-08.md, docs/FEATURES_0.2.0.md, docs/FEATURES_0.3.0.md, docs/FEATURES_0.4.0.md, docs/FEATURES_0.4.1.md, docs/QA_REPORT.md.
 Inspect git status and the actual owning source/tests before edits. Preserve user changes.
 Implement only this milestone's approved slice and its acceptance criteria; do not add
 unapproved UI, dependencies, network scope or unrelated future features.

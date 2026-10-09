@@ -1,0 +1,11 @@
+# 0.5.0 combined verification
+
+Subject: approved Wi-Fi implementation merged from the original 9e31232-based checkout into published 0.4.2, with central version 0.5.0. The 52 original Wi-Fi/planning WIP files are recoverably snapshotted under `artifacts/github-release/0.5.0/wifi-source-snapshot`; integration occurs in the attached managed checkout. Original scope/Ping/Trace/brand/Wi-Fi reference bytes are preserved.
+
+Initial combined Release build: PASS, zero warnings/errors. Initial combined suite: PASS, 240 tests, zero failures/skips. Review adds two regressions for recovery preservation and secret-free Personal re-import without losing hidden-SSID/configuration. Reviewed suite: **242 passed, 0 failed, 0 skipped**. Reviewed exact-publish WPF checks PASS: selectable Wi-Fi cells/headers/sorting, source-bound owned-loopback measurements, network transition invalidation, shared updater drain with a pending Wi-Fi connection, Light/Dark/1280/1536/150% renders and zero binding errors. Waiting-connection Dispatcher response: 19 ticks over 599.8 ms, max gap 37.1 ms.
+
+Final clean-commit exact-package WPF/native/60-second soak, Windows CI, installer identity and public updater checks are PENDING at this preparation checkpoint. Do not infer PASS from earlier preview QA.
+
+Actual Wi-Fi scan/connect/Personal/PEAP/EAP-TLS authentication, location/policy/driver matrix, captive portal sign-in, multi-adapter physical egress, clean Windows installation/upgrade/uninstall/recovery and human accessibility/DPI acceptance are NOT TESTED. Development QA uses WLAN fixtures for mutations and owned-loopback endpoints for real service probes; it does not enable WLAN AutoConfig or switch the working machine's network. Read-only native enumeration is recorded separately. Installers remain unsigned and require explicit acknowledgement in the application, with normal Windows prompts preserved.
+
+The original [Wi-Fi preview QA](QA_WIFI_2026-10-09.md) and [0.4.2 QA](QA_0.4.2.md) remain historical exact subjects. [Manual checklist](FEATURES_0.5.0.md#human-acceptance-checklist) remains unchecked until the human tests the installed application.

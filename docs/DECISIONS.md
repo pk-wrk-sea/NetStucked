@@ -1,5 +1,7 @@
 # Decision register
 
+Subsequent 2026-10-09 Wi-Fi decision: the human approves Network Info's supplied reference with a compact profiles table. Windows owns WLAN/EAP/certificate credentials; an explicitly selected app copy uses Credential Manager. Configured service tests retain source/context and cancel on transitions. Development does not enable services/switch the working network without a designated lab. This supersedes the earlier placeholder/awaiting-approval status for this slice only; version/publication remain unchanged. See [scope](FEATURES_WIFI_2026-10-09.md).
+
 | ID/date | Decision | Authority / implication |
 |---|---|---|
 | D01 / initial scope | Remote-target engineering diagnostics, WPF/.NET 10/MVVM, compact light UI; Live Ping and IPv4 ICMP Trace | Original approved scope/PNGs; preserve bytes |
@@ -15,5 +17,6 @@
 | D11 / planned scope | Cisco Collector first, multiline targets, raw evidence vs parsed facts, bounded credential fallback; scheduled collection excluded | Brief selected constraints; Collector v2 UI not approved |
 | D12 / planned scope | One-hop evidence-based topology, advisory applicability and engineer-approved upgrade target | Brief concepts; no topology/CVE/upgrade implementation approval |
 | D13 / postponed | Commercial payments/licensing On Hold; no provider, price, two-device/30-day policy final | Explicit postponement reported in supplied brief |
+| D14 / separate 2026-10-09 follow-up | Named caption/caret/spacing/toolbar/state fixes, continuous multiple-target ports, ranges and bounded TCP/UDP payload | Subsequent human defect/payload clarification in `FEATURES_0.4.1.md`; preserve/audit concurrent source independently of this planning task |
 
 Future changes need a dated decision/source and synchronized approval/status/roadmap records. A documentation assertion alone cannot approve a mockup or prove completed work. Canonical 0.1.0 documents retain historical wording; newer authorized scope overrides only named items.

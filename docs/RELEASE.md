@@ -1,4 +1,10 @@
-# Release 0.3.0
+# Release operations
+
+Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump and GitHub publication are explicitly requested. See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
+
+The latest public release verified in this milestone audit is **0.4.0**; [release/version register](RELEASE_AND_VERSIONING.md) and [0.4.0 publication evidence](GITHUB_RELEASE_0.4_REPORT_2026-10-09.md) record it separately from the 0.4.1 working follow-up. Derive versions from `Directory.Build.props`, use fresh directories and preserve frozen assets. The 0.3.0 paths/exercise below are historical examples, not instructions to overwrite releases.
+
+## Historical 0.3.0 foundation
 
 0.3.0 implements user-triggered installation/recovery of the selected public GitHub build. The later 2026-10-09 request authorizes publishing it with a 0.3.1 TEST BUILD and retiring 0.2.x release/build downloads while preserving Git history/tags and local verified backups. See [actual publication status](GITHUB_RELEASE_0.3_REPORT_2026-10-09.md), [behavior and failure recovery](FEATURES_0.3.0.md) and [original local QA](QA_0.3.0.md). No background updater is present.
 

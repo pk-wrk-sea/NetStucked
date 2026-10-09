@@ -1,5 +1,9 @@
 # Approved WPF UI
 
+Network Info's Wi-Fi Manager is subsequently approved by the 2026-10-09 human request: `design/references/WiFiProfiles_APPROVED_2026-10-09.png` with the explicit compact-table override. Use existing theme resources, adapter toolbar, saved/available tables, bounded history/logs and right-side connection/security/services. See [scope](FEATURES_WIFI_2026-10-09.md) and [actual WPF QA](QA_WIFI_2026-10-09.md). This does not approve remaining future pages or change canonical references.
+
+[UI_APPROVAL_REGISTER](UI_APPROVAL_REGISTER.md) records precedence. Original light-theme PNGs remain unchanged; later approved 2026-10-08 and 0.4.0 revisions authorize compact templates/settings/window/table changes, Light/Dark/System, supplied branding, resizable/folding panels and five trace sessions. The 0.4.1 defect follow-up changes named caption/caret/toolbar/spacing behavior only. Read baseline geometry below with explicit later revisions; pending future pages have no implementation approval.
+
 Use `design/references/LivePing_APPROVED.png` and `Traceroute_APPROVED.png` as visual truth. Shared Segoe UI, off-white canvas, white compact cards, blue accent, thin gray borders, subtle rounded corners and minimal shadows. Status text accompanies color. Native WPF supports Thai text; no redistributed fonts.
 
 Sidebar width about 182 logical pixels. Live Ping target card spans the full content height; Load/Save/settings above editor and the only probe controls below. Six small top-right KPI cards, dense upper results grid and lower selected-host history. Traceroute target/results left (about 70%), full-height log right; no KPI row. Settings are modal rather than permanent fields.

@@ -1,6 +1,8 @@
-# Implemented scope — 0.1.0
+# Retained Ping/Traceroute specification
 
-This page records the retained Ping/Traceroute behavior. The authorized 0.2.0 TCP Port Test and manual Updates extension is described in [FEATURES_0.2.0.md](FEATURES_0.2.0.md).
+The subsequent approved Network Info/Wi-Fi slice is specified separately in [FEATURES_WIFI_2026-10-09](FEATURES_WIFI_2026-10-09.md) and [WIFI_PROFILE_MANAGER](WIFI_PROFILE_MANAGER.md); current implementation/QA and pending hardware acceptance are recorded there. It is not a dedicated DNS/HTTP health-tool implementation or broader route/neighbor page.
+
+This page records retained behavior originally implemented in 0.1.0. [FEATURES_0.4.0.md](FEATURES_0.4.0.md) adds the current `IP Addresses & Templates` title, five sessions/protected main session/shared descriptions and themes/resizable panels; earlier names/eight-session text below is historical. [FEATURES_0.4.1.md](FEATURES_0.4.1.md) records named defect/toolbar follow-ups. [FEATURE_REGISTRY](FEATURE_REGISTRY.md) and [IMPLEMENTATION_STATUS](IMPLEMENTATION_STATUS.md) are current inventories. TCP/manual Updates are in [FEATURES_0.2.0.md](FEATURES_0.2.0.md); [FEATURES_0.3.0.md](FEATURES_0.3.0.md) supersedes its manual-only restriction for explicit selected-build actions.
 
 The user's explicit 2026-10-08 UI revision supersedes the original screenshots for the requested changes. The canonical scope and PNG files remain unchanged. See UI_REVISION_2026-10-08.md for the revision and verification.
 

@@ -1,8 +1,16 @@
 # Next Codex task
 
+Later authorized task: integrate approved Wi-Fi with 0.4.2 and publish **0.5.0**. See [scope](FEATURES_0.5.0.md), [combined QA](QA_0.5.0.md). After publication, human Wi-Fi/hardware and diagnostics acceptance remains next; the earlier queue below is historical, not permission to implement broader M01 pages.
+
+## Subsequent human-approved Wi-Fi task
+
+The later 2026-10-09 instruction approved and implemented M01's Wi-Fi slice. Earlier “M01 UI not approved” statements below are historical for the broader Network Info/route views and do not block maintenance of the approved Wi-Fi Manager. Read `FEATURES_WIFI_2026-10-09.md`, `WIFI_PROFILE_MANAGER.md`, `QA_WIFI_2026-10-09.md` and the newly preserved reference first.
+
+Next Wi-Fi acceptance: on an explicitly designated lab, enable/provision WLAN through the owner/IT, verify actual scan/profile CRUD, Personal and company PEAP/EAP-TLS connections, policy/location failures, multiple adapters, DHCP readiness, service source routing and transitions while Ping/Trace run. Do not silently enable WLAN services, switch the working network, install certificates or alter server trust. Current automated build/loopback/WPF checks are recorded; broader M01 routes/neighbors and A09 expanded EAP editing remain pending. Version stays 0.4.1 until a separately authorized release decision.
+
 ## Selected task and reason
 
-**M00: close acceptance of existing functionality on the current 0.4.0 release.** This is the earliest incomplete milestone with approved implemented scope. Its automated/native/owned-loopback regression slice can run now without missing new-page UI approval. Full closure is partly environment-blocked by clean Windows 11, human monitor/accessibility acceptance and an explicitly authorized remote lab. Do not mark the entire milestone unblocked/complete because this slice is executable.
+**M00: close acceptance of existing functionality, including the approved 0.4.1 defect follow-up.** This is the earliest incomplete milestone with approved implemented scope. Its automated/native/owned-loopback regression slice can run now without missing new-page UI approval. At audit start 0.4.0 was published; a separate 0.4.1 source snapshot now passes 196 tests. Freeze/identify the actual candidate before checking it; source results do not certify a final release binary. Full closure is partly environment-blocked by clean Windows 11, human monitor/accessibility acceptance and authorized remote lab. Do not mark the entire milestone unblocked/complete because this slice is executable.
 
 Related gate: **M07 real installed-app upgrade/recovery acceptance**. The updater already ships in 0.3.0+; build/download/helper checks passed, but no actual machine-install matrix is proven. Execute this only on an authorized isolated VM/snapshot; no permission to install onto the working machine follows from this planning document.
 
@@ -14,15 +22,16 @@ No code defect is established by this audit. Begin with verification and only fi
 2. `docs/milestones/M00_FOUNDATION.md` and `M07_UPDATES_RECOVERY.md`.
 3. `docs/IMPLEMENTATION_STATUS.md`, `UI_APPROVAL_REGISTER.md`, `FEATURE_DEPENDENCIES.md`, `ARCHITECTURE.md`, `SECURITY_AND_DATA_POLICY.md`, `RELEASE_AND_VERSIONING.md`.
 4. `docs/APPROVED_UI_SCOPE.md`, `design/references/LivePing_APPROVED.png`, `Traceroute_APPROVED.png`.
-5. `docs/UI_REVISION_2026-10-08.md`, `FEATURES_0.2.0.md`, `FEATURES_0.3.0.md`, `FEATURES_0.4.0.md`.
-6. `docs/QA_REPORT.md`, `QA_0.4.0.md`, `GITHUB_RELEASE_0.4_REPORT_2026-10-09.md`, `DEVELOPMENT.md`, `TEST_PLAN.md`.
+5. `docs/UI_REVISION_2026-10-08.md`, `FEATURES_0.2.0.md`, `FEATURES_0.3.0.md`, `FEATURES_0.4.0.md`, `FEATURES_0.4.1.md`.
+6. `docs/QA_REPORT.md`, `QA_0.4.0.md`, `QA_0.4.1.md`, `GITHUB_RELEASE_0.4_REPORT_2026-10-09.md`, `DEVELOPMENT.md`, `TEST_PLAN.md`; read the eventual 0.4.1 publication report if available.
 7. Owning sources: `src/NetStucked.Core/{MultiTargetPingService,TracerouteMonitoringService,MultiTargetPortService,AsyncSession}.cs`; `src/NetStucked.Infrastructure/{IcmpPingProbe,TcpPortProbe,UdpPortProbe,WindowsUpdates,UpdateRunner,UpdateFiles,UserSettingsStore}.cs`; Desktop `App.xaml.cs`, `MainWindow.xaml.cs`, diagnostic/Updates VMs/views and `HopDescriptionService.cs`.
 8. `tests/NetStucked.Tests/`, `tests/NetStucked.WindowsQa/{Program,BrandingScanQa,SelectedBuildQa}.cs`, `scripts/{Publish,SmokePublished}.ps1` and `installer/NetStucked.iss`.
 
 ## Acceptance checklist
 
 - [ ] Inspect actual working changes and freeze source/package identity; preserve all prior published bytes.
-- [ ] Restore/build/test current subject; separate tagged-package 175 tests from main's 176-test follow-up.
+- [ ] Restore/build/test current subject; separate tagged 0.4.0's 175 tests, baseline main's 176 and captured 0.4.1's 196. Record changes to the subject instead of reusing a stale count.
+- [ ] Preserve verified 0.4.1 port-range/payload and caption/caret/toolbar/state behavior; check zero/32/1400-byte sends with owned sockets and keep TCP connect timing separate from application response.
 - [ ] Run actual owned-loopback WPF/native tests and a current-package >=10-minute simultaneous diagnostic soak; record cadence, overlap, Dispatcher timing, cleanup and memory without inventing thresholds or remote results.
 - [ ] Inspect actual WPF at approved sizes/themes and verify history scrolling/column interactions/session/panel behavior.
 - [ ] Human-test monitor work area/DPI, keyboard/assistive technology and Windows 10/11, where environments exist.
@@ -50,7 +59,7 @@ Check each command's exit code before proceeding. Exact-package testing should c
 ## Ready-to-copy prompt
 
 ```text
-Finish NetStucked's approved M00 acceptance on current 0.4.0, with the M07
+Finish NetStucked's approved M00 acceptance, including the approved 0.4.1 follow-up, with the M07
 selected-build installation/recovery matrix as the related release gate.
 Read docs/CODEX_NEXT_TASK.md and its exact reading list before editing.
 Inspect git status and preserve user changes, canonical PNG/scope and frozen releases.
@@ -64,7 +73,7 @@ complete independent local checks and report exact NOT TESTED prerequisites.
 Never replace the working machine's installation or settings as an implied side effect.
 Fix only actual approved-scope defects with meaningful regression tests. Preserve MVVM,
 async cancellation and target/concurrency bounds. Never fabricate measurements/outcomes.
-Keep version 0.4.0 unless a separate release instruction authorizes a change.
+Keep the actual central version unchanged unless a separate release instruction authorizes a change.
 Update milestone checkboxes, IMPLEMENTATION_STATUS, QA and CHANGELOG from evidence.
 Do not implement Network Info, Dashboard, DNS/HTTP, Wi-Fi, Monitoring, SQLite history,
 Terminal, Collector, Inventory, Topology, CVE, device Upgrade Planner or licensing/payments.

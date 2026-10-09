@@ -1,5 +1,7 @@
 # UI approval register
 
+Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump and GitHub publication are explicitly requested. See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
+
 Snapshot: 2026-10-09. Source bytes and explicit human decisions govern approval; this planning task does not approve future screens.
 
 | Screen/change | Design approval | Located evidence | Current implementation / remaining verification |
@@ -11,8 +13,10 @@ Snapshot: 2026-10-09. Source bytes and explicit human decisions govern approval;
 | Port Test and bottom Settings/Updates group | Approved human extension | `docs/FEATURES_0.2.0.md` | Implemented; current TCP/UDP scope extends it |
 | Selected-build Install/Reinstall/Recover | Approved explicit-click extension | `docs/FEATURES_0.3.0.md` | Implemented; machine installer scenarios NOT TESTED |
 | Supplied logo, Light/Dark/System, resizable/folding panels, shared hop mapping, five trace sessions, multiple-target TCP/UDP scans | Approved human-reviewed mockup/revision | `docs/FEATURES_0.4.0.md`; actual WPF QA in `artifacts/github-release/0.4.0/final/windows-qa/` | Implemented/released; interactive source mockup is not checked into `design/references/` |
-| Network Info / Dashboard / dedicated DNS-HTTP-Health pages / History-Reports | Concept; final UI pending | Planning brief; no final approved reference located | UI implementation BLOCKED until approved or functional-only prototype authorized |
-| Wi-Fi Manager / Monitoring / Terminal / Topology | Mockup — Awaiting Approval, reported by planning brief | No matching mockup file located in tracked repository | Request/locate supplied mockup before review; do not reconstruct or assume approval |
+| Caption/caret/spacing/Trace toolbar/state fixes, continuous multiple-target ports/ranges/configurable payload | Approved subsequent defect/payload clarification | `docs/FEATURES_0.4.1.md`, separate `docs/QA_0.4.1.md` | Implemented by concurrent development; captured source build/196 tests PASS; do not infer public release or machine acceptance |
+| Network Info: Wi-Fi Profile Manager | Approved human 2026-10-09 with compact-table override | `design/references/WiFiProfiles_APPROVED_2026-10-09.png`, `docs/FEATURES_WIFI_2026-10-09.md` | Implemented with current Light/Dark theme; actual WPF renders/fixture behavior and loopback checks PASS; real Wi-Fi authentication NOT TESTED |
+| Broader Network Info routes/neighbors / Dashboard / dedicated DNS-HTTP-Health pages / History-Reports | Concept; final UI pending | Planning brief only | Wi-Fi approval does not approve these other pages |
+| Monitoring / Terminal / Topology | Mockup — Awaiting Approval, reported by planning brief | No matching mockup file located in tracked repository | Request/locate supplied mockup before review; do not reconstruct or assume approval |
 | Config Collector v2 | Mockup — Awaiting Approval, reported by brief | No v2 mockup file located | Multiline targets requirement preserved; UI implementation BLOCKED |
 | MA Inventory / Device Intelligence / CVE / Upgrade Planner | Concept | Planning brief only | Approval and implementation pending |
 | Account/license/billing | Future Idea / On Hold | Explicitly postponed in planning brief | No current navigation or payment integration |
@@ -32,3 +36,6 @@ Original scope and screenshots remain byte-for-byte unchanged. Their obsolete ve
 | `docs/APPROVED_UI_SCOPE.md` | `0f722da815555532a330e1ae9c5121778aa184cc740c94da82cb7e65d3003776` |
 | `design/references/LivePing_APPROVED.png` | `45f941795fa7347a824976b79f73cd61f029778f7afecc246df302e181d55772` |
 | `design/references/Traceroute_APPROVED.png` | `e8f8f3ad08d9d9ca844bc2f2f3326910df74583afe52dbc4730c19085f2cb2f1` |
+| New approved Wi-Fi reference (table override applies) | `39fd622f6ce502d5c4b2027368009c951230b2eddbe38c25ec78c2669eeb2481` |
+
+0.5.0 combined-source review: original Wi-Fi reference/compact-table authorization is preserved; selectable text replaces table TextBlocks without changing approved hierarchy. Later human request authorizes the Wi-Fi/0.4.2 merge and new GitHub version. Reviewed exact-publish WPF checks PASS; human/native hardware acceptance stays open.

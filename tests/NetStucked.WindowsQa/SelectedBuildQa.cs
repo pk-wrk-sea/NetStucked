@@ -26,6 +26,9 @@ internal static partial class Program
             // Opening the real app otherwise intentionally migrates the legacy false mode flags on shutdown.
             store.Preferences.Port = store.Preferences.Port with { Continuous = true };
             store.Preferences.PortMultipleTargets = store.Preferences.PortContinuous = true;
+            store.Preferences.Trace = store.Preferences.Trace with { CheckHopTcp = true, HopTcpPorts = "22,443,8088" };
+            store.Preferences.WifiProfiles["Owned QA metadata"] = new("Wi-Fi ไทย");
+            store.Preferences.WifiTestProfiles.Add(new() { Name = "Owned QA services", TcpHost = "127.0.0.1" });
             await store.SaveAsync(token.Token);
             byte[] settings = await File.ReadAllBytesAsync(Path.Combine(store.DirectoryPath, "settings.json"), token.Token);
             using var updater = new WindowsApplicationUpdateService(store);

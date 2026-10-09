@@ -1,10 +1,9 @@
-# Roadmap
+# Roadmap entry point
 
-## 0.2.0
+Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump and GitHub publication are explicitly requested. See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
 
-User-authorized TCP Port Test and manual Updates & Recovery: independent real TCP handshakes, named endpoint templates/history/CSV, manual public GitHub release checks and recorded version notes. Settings/Updates move to the bottom sidebar group. See [the implementation scope](FEATURES_0.2.0.md). No automatic check/download/install/rollback, Dashboard or Network Info implementation.
+The canonical current roadmap is [PRODUCT_ROADMAP](PRODUCT_ROADMAP.md), with [milestone documents](MILESTONE_INDEX.md), [feature registry](FEATURE_REGISTRY.md), [actual status](IMPLEMENTATION_STATUS.md) and [next task](CODEX_NEXT_TASK.md). This retained filename redirects existing references rather than maintaining a competing schedule.
 
-- 0.1.0: approved Live Ping and continuous ICMP Traceroute, local persistence/export, bounded async execution and Windows installer foundation.
-- Future design approval: Dashboard, Network Info and broader preferences. No local-PC health dashboard is assumed.
-- Before stable 1.0.0: release signing and clean Windows matrix; if in-app updates are wanted, implement a GitHub Releases client with authenticated publisher/signature verification, SemVer channel policy, staged replacement, backup and recovery from interrupted update. Preserve user settings and stable installer identity. No credentials in the binary.
-- IPv6 trace, charts and other network tools require separate scope/validation. SNMP, discovery, topology, TCP/UDP, centralized monitoring and cloud are not part of this implementation.
+Historical deliveries: 0.1.0 Foundation/Ping/IPv4 ICMP Trace; 0.2.0 TCP/manual GitHub menu; 0.3.0 selected-build installation/recovery; 0.3.1 TEST BUILD; 0.4.0 themes/branding/panels/descriptions/TCP-UDP scans. Separate 0.4.1 defect/range/payload source is documented without inferring publication. Network Info now contains the subsequently approved local Wi-Fi Manager slice; see [QA](QA_WIFI_2026-10-09.md). Dashboard remains a placeholder; unattended application installation remains excluded.
+
+Before stable 1.0.0, close actual clean Windows/human/remote/security/signing and compatible recovery acceptance for the explicitly chosen scope. Pending UI and commercial ideas are not committed work. Published 0.2.x downloads were retired with authorized verified backups; source history/tags remain.

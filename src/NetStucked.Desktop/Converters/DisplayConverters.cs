@@ -9,9 +9,9 @@ public sealed class StatusBrushConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value?.ToString() switch
     {
-        "Up" or "Reply" or "Connected" or "Responded" => Brush("SuccessBrush"),
+        "Up" or "Reply" or "Connected" or "Responded" or "PASS" or "Success" => Brush("SuccessBrush"),
         "Warn" or "Route" or "No response" => Brush("WarningBrush"),
-        "Unreachable" or "Timeout" or "Error" or "Refused" or "Closed" or "DNS error" => Brush("DangerBrush"),
+        "Unreachable" or "Timeout" or "Error" or "Refused" or "Closed" or "DNS error" or "FAIL" or "Failed" => Brush("DangerBrush"),
         "Info" or "DNS" => Brush("AccentBrush"),
         _ => Brush("MutedBrush")
     };
@@ -33,7 +33,7 @@ public sealed class PageSelectedConverter : IValueConverter
 
 public sealed class PageVisibilityConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => (parameter?.ToString() == "Other" ? value?.ToString() is not ("Live Ping" or "Traceroute" or "Port Test" or "Updates") : Equals(value, parameter)) ? Visibility.Visible : Visibility.Collapsed;
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => (parameter?.ToString() == "Other" ? value?.ToString() is not ("Live Ping" or "Traceroute" or "Port Test" or "Updates" or "Network Info") : Equals(value, parameter)) ? Visibility.Visible : Visibility.Collapsed;
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
 }
 

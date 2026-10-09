@@ -29,6 +29,11 @@ public sealed class UserPreferences
     public bool PortMultipleTargets { get; set; }
     public bool PortContinuous { get; set; }
     public Dictionary<string, string> PortNumberTemplates { get; set; } = new();
+    public Guid? WifiAdapter { get; set; }
+    public Dictionary<string, WifiProfileMetadata> WifiProfiles { get; set; } = new();
+    public List<ServiceTestProfile> WifiTestProfiles { get; set; } = [];
+    public List<WifiEvent> WifiHistory { get; set; } = [];
+    public List<WifiTestRun> WifiTestRuns { get; set; } = [];
 }
 
 public sealed class UserSettingsStore
@@ -67,6 +72,14 @@ public sealed class UserSettingsStore
             if (loaded.Ping.TimeoutMs is >= 100 and < 500) loaded.Ping = loaded.Ping with { TimeoutMs = 500 };
             if (loaded.Trace.TimeoutMs is >= 100 and < 500) loaded.Trace = loaded.Trace with { TimeoutMs = 500 };
             loaded.Ping.Validate(); loaded.Trace.Validate(); loaded.Port.Validate();
+            if (loaded.WifiProfiles is null || loaded.WifiProfiles.Count > 1024 || loaded.WifiProfiles.Any(p => p.Key.Length > 512 || p.Value is null || p.Value.Description is null || p.Value.Description.Length > 512) ||
+                loaded.WifiTestProfiles is null || loaded.WifiTestProfiles.Count > 100 || loaded.WifiTestProfiles.Any(p => p is null) || loaded.WifiTestProfiles.Select(p => p.Id).Distinct().Count() != loaded.WifiTestProfiles.Count ||
+                loaded.WifiHistory is null || loaded.WifiHistory.Count > 500 || loaded.WifiHistory.Any(e => e is null || e.Adapter is null || e.Adapter.Length > 512 || e.Profile is null || e.Profile.Length > 512 || e.Event is null || e.Event.Length > 80 || e.Result is null || e.Result.Length > 80 || e.Message is null || e.Message.Length > 1024))
+                throw new InvalidDataException("Invalid Wi-Fi preferences.");
+            foreach (var profile in loaded.WifiTestProfiles) profile.Validate();
+            if (loaded.WifiTestRuns is null || loaded.WifiTestRuns.Count > 100 || loaded.WifiTestRuns.Any(r => r is null || r.Adapter is null || r.Adapter.Length > 512 || r.Ssid is null || r.Ssid.Length > 512 || r.Profile is null || r.Profile.Length > 512 || r.TestProfile is null || r.TestProfile.Length > 80 || r.Status is null || r.Results is null || r.Results.Count > 4 ||
+                r.Results.Any(t => t is null || t.Service is null || t.Service.Length > 80 || t.Status is not ("PASS" or "FAIL" or "SKIPPED") || t.Message is null || t.Message.Length > 2048 || t.Target is null || t.Target.Length > 2048 || t.LatencyMs is { } ms && (!double.IsFinite(ms) || ms < 0))))
+                throw new InvalidDataException("Invalid saved Wi-Fi test results.");
             Preferences = loaded;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or ArgumentException or InvalidDataException)

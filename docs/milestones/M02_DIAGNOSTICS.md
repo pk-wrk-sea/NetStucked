@@ -27,7 +27,7 @@ Non-goals: No port-template service identification, intrusive vulnerability scan
 These checkboxes track remaining milestone acceptance, not just code presence.
 
 - [ ] Query A/AAAA/CNAME/MX/TXT/PTR/SRV with explicit query/resolver/result/time semantics and bounded cancellation.
-- [ ] Retain current TCP/UDP scope limits, measured connection/reply timings and inconclusive UDP silence.
+- [ ] Retain TCP/UDP scope limits, inclusive range parsing, continuous multiple-target desktop behavior and configurable 0–1400-byte payload; connect/send completion is not an application reply and UDP silence is inconclusive.
 - [ ] For HTTP/HTTPS report actual status/redirects/timing and bounded response metadata without downloading unbounded bodies.
 - [ ] Inspect certificate chain/hostname/expiry/TLS negotiation with clear validation failures; do not represent reachability as application health.
 - [ ] Allow export and independent target-oriented protocol findings; document resolver/transport limitations.

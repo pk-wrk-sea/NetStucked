@@ -1,6 +1,6 @@
 # NetStucked product vision
 
-Planning snapshot: 2026-10-09. Current code is **0.4.0**, a development release. The initial 0.1.0 target is historical; the first stable target remains **1.0.0**. Version proposals do not authorize implementation or publication.
+Planning snapshot: 2026-10-09. The published baseline verified in this audit is **0.4.0**; current source has the separately authorized **0.4.1** defect follow-up. Both are development versions; local metadata does not prove publication. The initial 0.1.0 target is historical and the first stable target remains **1.0.0**. Version proposals do not authorize implementation/publication.
 
 NetStucked is an All-in-One Network Engineering Toolkit for network engineers, NOC teams, infrastructure engineers and IT support. Its purpose is diagnosing remote IP addresses, hostnames, authorized subnets, routes and services. Local adapter information is supporting context, not a PC health dashboard.
 

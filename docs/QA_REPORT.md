@@ -1,6 +1,12 @@
 # NetStucked verification reports
 
-**Published 0.4.2 — current GitHub Latest:** [Verified source/assets, CI, exact simultaneous-load checks and actual public updater/installer preparation](GITHUB_RELEASE_0.4.2_REPORT_2026-10-09.md). 214 tests pass; 52 original checkout WIP files remain byte-for-byte unchanged. Human acceptance and machine installation remain open.
+**0.5.0 combined-source verification:** [approved Wi-Fi + 0.4.2 diagnostics](QA_0.5.0.md). Reviewed Release build/242 tests/exact-publish WPF checks PASS; final clean-commit package/CI/public release verification follows. Wi-Fi hardware/authentication and actual machine installation are NOT TESTED.
+
+**Current local Wi-Fi extension:** [approved Network Info QA](QA_WIFI_2026-10-09.md), including exact published-assembly WPF checks, source-bound owned-loopback IPv4/IPv6 ICMP/DNS/TCP/HTTP, Credential Manager, cancellation/transitions and installer build. Actual Wi-Fi/Enterprise hardware is NOT TESTED; stopped WLAN service is recorded without changing the working machine. This local preview is not a GitHub release. Earlier results below are historical subjects.
+
+**Milestone documentation audit (2026-10-09):** [Implementation status](IMPLEMENTATION_STATUS.md) separates the published 0.4.0 baseline, its 176-test main follow-up and a separately captured 0.4.1 working snapshot. Fresh logs/TRX live under `artifacts/milestone-audit/2026-10-09-docs/`. This planning task executes no installer or new release; prior WPF/soak/native/installer results remain separate evidence. [Milestones](MILESTONE_INDEX.md) and [next task](CODEX_NEXT_TASK.md) preserve outstanding acceptance.
+
+**Historical published 0.4.2:** [Verified source/assets, CI, exact simultaneous-load checks and actual public updater/installer preparation](GITHUB_RELEASE_0.4.2_REPORT_2026-10-09.md). 214 tests pass; 52 original checkout WIP files remain byte-for-byte unchanged. Human acceptance and machine installation remain open.
 
 **0.4.2 diagnostics follow-up:** [Ping capacity/health, actual reply addresses, selectable tables, Port columns and optional hop TCP QA](QA_0.4.2.md). Release build and 214 tests pass. Owned loopback/WPF checks and simultaneous diagnostics evidence are recorded with explicit remote/human/install limits; publication verifies the exact frozen package separately.
 

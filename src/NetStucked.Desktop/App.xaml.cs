@@ -24,6 +24,10 @@ public partial class App : Application
         services.AddSingleton<IDnsResolver, DnsResolver>();
         services.AddSingleton<ITcpProbe, TcpPortProbe>();
         services.AddSingleton<IUdpProbe, UdpPortProbe>();
+        services.AddSingleton<IWifiService, WindowsWifiService>();
+        services.AddSingleton<IWifiCredentialVault, WindowsWifiCredentialVault>();
+        services.AddSingleton<IWifiServiceTests, WifiServiceTests>();
+        services.AddSingleton<NetworkInfoViewModel>();
         services.AddSingleton<IWanIdentitySource, RipeWanIdentitySource>();
         services.AddSingleton<HopDescriptionService>();
         services.AddSingleton<IReleaseSource, GitHubReleaseSource>();

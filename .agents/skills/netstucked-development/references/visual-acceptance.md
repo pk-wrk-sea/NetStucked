@@ -1,3 +1,7 @@
 # Visual acceptance
 
 Live Ping: full-height editor left, template dropdown/Save/gear at top, one bottom action group; six compact cards right above results/history. Apply the authorized UI revision in docs/UI_REVISION_2026-10-08.md. Traceroute: session tabs, target history/gear/results left, full-height log right, no KPIs. Shared Segoe UI, off-white background, blue controls, thin borders, small scrollbars. Compare rendered WPF at 1536x1024 and 1280x800, and 100/125/150% scaling. Verify keyboard access and named icon buttons. Do not claim manual GUI/install acceptance from a build or headless render alone.
+
+Apply named later authorizations in docs/FEATURES_0.4.0.md and FEATURES_0.4.1.md; check docs/UI_APPROVAL_REGISTER.md. They include supplied brand, Light/Dark/System popups, panels/five sessions and named defect fixes. Missing/reported future mockups do not authorize replacement designs. Preserve original PNG/scope hashes; inspect actual current output separately from historical renders.
+
+The human-approved Wi-Fi reference is design/references/WiFiProfiles_APPROVED_2026-10-09.png with the explicit compact-table override recorded in docs/FEATURES_WIFI_2026-10-09.md. Keep adapter/scan/import/export toolbar, compact saved/available tables, bounded history/logs and right-side profile/security/connection/services in the shared theme. Native signal quality is displayed as percent; do not invent RSSI, SSIDs or measurement values. Label fixture-only renders honestly.
