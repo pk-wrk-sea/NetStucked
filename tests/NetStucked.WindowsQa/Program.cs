@@ -164,12 +164,17 @@ internal static partial class Program
         Require(Descendants<DataGridColumnHeader>(restoredGrid).Any(h => Equals(h.Column?.Header, "Lost") && h.IsVisible), "Visible Lost column remains realized after configuring columns and resizing");
         Render(window, output, "LivePing-configured-settled", 1536, 1024, 1);
         vm.NavigateCommand.Execute("Dashboard"); Require(vm.CurrentPage is PlaceholderViewModel, "Dashboard remains neutral placeholder");
+        await CheckDnsHttpAsync(window, vm, dialogs, output);
         try { await CheckNetworkInfoAsync(window, vm, wifi, output); }
         catch (Exception ex) { Console.Error.WriteLine("Network Info QA: " + ex); await vm.ShutdownAsync(); throw; }
 
         if (soakSeconds > 0)
         {
             using var tcpFarm = new LoopbackTcpFarm(32);
+            await using var diagnosticFarm = new OwnedDiagnosticFarm();
+            vm.Dns.UseSystemResolvers = false; vm.Dns.ResolverText = diagnosticFarm.Resolver; vm.Dns.TimeoutText = "5000"; vm.Dns.Concurrency = 16; vm.Dns.QueryA = true; vm.Dns.QueryAaaa = true;
+            vm.Dns.TargetText = string.Join('\n', Enumerable.Range(0, 64).Select(i => "soak" + i + ".example"));
+            vm.Http.TargetText = string.Join('\n', Enumerable.Range(0, 32).Select(i => diagnosticFarm.Url + "soak" + i)); vm.Http.Concurrency = 8;
             measuredTcp.Reset();
             SetPortFarm(vm.Port, tcpFarm.Targets);
             await vm.Port.StartCommand.ExecuteAsync(null);
@@ -192,6 +197,7 @@ internal static partial class Program
             double maximumGap = 0;
             long startingMemory = GC.GetTotalMemory(true);
             int nextReport = 30, nextNavigation = 5;
+            int nextDiagnosticBatch = 1, diagnosticBatches = 0;
             string[] soakPages = ["Port Test", "Traceroute", "Live Ping", "Updates"];
             int navigationIndex = 0;
             var navigationTimes = new List<double>();
@@ -199,6 +205,12 @@ internal static partial class Program
             {
                 await Task.Delay(50);
                 maximumGap = Math.Max(maximumGap, heartbeat.Elapsed.TotalMilliseconds); heartbeat.Restart();
+                if (elapsed.Elapsed.TotalSeconds >= nextDiagnosticBatch)
+                {
+                    await Task.WhenAll(vm.Dns.StartCommand.ExecuteAsync(null), vm.Http.StartCommand.ExecuteAsync(null));
+                    Require(vm.Dns.Results.Count == 128 && vm.Dns.Results.All(r => r.Status == "PASS") && vm.Http.Results.Count == 32 && vm.Http.Results.All(r => r.Status == "PASS"), "Owned DNS/HTTP batch succeeds while 254 Ping, 32 TCP and two traces run");
+                    diagnosticBatches++; nextDiagnosticBatch += 5;
+                }
                 if (elapsed.Elapsed.TotalSeconds >= nextNavigation)
                 {
                     var navigation = Stopwatch.StartNew();
@@ -217,6 +229,8 @@ internal static partial class Program
             }
             await vm.Ping.StopCommand.ExecuteAsync(null); await secondTrace.StopCommand.ExecuteAsync(null); await vm.TraceWorkspace.Sessions[0].StopCommand.ExecuteAsync(null); vm.Ping.Refresh(true);
             await vm.Port.StopCommand.ExecuteAsync(null); vm.Port.Refresh(true);
+            Require(!vm.Dns.IsRunning && !vm.Http.IsRunning, "All DNS/HTTP presentation and network work is drained after coexistence soak");
+            await File.WriteAllTextAsync(Path.Combine(output, "dns-http-soak.json"), JsonSerializer.Serialize(new { Batches = diagnosticBatches, diagnosticFarm.DnsReplies, diagnosticFarm.HttpReplies, DnsRunning = vm.Dns.IsRunning, HttpRunning = vm.Http.IsRunning, ConcurrencyDns = vm.Dns.Concurrency, ConcurrencyHttp = vm.Http.Concurrency }));
             Require(vm.Port.Rows.Count == 32 && vm.Port.Rows.All(r => r.Connected > 0 && r.Attempts == r.Connected) && measuredTcp.Active == 0 && measuredTcp.Maximum <= 32 && measuredTcp.Overlap == 0, "32 actual TCP endpoints run alongside 254 Ping targets and two trace sessions without TCP overlap; Stop drains all sockets");
             vm.NavigateCommand.Execute("Port Test"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
             Render(window, output, "PortTest-32-soak", 1536, 1024, 1);
@@ -350,7 +364,7 @@ internal static partial class Program
                 Require(vm.Updates.Available is null && vm.Updates.StatusTitle == "No newer published version" && download.IsEnabled && vm.Updates.InstallLabel == "Reinstall v" + vm.Updates.CurrentVersion, "Current test build offers Reinstall and reports no newer public update");
                 vm.Updates.SelectedBuild = vm.Updates.Builds.Single(b => b.Version.ToString() == "0.3.0");
                 Require(vm.Updates.InstallLabel == "Recover v0.3.0" && vm.Updates.InstallCommand.CanExecute(null) && download.IsEnabled, "Actual test build can select the published 0.3.0 installer for Recovery");
-                string previous = vm.Updates.CurrentVersion == "0.5.0" ? "0.4.2" : vm.Updates.CurrentVersion == "0.4.2" ? "0.4.1" : vm.Updates.CurrentVersion == "0.4.1" ? "0.4.0" : "0.3.0";
+                string previous = vm.Updates.CurrentVersion == "0.6.0" ? "0.5.0" : vm.Updates.CurrentVersion == "0.5.0" ? "0.4.2" : vm.Updates.CurrentVersion == "0.4.2" ? "0.4.1" : vm.Updates.CurrentVersion == "0.4.1" ? "0.4.0" : "0.3.0";
                 Require(vm.Updates.PreviousVersion == "Previous documented version: v" + previous, "Current build records its actual documented recovery version");
             }
             else

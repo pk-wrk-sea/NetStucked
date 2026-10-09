@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0 — 2026-10-09
+
+- Added DNS Test with selected records/resolvers, validated UDP/TCP responses, bounded queries and measured results.
+- Added HTTP/HTTPS Test with GET/HEAD, expected status, optional redirects, header timing and TLS/certificate details; normal certificate validation remains enforced.
+- Grouped navigation with licensed outline icons and Coming Soon pages; retained Wi-Fi and removed History/Reports from navigation as requested.
+- Fixed Dark version labels and native Taskbar/Alt-Tab icon/shortcut identity. New tools drain during Stop/shutdown/update.
+- Verification and remaining human/remote/install limits: docs/QA_0.6.0.md.
+
+
 ## 0.5.0 — 2026-10-09
 
 - Replace Network Info's placeholder with the approved compact saved-WLAN-profile table and current Light/Dark theme; add adapter selection, explicit scan/connect/disconnect, nonsecret descriptions/auto-connect, confirmed deletion and safe IT-profile import/secret-free export.

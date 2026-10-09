@@ -3,11 +3,13 @@
     <OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF>
     <ApplicationManifest>$(BaseIntermediateOutputPath)app.generated.manifest</ApplicationManifest><AssemblyName>NetStucked</AssemblyName>
     <ApplicationIcon>Resources/Brand/NetStucked.ico</ApplicationIcon>
-    <Product>NetStucked</Product><Description>ICMP, TCP and UDP diagnostics for network engineers</Description>
+    <Product>NetStucked</Product><Description>ICMP, TCP, UDP, DNS and HTTP diagnostics for network engineers</Description>
   </PropertyGroup>
   <ItemGroup>
     <Resource Include="Resources/Brand/NetStuckedLogo.png" />
     <Resource Include="Resources/Brand/NetStucked.ico" />
+    <EmbeddedResource Include="Resources/Icons/*.svg" LogicalName="NetStucked.Icons.%(Filename)%(Extension)" />
+    <None Update="Resources/Icons/LICENSE" CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="Resources/ReleaseHistory.json" LogicalName="NetStucked.ReleaseHistory.json" />
     <ProjectReference Include="../NetStucked.Core/NetStucked.Core.csproj" />
     <ProjectReference Include="../NetStucked.Infrastructure/NetStucked.Infrastructure.csproj" />

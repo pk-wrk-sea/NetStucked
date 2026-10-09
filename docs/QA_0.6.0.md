@@ -1,0 +1,13 @@
+# 0.6.0 verification
+
+Current subject is the human-authorized 0.6.0 DNS/HTTP/navigation/branding change on codex/dns-http-060. This document is updated from final exact-source/package evidence before publication.
+
+- Release build: PASS, zero warnings/errors.
+- Unit and owned network suite: PASS, 265 passed / 0 failed / 0 skipped at the reviewed source. DNS record types, validated questions/compression limits, negative responses, actual UDP-to-TCP fallback, timeout/cancel; actual HTTP headers-only/status/redirect/redaction/timeout/cancel, case-sensitive URL targets and untrusted HTTPS rejection are covered. CSV reuses existing formula-safe cell encoding.
+- Initial regressions corrected before this PASS: bracketed IPv6 resolver port parsing; normalized IPv4-mapped remote address display; owned Windows TLS fixture private-key materialization. Initial native UI check exposed an SVG polyline parser issue, fixed before final review. A stale pre-history build failed the current-version/history check; the harness's error cleanup masked it with a Dispatcher disposal exception. These failed subjects are not release evidence.
+- Actual WPF/native source checks: PASS. Both new pages rendered in Light/Dark at 1536x1024 and 1280x800; selectable text, CSV, collapsible panels, pending menus, eleven readable Dark version labels and both native branded icon handles were verified. No data-binding errors. Update preparation cancelled a real pending UDP read and awaited presentation/transport cleanup.
+- Owned coexistence soak: PASS for 60.7 seconds with 254 actual loopback Ping targets (3984 sent/received), 32 TCP endpoints, two traces (241 cycles each), 1536 DNS answers and 384 HTTP responses. Per-address/TTL overlap was zero; maximum combined ICMP concurrency 36; all Stop/shutdown work drained. Navigation mean/max were 19.7/123.9 ms. The 896.4 ms maximum loop gap includes awaiting owned DNS/HTTP batches and is not a standalone Dispatcher-latency measurement. Managed memory returned from 139 MB observed during the soak to 51.7 MB after cleanup.
+- Exact portable assemblies/native startup/package/public release checks: pending until recorded below.
+- Human-installed UI/Taskbar/pinned-shortcut acceptance, actual Wi-Fi and remote Enterprise DNS/HTTP/proxy/TLS combinations, clean Windows install/upgrade/recovery/uninstall and Windows 11: NOT TESTED. No working machine Wi-Fi, certificate trust store or installation was changed by QA.
+
+Scope/manual checklist: FEATURES_0.6.0.md. Canonical Ping/Trace/brand/Wi-Fi references must remain byte-identical; Wi-Fi source is excluded from edits.

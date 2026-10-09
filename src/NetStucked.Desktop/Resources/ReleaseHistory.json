@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.6.0",
+    "Date": "2026-10-09",
+    "Notes": "• Added DNS Test with selected record types, direct resolver comparison and bounded UDP/TCP queries.\n• Added HTTP/HTTPS Test with response status, redirects, measured header time, TLS/certificate details and normal certificate validation.\n• Grouped sidebar navigation with outline icons and pending pages; History/Reports and broader Network Info remain deferred.\n• Corrected Dark theme version labels and native window/taskbar branding; preserves the existing Wi-Fi page."
+  },
+  {
     "Version": "0.5.0",
     "Date": "2026-10-09",
     "Notes": "• Added Network Info Wi-Fi Profile Manager with compact searchable/configurable Windows profile tables, explicit scan/connect/disconnect and safe import/export.\n• Windows-managed Personal/EAP/certificate authentication; optional PEAP app credentials use Windows Credential Manager.\n• Configured source-aware Gateway/DNS/TCP/HTTP Connect & Test, bounded measured history and network transition notices.\n• Retains all 0.4.2 diagnostics fixes; Wi-Fi tables support selectable text and update preparation drains Wi-Fi work.\n• Actual Wi-Fi/Enterprise hardware authentication still requires acceptance on a Wi-Fi-capable machine."

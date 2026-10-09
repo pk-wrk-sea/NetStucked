@@ -1,5 +1,7 @@
 # M02 — Dedicated DNS, TCP/UDP and HTTP/TLS diagnostics
 
+Current authorized 0.6.0 work (human 2026-10-09): DNS Test and HTTP / HTTPS Test plus grouped navigation, Dark version labels and native taskbar branding are implemented; see FEATURES_0.6.0.md / QA_0.6.0.md. Publication status is established only by the eventual GitHub release report. Wi-Fi remains unchanged. Broader adapter/routes/ARP and durable History/Reports were explicitly declined; other unimplemented menu pages show Pending - Coming Soon. Earlier planning snapshots below are historical and do not override this later scope.
+
 ## 1. Milestone and version
 
 **M02** / 0.6.0 proposed (brief originally 0.3.0; TCP shipped earlier). Planning snapshot 2026-10-09; not a version bump or publication instruction. [Milestone index](../MILESTONE_INDEX.md).
@@ -26,9 +28,9 @@ Non-goals: No port-template service identification, intrusive vulnerability scan
 
 These checkboxes track remaining milestone acceptance, not just code presence.
 
-- [ ] Query A/AAAA/CNAME/MX/TXT/PTR/SRV with explicit query/resolver/result/time semantics and bounded cancellation.
+- [x] Query A/AAAA/CNAME/MX/TXT/PTR/SRV with explicit query/resolver/result/time semantics and bounded cancellation (0.6.0 source/unit/owned UDP-TCP checks; remote lab remains open).
 - [ ] Retain TCP/UDP scope limits, inclusive range parsing, continuous multiple-target desktop behavior and configurable 0–1400-byte payload; connect/send completion is not an application reply and UDP silence is inconclusive.
-- [ ] For HTTP/HTTPS report actual status/redirects/timing and bounded response metadata without downloading unbounded bodies.
+- [x] For HTTP/HTTPS report actual status/redirects/timing and bounded response metadata without downloading unbounded bodies (owned HTTP/redirect/timeout and untrusted HTTPS checks in 0.6.0).
 - [ ] Inspect certificate chain/hostname/expiry/TLS negotiation with clear validation failures; do not represent reachability as application health.
 - [ ] Allow export and independent target-oriented protocol findings; document resolver/transport limitations.
 
@@ -73,7 +75,7 @@ Deterministic DNS packet/record/status fixtures, owned local DNS/HTTP/TLS server
 ## 16. Definition of Done
 
 - [x] Current Port Test implementation/release and bounded behavior are recorded as a completed subset.
-- [ ] New tool scope/UI/API choice approved.
+- [x] New tool scope/UI/API choice approved by later explicit human 0.6.0 instruction; bounded direct DNS wire client and .NET HTTP/TLS preserve normal trust.
 - [ ] DNS/HTTP/TLS implementations and meaningful tests pass.
 - [ ] Owned-service and authorized remote acceptance plus full regressions documented.
 

@@ -35,6 +35,9 @@ public partial class App : Application
         services.AddSingleton<IApplicationUpdateService, WindowsApplicationUpdateService>();
         services.AddSingleton<IDesktopDialogs>(dialogs ?? new WpfDialogService());
         services.AddSingleton<MultiTargetPingService>();
+        services.AddSingleton<IDnsTestClient, DnsTestClient>();
+        services.AddSingleton<IHttpTestClient, HttpTestClient>();
+        services.AddSingleton<DnsTestViewModel>(); services.AddSingleton<HttpTestViewModel>();
         services.AddSingleton<MultiTargetPortService>();
         services.AddSingleton<PortTestViewModel>(); services.AddSingleton<UpdatesViewModel>();
         services.AddSingleton<LivePingViewModel>(); services.AddSingleton<TracerouteWorkspaceViewModel>();
@@ -45,6 +48,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        WindowBranding.SetApplicationIdentity();
         if (e.Args.Length == 2 && e.Args[0] == "--apply-update")
         {
             ShutdownMode = ShutdownMode.OnExplicitShutdown;

@@ -33,7 +33,7 @@ Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription:
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 [Icons]
-Name: "{group}\NetStucked"; Filename: "{app}\NetStucked.exe"
-Name: "{autodesktop}\NetStucked"; Filename: "{app}\NetStucked.exe"; Tasks: desktopicon
+Name: "{group}\NetStucked"; Filename: "{app}\NetStucked.exe"; IconFilename: "{app}\NetStucked.exe"; AppUserModelID: "NetStucked.Desktop"
+Name: "{autodesktop}\NetStucked"; Filename: "{app}\NetStucked.exe"; IconFilename: "{app}\NetStucked.exe"; AppUserModelID: "NetStucked.Desktop"; Tasks: desktopicon
 [Run]
 Filename: "{app}\NetStucked.exe"; Description: "Launch NetStucked"; Flags: nowait postinstall skipifsilent runasoriginaluser

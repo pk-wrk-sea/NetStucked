@@ -10,7 +10,7 @@ namespace NetStucked.Desktop;
 public partial class MainWindow : Window
 {
     private bool _closedAfterCleanup;
-    public MainWindow() { InitializeComponent(); Icon = Services.BrandAssets.Icon; Services.ThemeService.ApplyWindow(this); WindowWorkArea.Attach(this); Closing += ClosingAsync; }
+    public MainWindow() { InitializeComponent(); Icon = Services.BrandAssets.Icon; Services.WindowBranding.Attach(this); Services.ThemeService.ApplyWindow(this); WindowWorkArea.Attach(this); Closing += ClosingAsync; }
     private void Minimize_Click(object sender, RoutedEventArgs e) => SystemCommands.MinimizeWindow(this);
     private void Maximize_Click(object sender, RoutedEventArgs e) { if (WindowState == WindowState.Maximized) SystemCommands.RestoreWindow(this); else SystemCommands.MaximizeWindow(this); }
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
