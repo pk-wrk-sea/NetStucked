@@ -1,5 +1,7 @@
 # NetStucked verification reports
 
+**Published 0.3.0 / 0.3.1 TEST BUILD:** [Publication and 0.2.x retirement report](GITHUB_RELEASE_0.3_REPORT_2026-10-09.md). Both source builds, exact-package WPF/native checks and Windows CI installers passed. Actual 0.3.0 offers Install 0.3.1; actual 0.3.1 offers Recover 0.3.0; both public lists exclude retired 0.2.x. Full machine installer upgrade/downgrade remains NOT TESTED.
+
 **Local 0.3.0:** [Selected-build installation/recovery QA](QA_0.3.0.md), with installer integrity/trust checks, real isolated-helper startup, actual network-session drain tests and explicit machine-install limitations. Runnable output: `artifacts/selected-build/0.3.0/final/publish/NetStucked.exe`. Earlier reports remain historical evidence.
 
 **Published 0.2.0 / 0.2.1 TEST BUILD:** [2026-10-09 GitHub publication report](GITHUB_RELEASE_REPORT_2026-10-09.md), with exact package hashes, Windows CI installer builds and live release-menu evidence. Machine installer upgrade/downgrade remains untested. The local reports below are historical evidence from before this publication.
