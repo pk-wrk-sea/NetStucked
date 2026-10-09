@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 — 2026-10-09 — TEST BUILD
+
+- Exercise selected-build Upgrade from 0.3.0 and Recovery back to 0.3.0 through actual GitHub installer assets.
+- Change version metadata and bundled release-history notes only. Diagnostic/update code and schema-1 settings match the 0.3.0 baseline.
+- Keep this clearly labeled TEST BUILD separate from the regular Latest release. Normal SemVer is required by the checker; no background installation is introduced.
+
 ## 0.3.0 — 2026-10-09
 
 - Added user-triggered installation/recovery of a selected published build, with actual release notes, a dynamic Install/Reinstall/Recover button, download progress and preparation cancellation.

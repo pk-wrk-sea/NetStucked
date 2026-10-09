@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.3.1",
+    "Date": "2026-10-09",
+    "Notes": "• TEST BUILD for upgrading from 0.3.0 and recovering back to 0.3.0 through the selected-build menu.\n• Changes from 0.3.0: version metadata and this test-build release history only.\n• Ping, Traceroute, TCP Port Test, update/recovery implementation and schema-1 settings are unchanged.\n• Unsigned installers require acknowledgement; Windows permission prompts remain enabled."
+  },
+  {
     "Version": "0.3.0",
     "Date": "2026-10-09",
     "Notes": "• Added a published-build selector and one action to install, reinstall or recover the chosen version.\n• Verify GitHub installer identity, SHA-256, size, product version and Windows trust; unsigned builds require acknowledgement.\n• Stop diagnostics, preserve versioned settings backups and restart through an isolated helper.\n• Keep Windows permission prompts and manual release links; no background installation."

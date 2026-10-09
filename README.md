@@ -1,4 +1,6 @@
-# NetStucked 0.3.0
+# NetStucked 0.3.1 — TEST BUILD
+
+This test branch changes version metadata and release-history notes from 0.3.0, with the same diagnostic/update code and schema-1 settings. Start with published 0.3.0, select 0.3.1 to Upgrade, then select 0.3.0 to Recover. This release is labeled TEST BUILD and is not GitHub Latest. See [the test procedure](docs/TEST_BUILD_0.3.1.md). Actual machine installation/rollback has not been tested by the release task.
 
 Windows 10/11 x64 desktop diagnostics for remote IP addresses, hostnames and authorized IPv4 subnets. C# / WPF / .NET 10 / MVVM. Live Ping, continuous ICMP Traceroute and TCP Port Test use actual network APIs. Updates & Recovery reads GitHub releases on demand and installs or recovers the build you select, with download verification, settings backup and restart. The approved layouts in `design/references/` are preserved; sample telemetry is never loaded.
 
