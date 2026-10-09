@@ -1,5 +1,7 @@
 # NetStucked verification reports
 
+**Published 0.4.0:** [Verified source/packages, CI and actual public Updates/installer checks](GITHUB_RELEASE_0.4_REPORT_2026-10-09.md). 0.4.0 is GitHub Latest. The frozen tagged package passed 175 tests, exact WPF/native checks and a 60-second simultaneous-diagnostics soak. Post-publication QA follow-up concerns test cancellation accounting only; published application bytes remain unchanged. Full machine installer scenarios remain NOT TESTED.
+
 **Local 0.4.0:** [Branding, themes, panels, shared hop descriptions and TCP/UDP scan QA](QA_0.4.0.md). 175 tests pass; exact-published WPF/native checks, real loopback diagnostics, RIPEstat metadata and installer compilation are verified. Runnable output: `artifacts/ui-branding/0.4.0/final/publish/NetStucked.exe`. This UI task did not commit, push, publish or install the build. Earlier reports and packages below remain historical evidence.
 
 **Published 0.3.0 / 0.3.1 TEST BUILD:** [Publication and 0.2.x retirement report](GITHUB_RELEASE_0.3_REPORT_2026-10-09.md). Both source builds, exact-package WPF/native checks and Windows CI installers passed. Actual 0.3.0 offers Install 0.3.1; actual 0.3.1 offers Recover 0.3.0; both public lists exclude retired 0.2.x. Full machine installer upgrade/downgrade remains NOT TESTED.

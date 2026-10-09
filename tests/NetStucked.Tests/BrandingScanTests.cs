@@ -108,6 +108,28 @@ public sealed class BrandingScanTests
         handler.Oversized = true;
         await Assert.ThrowsAsync<IOException>(() => source.LookupAsync(IPAddress.Parse("8.8.8.8"), CancellationToken.None));
     }
+    [Fact]
+    public async Task WanCancellationDrainsActiveHttpAndPreventsQueuedHttpSends()
+    {
+        var handler = new BlockingWanHttp(); using var source = new RipeWanIdentitySource(new HttpClient(handler));
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var tasks = Enumerable.Range(1, 32).Select(i => source.LookupAsync(IPAddress.Parse($"8.8.8.{i}"), cancellation.Token)).ToArray();
+        await handler.Started.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        await cancellation.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Task.WhenAll(tasks));
+        Assert.Equal(1, handler.Requests); Assert.Equal(0, handler.Active);
+    }
+    private sealed class BlockingWanHttp : HttpMessageHandler
+    {
+        public TaskCompletionSource Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public int Requests, Active;
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
+        {
+            Interlocked.Increment(ref Requests); Interlocked.Increment(ref Active); Started.TrySetResult();
+            try { await Task.Delay(Timeout.Infinite, token); throw new InvalidOperationException("The test response must be cancelled."); }
+            finally { Interlocked.Decrement(ref Active); }
+        }
+    }
     private sealed class WanHttp : HttpMessageHandler
     {
         public List<Uri> Requests { get; } = []; public bool Oversized;
