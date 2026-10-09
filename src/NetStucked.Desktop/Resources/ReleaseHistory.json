@@ -1,0 +1,12 @@
+[
+  {
+    "Version": "0.2.0",
+    "Date": "2026-10-09",
+    "Notes": "• Added TCP Port Test with independent endpoint polling, pause/resume, templates, connection history and CSV export.\n• Added manual GitHub Releases checks, release notes and a manual recovery guide.\n• Moved Settings and Updates to the bottom application group in the sidebar."
+  },
+  {
+    "Version": "0.1.0",
+    "Date": "2026-10-08",
+    "Notes": "• Introduced real multi-target ICMP Live Ping and continuous TTL-based ICMP Traceroute.\n• Added CIDR input, named address templates, trace address history and independent trace sessions.\n• Improved independent scheduling, bounded DNS/probe workers and UI update batching.\n• Added compact probe settings, result timestamps, configurable columns, fit/resize guides and stable history scrolling.\n• Corrected maximized window bounds and introduced minimal window controls.\n• Added .NET 10 Windows self-contained publishing and the Inno Setup installer foundation."
+  }
+]

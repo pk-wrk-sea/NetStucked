@@ -1,0 +1,25 @@
+name: Windows build
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet restore NetStucked.sln
+      - run: dotnet build NetStucked.sln -c Release --no-restore
+      - run: dotnet test NetStucked.sln -c Release --no-build --logger trx
+      - run: dotnet run --project tests/NetStucked.WindowsQa -c Release --no-build -- artifacts/windows-qa 0
+      - run: dotnet publish src/NetStucked.Desktop/NetStucked.Desktop.csproj -c Release -r win-x64 --self-contained true -o artifacts/publish/win-x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NetStucked-win-x64
+          path: artifacts/publish/win-x64

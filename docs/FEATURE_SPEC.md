@@ -1,0 +1,15 @@
+# Implemented scope — 0.1.0
+
+This page records the retained Ping/Traceroute behavior. The authorized 0.2.0 TCP Port Test and manual Updates extension is described in [FEATURES_0.2.0.md](FEATURES_0.2.0.md).
+
+The user's explicit 2026-10-08 UI revision supersedes the original screenshots for the requested changes. The canonical scope and PNG files remain unchanged. See UI_REVISION_2026-10-08.md for the revision and verification.
+
+Live Ping accepts one IP, hostname or IPv4 CIDR plus an optional description per line. It expands and deduplicates targets before starting, with a fixed desktop cap of 1024. The framed editor is titled Addresses List to Ping. Save an address template with a name, choose it from the dropdown, or delete it with × after Yes/No confirmation. Names match without case; saving an existing name replaces that template. Templates persist locally, with a limit of 100 and an overall settings size limit of 2 MB. The settings gear exposes only interval (250 ms minimum), timeout (500 ms minimum) and packet size. Internal concurrency/rate/retention limits remain enforced.
+
+One Start/Pause/Resume/Stop group, six compact summaries, sortable/configurable results, selected-target history and CSV export remain available. Results add Last ping, Last success, Reachable since, Unreachable since and Result / error. History reports each completed outcome as Up or Unreachable. Selecting empty results space clears selection; subsequent probes do not reselect it. Manual history scrolling preserves the first visible sample as new rows arrive. Filtered-out selections can be restored when the filter is cleared. Fit Columns uses WPF header/realized-cell sizing and stretches the final visible column. Column order, widths and visibility persist.
+
+Traceroute accepts an editable destination history dropdown, with immediate × deletion and no confirmation. Valid started destinations persist (most recent first, deduplicated, maximum 100); deleting history retains existing session destinations. Add or close independent sessions, up to eight. Closing awaits that session's network cleanup. Only the selected session paints its table; all running engines continue independently. Probe Settings exposes only Max hops, interval (250 ms minimum), timeout (500 ms minimum) and packet size. Continuous polling is always enabled in the desktop UI. No per-probe event spam or Traceroute KPIs. Route descriptions remain editable metadata; CSV exports the current edit.
+
+The framed window has a tab header and minimal colored minimize/maximize/close buttons. Maximization uses the current monitor's native working rectangle. Running tools/sessions show green activity indicators. Main pages retain their actual views on navigation. Buttons provide one-second hover descriptions; column drags display a blue guide and width label.
+
+Dashboard and Network Info remain neutral placeholders. No new monitoring pages, local-PC health features, charts, TCP/UDP trace, discovery, automatic updates or online authentication are implemented.

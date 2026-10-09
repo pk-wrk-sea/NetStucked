@@ -1,0 +1,107 @@
+name: Build verified Windows installer
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag with a prepared draft release
+        required: true
+        type: string
+      portable_sha256:
+        description: SHA-256 of the tested portable ZIP attached to that draft
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: installer-${{ inputs.tag }}
+  cancel-in-progress: false
+jobs:
+  installer:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_TAG: ${{ inputs.tag }}
+      EXPECTED_PORTABLE_SHA: ${{ inputs.portable_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Validate source, tag and draft
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:EXPECTED_TAG -notmatch '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'A stable SemVer tag is required.' }
+          if ($env:EXPECTED_PORTABLE_SHA -notmatch '^[a-fA-F0-9]{64}$') { throw 'Invalid package hash.' }
+          [xml]$props = Get-Content Directory.Build.props
+          $version = [string]$props.Project.PropertyGroup.Version
+          if ($env:EXPECTED_TAG -ne "v$version") { throw 'Tag and source version differ.' }
+          $tagCommit = git rev-parse "$($env:EXPECTED_TAG)^{commit}"
+          $headCommit = git rev-parse HEAD
+          if ($tagCommit -ne $headCommit) { throw 'Checkout does not match the tag.' }
+          $release = gh release view $env:EXPECTED_TAG --repo $env:GITHUB_REPOSITORY --json isDraft,tagName | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or !$release.isDraft -or $release.tagName -ne $env:EXPECTED_TAG) { throw 'A matching draft is required. This workflow never modifies a published release.' }
+          "APP_VERSION=$version" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Restore, build and test source
+        shell: pwsh
+        run: |
+          dotnet restore NetStucked.sln
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet build NetStucked.sln -c Release --no-restore
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet test tests/NetStucked.Tests -c Release --no-build --logger 'trx;LogFileName=tests.trx' --results-directory artifacts/release/test-results
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Download and verify the frozen tested package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path artifacts/release/package -Force | Out-Null
+          gh release download $env:EXPECTED_TAG --repo $env:GITHUB_REPOSITORY --pattern "NetStucked-$env:APP_VERSION-win-x64-portable.zip" --dir artifacts/release/package
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $zip = "artifacts/release/package/NetStucked-$env:APP_VERSION-win-x64-portable.zip"
+          if ((Get-FileHash $zip -Algorithm SHA256).Hash -ne $env:EXPECTED_PORTABLE_SHA) { throw 'Portable bytes do not match the approved hash.' }
+          Expand-Archive -LiteralPath $zip -DestinationPath artifacts/release/publish
+          $info = (Get-Item artifacts/release/publish/NetStucked.exe).VersionInfo
+          if ($info.ProductVersion -ne $env:APP_VERSION) { throw 'Executable metadata does not match the tag.' }
+      - name: Verify exact published application code on Windows
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $qa = Join-Path $PWD artifacts/release/qa-runtime
+          New-Item -ItemType Directory -Path $qa -Force | Out-Null
+          Copy-Item tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/* $qa -Recurse
+          foreach ($file in @('NetStucked.Core.dll','NetStucked.Infrastructure.dll','NetStucked.dll')) { Copy-Item "artifacts/release/publish/$file" (Join-Path $qa $file) -Force }
+          dotnet (Join-Path $qa NetStucked.WindowsQa.dll) artifacts/release/windows-qa 0 artifacts/release/publish
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & ./scripts/SmokePublished.ps1 -PublishDirectory artifacts/release/publish
+      - name: Compile Inno Setup installer from the frozen package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $compiler = @('C:\Program Files (x86)\Inno Setup 6\ISCC.exe','C:\Program Files\Inno Setup 6\ISCC.exe') | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+          if (!$compiler) { $compiler = (Get-Command ISCC.exe -ErrorAction Stop).Source }
+          $publish = (Resolve-Path artifacts/release/publish).Path
+          & $compiler "/DMyAppVersion=$env:APP_VERSION" "/DPublishDir=$publish" installer/NetStucked.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $installer = "artifacts/installer/NetStucked-$env:APP_VERSION-win-x64-setup.exe"
+          if (!(Test-Path $installer)) { throw 'Installer output is missing.' }
+          $hash = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $([IO.Path]::GetFileName($installer))" | Set-Content "$installer.sha256" -Encoding ascii
+          [pscustomobject]@{ Version=$env:APP_VERSION; Commit=(git rev-parse HEAD); PortableSha256=$env:EXPECTED_PORTABLE_SHA; InstallerSha256=$hash; InstallerSigned=$false; ActualInstallTested=$false; ActualRollbackTested=$false } | ConvertTo-Json | Set-Content artifacts/release/installer-build.json -Encoding utf8
+          gh release upload $env:EXPECTED_TAG $installer "$installer.sha256" artifacts/release/installer-build.json --repo $env:GITHUB_REPOSITORY
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: installer-evidence-${{ inputs.tag }}
+          path: |
+            artifacts/release/test-results
+            artifacts/release/windows-qa
+            artifacts/release/installer-build.json
+            artifacts/installer

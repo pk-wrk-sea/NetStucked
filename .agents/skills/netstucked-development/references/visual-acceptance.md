@@ -1,0 +1,3 @@
+# Visual acceptance
+
+Live Ping: full-height editor left, template dropdown/Save/gear at top, one bottom action group; six compact cards right above results/history. Apply the authorized UI revision in docs/UI_REVISION_2026-10-08.md. Traceroute: session tabs, target history/gear/results left, full-height log right, no KPIs. Shared Segoe UI, off-white background, blue controls, thin borders, small scrollbars. Compare rendered WPF at 1536x1024 and 1280x800, and 100/125/150% scaling. Verify keyboard access and named icon buttons. Do not claim manual GUI/install acceptance from a build or headless render alone.

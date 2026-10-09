@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF>
+    <ApplicationManifest>$(BaseIntermediateOutputPath)app.generated.manifest</ApplicationManifest><AssemblyName>NetStucked</AssemblyName>
+    <Product>NetStucked</Product><Description>Remote ICMP and TCP diagnostics for network engineers</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/ReleaseHistory.json" LogicalName="NetStucked.ReleaseHistory.json" />
+    <ProjectReference Include="../NetStucked.Core/NetStucked.Core.csproj" />
+    <ProjectReference Include="../NetStucked.Infrastructure/NetStucked.Infrastructure.csproj" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />
+  </ItemGroup>
+  <Target Name="GenerateVersionedManifest" BeforeTargets="PrepareForBuild">
+    <MakeDir Directories="$(BaseIntermediateOutputPath)" />
+    <PropertyGroup><_AppManifest>$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)/app.manifest').Replace('__ASSEMBLY_VERSION__', '$(AssemblyVersion)'))</_AppManifest></PropertyGroup>
+    <WriteLinesToFile File="$(ApplicationManifest)" Lines="$(_AppManifest)" Overwrite="true" WriteOnlyWhenDifferent="true" Encoding="UTF-8" />
+  </Target>
+</Project>
