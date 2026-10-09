@@ -35,6 +35,8 @@ internal static partial class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        if (args.FirstOrDefault() == "--export-brand") return ExportBrand(Path.GetFullPath(args[1]));
+        if (args.FirstOrDefault() == "--wan-metadata") return ReadWanMetadataAsync(args[1], Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--verify-installer") return VerifyPublishedInstallerAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
         string output = Path.GetFullPath(args.FirstOrDefault() ?? "artifacts/windows-qa");
         int soakSeconds = args.Length > 1 ? int.Parse(args[1]) : 0;
@@ -78,6 +80,7 @@ internal static partial class Program
         var measured = new MeasuredRealProbe();
         var measuredTcp = new MeasuredRealTcp();
         await using var provider = App.ConfigureServices(store, dialogs, services => { services.AddSingleton<IIcmpProbe>(measured); services.AddSingleton<ITcpProbe>(measuredTcp); });
+        provider.GetRequiredService<ThemeService>();
         var vm = provider.GetRequiredService<MainViewModel>();
         var window = provider.GetRequiredService<MainWindow>();
         app.MainWindow = window; window.DataContext = vm;
@@ -125,6 +128,7 @@ internal static partial class Program
         await CheckUiRevisionAsync(window, vm, dialogs, output);
         await CheckPortAndUpdatesAsync(window, vm, dialogs, store, output);
         await CheckSelectedBuildAsync(vm, store, measured, measuredTcp);
+        await CheckBrandingScanAsync(window, vm, dialogs, provider, output);
         vm.NavigateCommand.Execute("Traceroute");
         await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
         Require(Descendants<RadioButton>((DependencyObject)window.Content).Single(b => Equals(b.CommandParameter, "Traceroute")).IsChecked == true, "Sidebar selection follows the active page");
@@ -163,7 +167,7 @@ internal static partial class Program
         {
             using var tcpFarm = new LoopbackTcpFarm(32);
             measuredTcp.Reset();
-            vm.Port.TargetText = tcpFarm.Targets;
+            SetPortFarm(vm.Port, tcpFarm.Targets);
             await vm.Port.StartCommand.ExecuteAsync(null);
             await Until(() => { vm.Port.Refresh(); return vm.Port.Rows.Count == 32 && vm.Port.Rows.All(r => r.Data.Connected > 0); });
             vm.NavigateCommand.Execute("Live Ping");
@@ -261,7 +265,7 @@ internal static partial class Program
         Exception? portError = null;
         Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
         {
-            var dialog = Application.Current.Windows.Cast<Window>().Single(w => w.Title == "TCP Probe Settings"); dialog.Opacity = 0;
+            var dialog = Application.Current.Windows.Cast<Window>().Single(w => w.Title == "Port Probe Settings"); dialog.Opacity = 0;
             try
             {
                 var inputs = Descendants<TextBox>((DependencyObject)dialog.Content).ToArray();
@@ -282,7 +286,7 @@ internal static partial class Program
         using var farm = new LoopbackTcpFarm(2);
         using var closed = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); closed.Bind(new IPEndPoint(IPAddress.Loopback, 0));
         int port = ((IPEndPoint)closed.LocalEndPoint!).Port;
-        vm.Port.TargetText = farm.Targets.Replace("127.0.0.1:", "localhost:") + $"\n127.0.0.1:{port} closed socket";
+        SetPortFarm(vm.Port, farm.Targets + $"\n127.0.0.1:{port}"); vm.Port.TargetText = "localhost TCP QA including closed socket";
         await vm.Port.StartCommand.ExecuteAsync(null);
         await Until(() => { vm.Port.Refresh(); return vm.Port.Rows.Count == 3 && vm.Port.Rows.All(r => r.Attempts > 0); });
         Require(vm.Port.Rows.Count(r => r.Status == "Connected") == 2 && vm.Port.Rows.Single(r => r.Port == port).Last is null, "Actual TCP successes have connect times; a closed endpoint has no invented time");
@@ -293,7 +297,7 @@ internal static partial class Program
         vm.Port.StatusFilter = "All status";
         await vm.Port.PauseCommand.ExecuteAsync(null); long attempts = vm.Port.Sent; await Task.Delay(600); vm.Port.Refresh();
         Require(vm.Port.State == SessionState.Paused && vm.Port.Sent == attempts, "TCP Pause drains sockets and preserves counters");
-        await vm.Port.ExportCommand.ExecuteAsync(null); Require(dialogs.Exports.Last().Contains("Connect (ms)") && dialogs.Exports.Last().Contains("closed socket"), "TCP CSV exports actual outcomes and connection time");
+        await vm.Port.ExportCommand.ExecuteAsync(null); Require(dialogs.Exports.Last().Contains("Response (ms)") && dialogs.Exports.Last().Contains("closed socket"), "TCP CSV exports actual outcomes and connection time");
         Render(window, output, "PortTest", 1536, 1024, 1); Render(window, output, "PortTest-narrow", 1280, 800, 1);
         var grid = Descendants<DataGrid>((DependencyObject)window.Content).Single(g => AutomationProperties.GetName(g) == "TCP Port Test Results");
         GridTools.FitColumns(grid); Require(grid.Columns[^1].Width.IsStar, "TCP Fit Columns stretches the final column");
@@ -302,7 +306,7 @@ internal static partial class Program
         vm.NavigateCommand.Execute("Updates"); await Task.Delay(400);
         Require(vm.IsPortActive && vm.Port.State == SessionState.Running, "TCP keeps running while Updates is visible");
         await vm.Port.StopCommand.ExecuteAsync(null);
-        vm.Port.TargetText = farm.Targets; dialogs.TemplateName = "TCP QA ไทย"; await vm.Port.SaveCommand.ExecuteAsync(null);
+        SetPortFarm(vm.Port, farm.Targets); dialogs.TemplateName = "TCP QA ไทย"; await vm.Port.SaveCommand.ExecuteAsync(null);
         Require(vm.Port.Templates.Any(t => t.Name == "TCP QA ไทย") && store.Preferences.PortTemplates.Any(t => t.Name == "TCP QA ไทย"), "TCP templates persist named endpoints");
         var template = vm.Port.Templates.Single(t => t.Name == "TCP QA ไทย"); dialogs.ConfirmDelete = false;
         await template.DeleteCommand.ExecuteAsync(null); Require(vm.Port.Templates.Contains(template), "TCP template deletion respects No");

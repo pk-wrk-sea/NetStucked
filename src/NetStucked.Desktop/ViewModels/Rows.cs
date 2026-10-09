@@ -144,6 +144,7 @@ public class HopRow(TraceHopSnapshot data, Action<int, string> onDescription) : 
     };
     private string _description = data.Description;
     public string Description { get => _description; set { if (SetProperty(ref _description, value)) onDescription(Hop, value); } }
+    public void SetResolvedDescription(string value) => SetProperty(ref _description, value, nameof(Description));
 }
 
 public sealed record PlaceholderViewModel(string Message);

@@ -2,9 +2,12 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF>
     <ApplicationManifest>$(BaseIntermediateOutputPath)app.generated.manifest</ApplicationManifest><AssemblyName>NetStucked</AssemblyName>
-    <Product>NetStucked</Product><Description>Remote ICMP and TCP diagnostics for network engineers</Description>
+    <ApplicationIcon>Resources/Brand/NetStucked.ico</ApplicationIcon>
+    <Product>NetStucked</Product><Description>ICMP, TCP and UDP diagnostics for network engineers</Description>
   </PropertyGroup>
   <ItemGroup>
+    <Resource Include="Resources/Brand/NetStuckedLogo.png" />
+    <Resource Include="Resources/Brand/NetStucked.ico" />
     <EmbeddedResource Include="Resources/ReleaseHistory.json" LogicalName="NetStucked.ReleaseHistory.json" />
     <ProjectReference Include="../NetStucked.Core/NetStucked.Core.csproj" />
     <ProjectReference Include="../NetStucked.Infrastructure/NetStucked.Infrastructure.csproj" />

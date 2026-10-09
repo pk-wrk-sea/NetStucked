@@ -49,6 +49,7 @@ public static class ColumnLayout
         var window = new Window { Title = "Visible columns", Width = 260, SizeToContent = SizeToContent.Height, MaxHeight = 650,
             Owner = Window.GetWindow(grid), WindowStartupLocation = WindowStartupLocation.CenterOwner, ResizeMode = ResizeMode.NoResize, ShowInTaskbar = false };
         var panel = new StackPanel { Margin = new(16) };
+        NetStucked.Desktop.Services.ThemeService.ApplyWindow(window);
         foreach (var column in grid.Columns.OrderBy(c => c.DisplayIndex))
         {
             var checkbox = new CheckBox { Content = column.Header, IsChecked = column.Visibility == Visibility.Visible, Margin = new(0, 4, 0, 4) };

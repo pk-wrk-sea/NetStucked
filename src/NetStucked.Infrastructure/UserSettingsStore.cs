@@ -20,6 +20,15 @@ public sealed class UserPreferences
     public PortProbeSettings Port { get; set; } = new();
     public string PortTargetText { get; set; } = "";
     public List<PingTemplate> PortTemplates { get; set; } = [];
+    public string Theme { get; set; } = "Light";
+    public bool SidebarExpanded { get; set; } = true;
+    public Dictionary<string, string> HopDescriptions { get; set; } = new();
+    public bool WanDescriptions { get; set; } = true;
+    public string PortNumbers { get; set; } = "443";
+    public PortProtocol PortProtocol { get; set; }
+    public bool PortMultipleTargets { get; set; }
+    public bool PortContinuous { get; set; }
+    public Dictionary<string, string> PortNumberTemplates { get; set; } = new();
 }
 
 public sealed class UserSettingsStore
@@ -48,7 +57,11 @@ public sealed class UserSettingsStore
                 loaded.Port is null || loaded.PortTargetText is null || loaded.PortTargetText.Length > 1000000 || loaded.PortTemplates is null ||
                 loaded.PortTemplates.Count > 100 || loaded.PortTemplates.Any(t => t is null || t.Id == Guid.Empty || string.IsNullOrWhiteSpace(t.Name) || t.Name.Length > 80 || t.Addresses is null || t.Addresses.Length > 1000000) ||
                 loaded.PortTemplates.Select(t => t.Id).Distinct().Count() != loaded.PortTemplates.Count ||
-                loaded.PortTemplates.Select(t => t.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != loaded.PortTemplates.Count)
+                loaded.PortTemplates.Select(t => t.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != loaded.PortTemplates.Count ||
+                loaded.Theme is not ("Light" or "Dark" or "System") || loaded.HopDescriptions is null || loaded.HopDescriptions.Count > 1024 ||
+                loaded.HopDescriptions.Any(p => !System.Net.IPAddress.TryParse(p.Key, out _) || p.Value is null || p.Value.Length > 512) ||
+                loaded.PortNumbers is null || loaded.PortNumbers.Length > 2048 || !Enum.IsDefined(loaded.PortProtocol) ||
+                loaded.PortNumberTemplates is null || loaded.PortNumberTemplates.Count > 100 || loaded.PortNumberTemplates.Any(p => p.Key.Length is < 1 or > 80 || p.Value is null || p.Value.Length > 2048))
                 throw new InvalidDataException("Unsupported settings schema.");
             // Older files can have the former 100ms timeout. Preserve other user data while migrating the new lower bound.
             if (loaded.Ping.TimeoutMs is >= 100 and < 500) loaded.Ping = loaded.Ping with { TimeoutMs = 500 };

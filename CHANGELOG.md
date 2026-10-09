@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 — 2026-10-09
+
+- Apply the supplied NetStucked brand, Light/Dark/System themes, themed application dialogs, input guides, status colors and smooth collapsible/resizable menu, addresses, history and event panels.
+- Share multiline IP-to-description mappings across Traceroute sessions; look up public WAN organization/ASN through RIPEstat with bounded cached requests and local mapping priority.
+- Keep one undeletable main trace session, require a valid destination before adding another new session, and limit the workspace to five sessions.
+- Separate port targets, TCP/UDP and port numbers; add single-pass/continuous selection, bounded Host/IP/CIDR × port scans, editable saved/restorable common-port templates and explicit acknowledgement above 4,096 checks. UDP silence remains inconclusive.
+- Preserve previous update/recovery behavior and all canonical approved reference files.
+
 ## 0.3.0 — 2026-10-09
 
 - Added user-triggered installation/recovery of a selected published build, with actual release notes, a dynamic Install/Reinstall/Recover button, download progress and preparation cancellation.

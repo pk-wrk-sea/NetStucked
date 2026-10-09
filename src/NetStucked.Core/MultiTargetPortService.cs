@@ -5,7 +5,7 @@ using System.Threading.Channels;
 
 namespace NetStucked.Core;
 
-public sealed class MultiTargetPortService(ITcpProbe probe, IDnsResolver dns) : AsyncSession
+public sealed class MultiTargetPortService(ITcpProbe probe, IDnsResolver dns, IUdpProbe? udp = null) : AsyncSession
 {
     private readonly object _data = new();
     private readonly EnginePerformance _performance = new();
@@ -23,14 +23,15 @@ public sealed class MultiTargetPortService(ITcpProbe probe, IDnsResolver dns) : 
         public long DueMs { get; set; }
         public long QueuedTimestamp { get; set; }
     }
-    private sealed record Completion(TargetWork Work, bool DnsFailed);
+    private sealed record Completion(TargetWork Work, bool DnsFailed, bool Cancelled);
 
     public Task StartAsync(IReadOnlyList<PortTarget> targets, PortProbeSettings settings)
     {
         settings.Validate();
-        if (targets.Count == 0 || targets.Count > settings.MaxTargets || targets.Any(t => t is null || !TargetInputParser.IsValidHost(t.Host) || t.Port is < 1 or > 65535 || t.Description is null || t.Description.Length > 512) ||
+        if (targets.Count == 0 || targets.Count > settings.MaxTargets || targets.Any(t => t is null || !TargetInputParser.IsValidHost(t.Host) || t.Port is < 1 or > 65535 || !Enum.IsDefined(t.Protocol) || t.Description is null || t.Description.Length > 512) ||
             targets.Select(t => t.Key).Distinct(StringComparer.OrdinalIgnoreCase).Count() != targets.Count)
             throw new ArgumentException("Targets must be unique and within the configured cap.");
+        if (udp is null && targets.Any(t => t.Protocol == PortProtocol.UDP)) throw new ArgumentException("UDP probe is unavailable.");
         return StartSessionAsync(() =>
         {
             lock (_data)
@@ -73,14 +74,15 @@ public sealed class MultiTargetPortService(ITcpProbe probe, IDnsResolver dns) : 
             try { await action().ConfigureAwait(false); }
             catch { await cancellation.CancelAsync().ConfigureAwait(false); throw; }
         }
-        void Complete(TargetWork item, bool dnsFailed)
+        void Complete(TargetWork item, bool dnsFailed, bool cancelled = false)
         {
-            if (!completed.Writer.TryWrite(new(item, dnsFailed))) throw new InvalidOperationException("Duplicate target completion.");
+            if (!completed.Writer.TryWrite(new(item, dnsFailed, cancelled))) throw new InvalidOperationException("Duplicate target completion.");
             wake.Release();
         }
 
         async Task Scheduler()
         {
+            int remaining = capacity;
             while (true)
             {
                 token.ThrowIfCancellationRequested();
@@ -89,6 +91,11 @@ public sealed class MultiTargetPortService(ITcpProbe probe, IDnsResolver dns) : 
                 {
                     while (completed.Reader.TryRead(out var done))
                     {
+                        if (!settings.Continuous && !done.Cancelled)
+                        {
+                            if (--remaining == 0) { connect.Writer.TryComplete(); resolve.Writer.TryComplete(); return; }
+                            continue;
+                        }
                         long interval = done.DnsFailed ? settings.DnsRetrySeconds * 1000L : settings.IntervalMs;
                         long next = done.Work.DueMs + interval;
                         long now = clock.ElapsedMilliseconds;
@@ -151,7 +158,7 @@ public sealed class MultiTargetPortService(ITcpProbe probe, IDnsResolver dns) : 
                     }
                 }
                 catch (OperationCanceledException) when (operation.Token.IsCancellationRequested) { token.ThrowIfCancellationRequested(); paused = true; }
-                if (failed || paused) Complete(item, failed);
+                if (failed || paused) Complete(item, failed, paused);
             }
         }
 
@@ -160,6 +167,7 @@ public sealed class MultiTargetPortService(ITcpProbe probe, IDnsResolver dns) : 
             await foreach (var item in connect.Reader.ReadAllAsync(token).ConfigureAwait(false))
             {
                 using var operation = await EnterOperationAsync(token).ConfigureAwait(false);
+                bool paused = false;
                 try
                 {
                     await network.WaitAsync(operation.Token).ConfigureAwait(false);
@@ -172,7 +180,9 @@ public sealed class MultiTargetPortService(ITcpProbe probe, IDnsResolver dns) : 
                         _performance.Queue(Stopwatch.GetElapsedTime(item.QueuedTimestamp, start).TotalMilliseconds);
                         Interlocked.Increment(ref _probeId);
                         TcpProbeResult result;
-                        try { result = await probe.ConnectAsync(item.Address!, item.Value.Target.Port, settings.TimeoutMs, operation.Token).ConfigureAwait(false); }
+                        try { result = item.Value.Target.Protocol == PortProtocol.UDP
+                            ? await udp!.ProbeAsync(item.Address!, item.Value.Target.Port, settings.TimeoutMs, operation.Token).ConfigureAwait(false)
+                            : await probe.ConnectAsync(item.Address!, item.Value.Target.Port, settings.TimeoutMs, operation.Token).ConfigureAwait(false); }
                         catch (OperationCanceledException) { throw; }
                         catch (Exception ex) { result = new(PortOutcome.Error, null, ex.Message); }
                         operation.Token.ThrowIfCancellationRequested();
@@ -181,8 +191,8 @@ public sealed class MultiTargetPortService(ITcpProbe probe, IDnsResolver dns) : 
                     catch (OperationCanceledException) { cancelled = true; throw; }
                     finally { if (entered) { _performance.Probe(Stopwatch.GetElapsedTime(start).TotalMilliseconds, cancelled); _performance.Leave(); } network.Release(); }
                 }
-                catch (OperationCanceledException) when (operation.Token.IsCancellationRequested) { token.ThrowIfCancellationRequested(); }
-                Complete(item, false);
+                catch (OperationCanceledException) when (operation.Token.IsCancellationRequested) { token.ThrowIfCancellationRequested(); paused = true; }
+                Complete(item, false, paused);
             }
         }
 
@@ -202,9 +212,12 @@ public sealed class MultiTargetPortService(ITcpProbe probe, IDnsResolver dns) : 
     {
         var previous = item.Published;
         var next = item.Value.Snapshot() with { SessionId = SessionId, Revision = ++_revision, PublishedTimestamp = Stopwatch.GetTimestamp() };
-        static int Up(PortSnapshot? row) => row?.Status == "Connected" ? 1 : 0;
-        static int Down(PortSnapshot? row) => row is not null && row.Status is not ("Connected" or "Unknown") ? 1 : 0;
+        static int Up(PortSnapshot? row) => row?.Status is "Connected" or "Responded" ? 1 : 0;
+        static int Down(PortSnapshot? row) => row is not null && row.Status is not ("Connected" or "Responded" or "No response" or "Unknown") ? 1 : 0;
+        static int Closed(PortSnapshot? row) => row?.Status is "Closed" or "Refused" ? 1 : 0;
+        static int Silent(PortSnapshot? row) => row?.Status == "No response" ? 1 : 0;
         _totals = _totals with { Connected = _totals.Connected + Up(next) - Up(previous), Failed = _totals.Failed + Down(next) - Down(previous),
+            Closed = _totals.Closed + Closed(next) - Closed(previous), NoResponse = _totals.NoResponse + Silent(next) - Silent(previous),
             Attempts = _totals.Attempts + next.Attempts - (previous?.Attempts ?? 0), Successful = _totals.Successful + next.Connected - (previous?.Connected ?? 0) };
         item.Published = next;
     }

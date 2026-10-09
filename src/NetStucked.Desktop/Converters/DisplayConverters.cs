@@ -9,13 +9,20 @@ public sealed class StatusBrushConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value?.ToString() switch
     {
-        "Up" or "Reply" or "Connected" => new SolidColorBrush(Color.FromRgb(0, 163, 105)),
-        "Warn" or "Route" => new SolidColorBrush(Color.FromRgb(219, 126, 0)),
-        "Unreachable" or "Timeout" or "Error" or "Refused" or "DNS error" => new SolidColorBrush(Color.FromRgb(224, 55, 55)),
-        "Info" or "DNS" => new SolidColorBrush(Color.FromRgb(36, 107, 253)),
-        _ => new SolidColorBrush(Color.FromRgb(86, 105, 140))
+        "Up" or "Reply" or "Connected" or "Responded" => Brush("SuccessBrush"),
+        "Warn" or "Route" or "No response" => Brush("WarningBrush"),
+        "Unreachable" or "Timeout" or "Error" or "Refused" or "Closed" or "DNS error" => Brush("DangerBrush"),
+        "Info" or "DNS" => Brush("AccentBrush"),
+        _ => Brush("MutedBrush")
     };
+    private static Brush Brush(string key) => Application.Current?.TryFindResource(key) as Brush ?? Brushes.Gray;
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
+}
+
+public sealed class InverseVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value is true ? Visibility.Collapsed : Visibility.Visible;
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
 }
 
 public sealed class PageSelectedConverter : IValueConverter

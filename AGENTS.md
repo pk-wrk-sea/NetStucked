@@ -1,5 +1,7 @@
 # NetStucked engineering rules
 
+- The human-reviewed 2026-10-09 extension in `docs/FEATURES_0.4.0.md` authorizes supplied branding, Light/Dark/System themes, collapsible/resizable panels, five trace sessions with shared hop descriptions and bounded TCP/UDP multiple-target port scans. The subsequent human instruction authorizes GitHub publication of 0.4.0. Preserve earlier canonical references and published assets.
+
 - The later human release instruction of 2026-10-09 authorizes publishing 0.3.0 plus a 0.3.1 TEST BUILD and retiring 0.2.x GitHub releases/download assets/Actions build artifacts after preserving local verified backups. Keep 0.2.x Git source history and tags. This is the explicit exception to published-asset preservation below; other published releases remain immutable. The public update/recovery catalog starts at 0.3.0.
 
 - The latest human authorization of 2026-10-09 adds selected-build installation/recovery in 0.3.0 and supersedes the earlier manual-only update restriction for explicit user clicks. See `docs/FEATURES_0.3.0.md`. Always verify fixed-project HTTPS asset identity, SHA-256, size, product/version and Windows trust status. Unsigned installers require explicit acknowledgement; invalid signatures are rejected. Preserve UAC/SmartScreen, await diagnostics shutdown, back up compatible settings and use an isolated restart helper. No scheduled/background installation or credential storage. Preserve published tags/assets and canonical references.

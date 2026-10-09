@@ -17,6 +17,7 @@ public partial class TracerouteViewModel : ObservableObject, IAsyncDisposable
     private readonly TracerouteMonitoringService _service;
     private readonly IDesktopDialogs _dialogs;
     private readonly ILogger<TracerouteViewModel> _logger;
+    private readonly HopDescriptionService? _descriptions;
     private readonly DispatcherTimer _timer;
     private TraceSettings _settings;
     private bool _busy;
@@ -32,7 +33,10 @@ public partial class TracerouteViewModel : ObservableObject, IAsyncDisposable
     public ObservableCollection<TraceAddressEntry> RecentAddresses { get; internal set; } = [];
     public Func<string, Task>? RecordAddressAsync { get; internal set; }
     public int SessionNumber { get; internal set; }
-    public string Title => string.IsNullOrWhiteSpace(Target) ? $"Session {SessionNumber}" : Target.Trim();
+    public bool IsPrimary { get; internal set; }
+    public string Title => string.IsNullOrWhiteSpace(Target) ? (IsPrimary ? "Main session" : "New session") : Target.Trim();
+    [ObservableProperty] private bool _eventsExpanded = true;
+    [RelayCommand] private void ToggleEvents() => EventsExpanded = !EventsExpanded;
     public bool IsActive => State is SessionState.Starting or SessionState.Running;
     public long ViewRefreshCount { get; private set; }
     public ObservableCollection<HopRow> Rows { get; } = [];
@@ -49,9 +53,10 @@ public partial class TracerouteViewModel : ObservableObject, IAsyncDisposable
     public string PauseLabel => State == SessionState.Paused ? "Ⅱ Resume" : "Ⅱ Pause";
     public bool CanEdit => !_busy && State is SessionState.Idle or SessionState.Stopped or SessionState.Error;
 
-    public TracerouteViewModel(TracerouteMonitoringService service, IDesktopDialogs dialogs, UserSettingsStore store, ILogger<TracerouteViewModel> logger)
+    public TracerouteViewModel(TracerouteMonitoringService service, IDesktopDialogs dialogs, UserSettingsStore store, ILogger<TracerouteViewModel> logger, HopDescriptionService? descriptions = null)
     {
-        _service = service; _dialogs = dialogs; Store = store; _logger = logger;
+        _service = service; _dialogs = dialogs; Store = store; _logger = logger; _descriptions = descriptions;
+        if (_descriptions is not null) _descriptions.Changed += RefreshDescriptions;
         _settings = Normalize(store.Preferences.Trace); Target = store.Preferences.TraceTarget;
         Results = CollectionViewSource.GetDefaultView(Rows);
         Events = CollectionViewSource.GetDefaultView(EventRows);
@@ -81,6 +86,7 @@ public partial class TracerouteViewModel : ObservableObject, IAsyncDisposable
     private Task StartAsync() => ExecuteAsync(async () =>
     {
         _sessionTarget = Target.Trim();
+        _descriptions?.Resume();
         await _service.StartAsync(_sessionTarget, _settings);
         Store.Preferences.TraceTarget = Target;
         if (RecordAddressAsync is not null) await RecordAddressAsync(_sessionTarget);
@@ -127,6 +133,7 @@ public partial class TracerouteViewModel : ObservableObject, IAsyncDisposable
                 row.Data = data;
             }
             _service.ReportUiApplied(data);
+            ApplyDescription(row);
             if (!flush && budget.Elapsed.TotalMilliseconds >= 4) break;
         }
         if (flush) _forceViewRefresh = true;
@@ -148,7 +155,14 @@ public partial class TracerouteViewModel : ObservableObject, IAsyncDisposable
         _resultsRefreshPending = _forceViewRefresh = false; _lastViewRefresh = Stopwatch.GetTimestamp();
     }
     private void LogDiagnostics() => _logger.LogInformation("Traceroute timing {Diagnostics}", System.Text.Json.JsonSerializer.Serialize(_service.Diagnostics));
-    public async ValueTask DisposeAsync() { _timer.Stop(); await _service.DisposeAsync(); LogDiagnostics(); }
+    private void ApplyDescription(HopRow row)
+    {
+        string fallback = Store.Preferences.TraceDescriptions.GetValueOrDefault($"{_sessionTarget}:{row.Hop}", row.Data.Description);
+        string value = _descriptions?.Resolve(row.Address, fallback) ?? fallback;
+        if (row.Description != value) { row.SetResolvedDescription(value); _resultsRefreshPending = _forceViewRefresh = true; }
+    }
+    private void RefreshDescriptions() { foreach (var row in Rows) ApplyDescription(row); RefreshResults(); }
+    public async ValueTask DisposeAsync() { _timer.Stop(); if (_descriptions is not null) _descriptions.Changed -= RefreshDescriptions; await _service.DisposeAsync(); LogDiagnostics(); }
     public async Task StopForUpdateAsync()
     {
         foreach (var command in new[] { StartCommand, PauseCommand, StopCommand }) if (command.ExecutionTask is { } task) await task;

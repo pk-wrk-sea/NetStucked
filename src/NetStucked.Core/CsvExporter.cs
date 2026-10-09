@@ -21,8 +21,8 @@ public static class CsvExporter
     }
     public static string Ping(IEnumerable<TargetSnapshot> rows) => Rows(["#", "Status", "Host", "Description", "Resolved IP", "Last (ms)", "Avg (ms)", "Min (ms)", "Max (ms)", "Sent", "Recv", "Lost", "Loss %", "Last ping", "Last success", "Reachable since", "Unreachable since", "Result / error", "TTL"],
         rows.Select(r => new object?[] { r.Number, r.Status, r.Host, r.Description, r.ResolvedIp, r.Last, r.Average, r.Minimum, r.Maximum, r.Sent, r.Received, r.Lost, r.LossPercent, r.LastPing, r.LastSuccess, r.ReachableSince, r.UnreachableSince, r.ResultError, r.Ttl }));
-    public static string Port(IEnumerable<PortSnapshot> rows) => Rows(["#", "Status", "Host", "Port", "Description", "Resolved IP", "Connect (ms)", "Avg (ms)", "Min (ms)", "Max (ms)", "Attempts", "Connected", "Failure %", "Last test", "Last success", "Result / error"],
-        rows.Select(r => new object?[] { r.Number, r.Status, r.Host, r.Port, r.Description, r.ResolvedIp, r.Last, r.Average, r.Minimum, r.Maximum, r.Attempts, r.Connected, r.FailurePercent, r.LastTest, r.LastSuccess, r.Details }));
+    public static string Port(IEnumerable<PortSnapshot> rows) => Rows(["#", "Status", "Host", "Port", "Protocol", "Description", "Resolved IP", "Response (ms)", "Avg (ms)", "Min (ms)", "Max (ms)", "Attempts", "Successes", "No success %", "Last test", "Last success", "Result / error"],
+        rows.Select(r => new object?[] { r.Number, r.Status, r.Host, r.Port, r.Protocol, r.Description, r.ResolvedIp, r.Last, r.Average, r.Minimum, r.Maximum, r.Attempts, r.Connected, r.FailurePercent, r.LastTest, r.LastSuccess, r.Details }));
     public static string Trace(IEnumerable<TraceHopSnapshot> rows) => Rows(["Hop", "Address", "Hostname", "Description", "Status", "Last (ms)", "Best (ms)", "Avg (ms)", "Worst (ms)", "Jitter (ms)", "Sent", "Recv", "Loss %", "Route Changes", "Updated"],
         rows.Select(r => new object?[] { r.Hop, r.Address, r.Hostname, r.Description, r.Status, r.Last, r.Best, r.Average, r.Worst, r.Jitter, r.Sent, r.Received, r.LossPercent, r.RouteChanges, r.Updated }));
 }

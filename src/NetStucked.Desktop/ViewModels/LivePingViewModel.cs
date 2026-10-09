@@ -32,6 +32,10 @@ public partial class LivePingViewModel : ObservableObject, IAsyncDisposable
     private bool _viewDirty;
     private long _lastViewRefresh;
     public UserSettingsStore Store { get; }
+    [ObservableProperty] private bool _addressesExpanded = true;
+    [ObservableProperty] private bool _historyExpanded = true;
+    [RelayCommand] private void ToggleAddresses() => AddressesExpanded = !AddressesExpanded;
+    [RelayCommand] private void ToggleHistory() => HistoryExpanded = !HistoryExpanded;
     public ObservableCollection<TargetRow> Rows { get; } = [];
     public StableObservableCollection<PingSample> History { get; } = [];
     public ObservableCollection<PingTemplateEntry> Templates { get; } = [];

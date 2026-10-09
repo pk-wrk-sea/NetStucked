@@ -1,6 +1,8 @@
-# NetStucked 0.3.0
+# NetStucked 0.4.0
 
-Windows 10/11 x64 desktop diagnostics for remote IP addresses, hostnames and authorized IPv4 subnets. C# / WPF / .NET 10 / MVVM. Live Ping, continuous ICMP Traceroute and TCP Port Test use actual network APIs. Updates & Recovery reads GitHub releases on demand and installs or recovers the build you select, with download verification, settings backup and restart. The approved layouts in `design/references/` are preserved; sample telemetry is never loaded.
+<img src="docs/branding/NetStuckedBanner.png" width="480" alt="NetStucked — Network Engineer's Toolkit" />
+
+Windows 10/11 x64 desktop diagnostics for IP addresses, hostnames and authorized subnets. C# / WPF / .NET 10 / MVVM. Live Ping, continuous ICMP Traceroute and TCP/UDP Port Test use actual network APIs. Light/Dark/System themes, collapsible/resizable panels and shared hop descriptions follow the human-reviewed UI mockup. Port scans use separate hosts and port numbers, single-pass/continuous selection and editable saved/restorable common-port templates. Public WAN descriptions use bounded RIPEstat metadata lookups; generic UDP silence stays inconclusive. Updates & Recovery retains explicit selected-build installation/recovery with verification, backup and restart. The approved layouts in `design/references/` are preserved; sample telemetry is never loaded.
 
 ## Build
 
@@ -16,7 +18,7 @@ pwsh -File scripts/Publish.ps1
 
 Inno Setup 6 is needed only to compile the installer. Preferences/logs are per-user under `%LOCALAPPDATA%\NetStucked`. No administrator privilege or .NET installation is required for the self-contained application. Choose only targets you are authorized to diagnose. ICMP loss does not establish that a remote host or service is offline.
 
-See [selected-build installation/recovery](docs/FEATURES_0.3.0.md), [0.2.0 diagnostics](docs/FEATURES_0.2.0.md), `docs/FEATURE_SPEC.md`, `docs/NETWORK_BEHAVIOR.md`, `docs/DEVELOPMENT.md` and [current QA](docs/QA_0.3.0.md). Dashboard, Network Info and background update checks/installations remain deferred.
+See [0.4.0 authorized features](docs/FEATURES_0.4.0.md), [current QA](docs/QA_0.4.0.md), [selected-build installation/recovery](docs/FEATURES_0.3.0.md), [0.2.0 diagnostics](docs/FEATURES_0.2.0.md), `docs/FEATURE_SPEC.md`, `docs/NETWORK_BEHAVIOR.md` and `docs/DEVELOPMENT.md`. Dashboard, Network Info and background update checks/installations remain deferred.
 
 ## Published versions
 
@@ -26,6 +28,8 @@ See [selected-build installation/recovery](docs/FEATURES_0.3.0.md), [0.2.0 diagn
 Both 0.3.x releases are published with self-contained Windows x64 portable ZIPs, Inno Setup installers, SHA-256 files and manifests. 0.3.0 is GitHub Latest; 0.3.1 is the test build. Install/extract 0.3.0 once, open Updates, check GitHub and choose 0.3.1; that build can then select 0.3.0 for Recovery. 0.2.x releases/downloads and six older Actions build artifacts were deleted by explicit user instruction after verified local backups; their Git source history/tags remain. The [0.3.x publication report](docs/GITHUB_RELEASE_0.3_REPORT_2026-10-09.md) records hashes, CI and actual menu/retirement checks. Installers are unsigned; explicit acknowledgement and Windows prompts remain. Actual machine install/upgrade/uninstall/downgrade remains untested. The [older 0.2.x report](docs/GITHUB_RELEASE_REPORT_2026-10-09.md) is historical evidence.
 
 ## Current verification and runnable output
+
+The original local output is `artifacts/ui-branding/0.4.0/final/publish/NetStucked.exe`; keep its full directory together. See [0.4.0 local QA](docs/QA_0.4.0.md) for that package's build, test, WPF, network and installer-compilation results. The human subsequently authorized GitHub publication; a new package from committed source is being prepared under `artifacts/github-release/0.4.0/final`. Machine installation remains outside this publication task. The packages and reports below remain historical evidence.
 
 The user-requested UI revision includes compact probe dialogs, named address templates, destination history, independent traceroute session tabs, result timestamps, stable manual history scrolling, Fit Columns/resize guide/tooltips, cached navigation, activity indicators and framed monitor-aware window controls. Traceroute polls each known TTL independently; the event log records important changes. Only actual API outcomes populate results. See [the revision report](docs/UI_REVISION_2026-10-08.md) for the implemented behavior and measured validation. Earlier bug-audit and performance packages/reports are preserved as historical evidence.
 

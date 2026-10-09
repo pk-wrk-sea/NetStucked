@@ -15,6 +15,7 @@ public partial class TracerouteWorkspaceViewModel : ObservableObject, IAsyncDisp
     private readonly IDesktopDialogs _dialogs;
     private readonly UserSettingsStore _store;
     private readonly ILoggerFactory _logs;
+    private readonly HopDescriptionService _descriptions;
     private readonly HashSet<TracerouteViewModel> _closing = [];
     private readonly SemaphoreSlim _historyGate = new(1, 1);
     private bool _visible;
@@ -24,9 +25,9 @@ public partial class TracerouteWorkspaceViewModel : ObservableObject, IAsyncDisp
     [ObservableProperty] private TracerouteViewModel _selectedSession = null!;
     public bool IsActive => Sessions.Any(s => s.IsActive);
 
-    public TracerouteWorkspaceViewModel(IIcmpProbe probe, IDnsResolver dns, IDesktopDialogs dialogs, UserSettingsStore store, ILoggerFactory logs)
+    public TracerouteWorkspaceViewModel(IIcmpProbe probe, IDnsResolver dns, IDesktopDialogs dialogs, UserSettingsStore store, ILoggerFactory logs, HopDescriptionService descriptions)
     {
-        _probe = probe; _dns = dns; _dialogs = dialogs; _store = store; _logs = logs;
+        _probe = probe; _dns = dns; _dialogs = dialogs; _store = store; _logs = logs; _descriptions = descriptions;
         foreach (string address in store.Preferences.TraceHistory) RecentAddresses.Add(Entry(address));
         AddSession();
     }
@@ -52,21 +53,22 @@ public partial class TracerouteWorkspaceViewModel : ObservableObject, IAsyncDisp
         catch (Exception ex) { _dialogs.ShowError($"Destination history: {ex.Message}"); }
         finally { _historyGate.Release(); }
     }
-    private bool CanAddSession() => Sessions.Count < 8;
+    private bool CanAddSession() => Sessions.Count < 5 && Sessions.Where(s => !s.IsPrimary).All(s => TargetInputParser.IsValidHost(s.Target.Trim()));
     [RelayCommand(CanExecute = nameof(CanAddSession))]
     private void AddSession()
     {
-        var session = new TracerouteViewModel(new TracerouteMonitoringService(_probe, _dns), _dialogs, _store, _logs.CreateLogger<TracerouteViewModel>())
-        { SessionNumber = ++_nextNumber, RecentAddresses = RecentAddresses, RecordAddressAsync = address => ChangeHistoryAsync(address, true) };
+        if (!CanAddSession()) return;
+        var session = new TracerouteViewModel(new TracerouteMonitoringService(_probe, _dns), _dialogs, _store, _logs.CreateLogger<TracerouteViewModel>(), _descriptions)
+        { IsPrimary = Sessions.Count == 0, SessionNumber = ++_nextNumber, RecentAddresses = RecentAddresses, RecordAddressAsync = address => ChangeHistoryAsync(address, true) };
         if (Sessions.Count > 0) session.Target = "";
-        session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(TracerouteViewModel.IsActive)) OnPropertyChanged(nameof(IsActive)); };
+        session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(TracerouteViewModel.IsActive)) OnPropertyChanged(nameof(IsActive)); if (e.PropertyName == nameof(TracerouteViewModel.Target)) AddSessionCommand.NotifyCanExecuteChanged(); };
         Sessions.Add(session); SelectedSession = session;
         AddSessionCommand.NotifyCanExecuteChanged();
     }
     [RelayCommand]
     private async Task RemoveSessionAsync(TracerouteViewModel? session)
     {
-        if (session is null || !Sessions.Contains(session) || !_closing.Add(session)) return;
+        if (session is null || session.IsPrimary || !Sessions.Contains(session) || !_closing.Add(session)) return;
         try
         {
             await session.DisposeAsync();
@@ -85,7 +87,16 @@ public partial class TracerouteWorkspaceViewModel : ObservableObject, IAsyncDisp
     }
     public void SetPresentationActive(bool active) { _visible = active; SelectedSession?.SetPresentationActive(active); }
     public void UpdateStates() { foreach (var session in Sessions) session.UpdateState(); }
-    public async ValueTask DisposeAsync() { foreach (var session in Sessions.ToArray()) await session.DisposeAsync(); }
+    public Task StopMetadataAsync() => _descriptions.CancelPendingAsync();
+    [RelayCommand]
+    private async Task HopDescriptionsAsync()
+    {
+        var edited = _dialogs.EditHopDescriptions(_descriptions.Text, _descriptions.WanEnabled);
+        if (edited is null) return;
+        try { await _descriptions.SaveAsync(edited.Text, edited.WanEnabled); }
+        catch (Exception ex) { _dialogs.ShowError(ex.Message); }
+    }
+    public async ValueTask DisposeAsync() { foreach (var session in Sessions.ToArray()) await session.DisposeAsync(); await _descriptions.DisposeAsync(); }
 }
 
 public sealed record TraceAddressEntry(string Value, IAsyncRelayCommand DeleteCommand);

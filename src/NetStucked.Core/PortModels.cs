@@ -5,10 +5,11 @@ namespace NetStucked.Core;
 
 public sealed record PortProbeSettings
 {
+    public bool Continuous { get; init; } = true;
     public int IntervalMs { get; init; } = 1000;
     public int TimeoutMs { get; init; } = 2000;
     internal int Concurrency => 32;
-    internal int MaxTargets => 1024;
+    internal int MaxTargets => PortScanPlanner.MaxChecks;
     internal int DnsConcurrency => 4;
     internal int MaxPacketsPerSecond => 128;
     internal int DnsCacheSeconds => 30;
@@ -21,9 +22,11 @@ public sealed record PortProbeSettings
     }
 }
 
+public enum PortProtocol { TCP, UDP }
 public sealed record PortTarget(string Host, int Port, string Description)
 {
-    public string Key => $"{Host.ToLowerInvariant()}:{Port}";
+    public PortProtocol Protocol { get; init; }
+    public string Key => (Protocol == PortProtocol.UDP ? "udp:" : "") + $"{Host.ToLowerInvariant()}:{Port}";
     public string Endpoint => Host.Contains(':') ? $"[{Host}]:{Port}" : $"{Host}:{Port}";
 }
 public sealed record PortParseResult(IReadOnlyList<PortTarget> Targets, IReadOnlyList<string> Errors)
@@ -66,18 +69,20 @@ public static class PortInputParser
     }
 }
 
-public enum PortOutcome { Connected, Refused, Timeout, Unreachable, Error }
+public enum PortOutcome { Connected, Refused, Timeout, Unreachable, Error, Responded, Closed, NoResponse }
 public sealed record TcpProbeResult(PortOutcome Outcome, double? ConnectMs, string Details);
 public interface ITcpProbe
 {
     Task<TcpProbeResult> ConnectAsync(IPAddress address, int port, int timeoutMs, CancellationToken cancellationToken);
 }
+public interface IUdpProbe { Task<TcpProbeResult> ProbeAsync(IPAddress address, int port, int timeoutMs, CancellationToken cancellationToken); }
 public sealed record PortSample(DateTimeOffset Time, long Sequence, string Status, double? ConnectMs, string Details);
 public sealed record PortSnapshot(int Number, string Host, int Port, string Description, string? ResolvedIp, string Status,
     double? Last, double? Average, double? Minimum, double? Maximum, long Attempts, long Connected, double FailurePercent,
     DateTimeOffset? LastTest, DateTimeOffset? LastSuccess, string Details, long HistoryRevision)
 {
-    public string Key => $"{Host.ToLowerInvariant()}:{Port}";
+    public PortProtocol Protocol { get; init; }
+    public string Key => (Protocol == PortProtocol.UDP ? "udp:" : "") + $"{Host.ToLowerInvariant()}:{Port}";
     public string Endpoint => Host.Contains(':') ? $"[{Host}]:{Port}" : $"{Host}:{Port}";
     public long SessionId { get; init; }
     public long Revision { get; init; }
@@ -85,6 +90,8 @@ public sealed record PortSnapshot(int Number, string Host, int Port, string Desc
 }
 public sealed record PortTotals(int Targets, int Connected, int Failed, long Attempts, long Successful)
 {
+    public int Closed { get; init; }
+    public int NoResponse { get; init; }
     public double FailurePercent => Statistics.LossPercent(Attempts, Successful);
 }
 public sealed record PortUpdate(long SessionId, long Revision, bool Reset, IReadOnlyList<PortSnapshot> Rows, PortTotals Totals);
@@ -101,10 +108,10 @@ internal sealed class PortAccumulator(PortTarget target, int number, int retenti
     private long _sequence;
     public void Add(TcpProbeResult result)
     {
-        _lastTest = DateTimeOffset.Now; _status = result.Outcome.ToString(); _details = result.Details;
-        _last = result.Outcome == PortOutcome.Connected ? result.ConnectMs : null;
+        _lastTest = DateTimeOffset.Now; _status = result.Outcome == PortOutcome.NoResponse ? "No response" : result.Outcome.ToString(); _details = result.Details;
+        _last = result.Outcome is PortOutcome.Connected or PortOutcome.Responded ? result.ConnectMs : null;
         _stats.Add(_last);
-        if (result.Outcome == PortOutcome.Connected) _lastSuccess = _lastTest;
+        if (result.Outcome is PortOutcome.Connected or PortOutcome.Responded) _lastSuccess = _lastTest;
         Record();
     }
     public void DnsFailure(string error)
@@ -120,5 +127,5 @@ internal sealed class PortAccumulator(PortTarget target, int number, int retenti
     }
     public IReadOnlyList<PortSample> History(int limit) => _history.Reverse().Take(limit).ToArray();
     public PortSnapshot Snapshot() => new(number, Target.Host, Target.Port, Target.Description, ResolvedIp, _status, _last,
-        _stats.Average, _stats.Minimum, _stats.Maximum, _stats.Sent, _stats.Received, _stats.LossPercent, _lastTest, _lastSuccess, _details, _sequence);
+        _stats.Average, _stats.Minimum, _stats.Maximum, _stats.Sent, _stats.Received, _stats.LossPercent, _lastTest, _lastSuccess, _details, _sequence) { Protocol = Target.Protocol };
 }

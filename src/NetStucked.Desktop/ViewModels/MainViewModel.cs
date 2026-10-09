@@ -10,6 +10,10 @@ public partial class MainViewModel : ObservableObject
     public TracerouteWorkspaceViewModel TraceWorkspace { get; }
     public PortTestViewModel Port { get; }
     public UpdatesViewModel Updates { get; }
+    public AppearanceViewModel Appearance { get; }
+    [ObservableProperty] private bool _sidebarExpanded = true;
+    [RelayCommand] private void ToggleSidebar() => SidebarExpanded = !SidebarExpanded;
+    partial void OnSidebarExpandedChanged(bool value) => Ping.Store.Preferences.SidebarExpanded = value;
     public TracerouteViewModel Trace => TraceWorkspace.SelectedSession;
     private readonly DispatcherTimer _activity;
     public bool IsPingActive => Ping.IsActive;
@@ -20,9 +24,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _pageSubtitle = "Ping multiple hosts or subnets and monitor response in real time";
     [ObservableProperty] private string _selectedPage = "Live Ping";
     public string Version => Updates.CurrentVersion;
-    public MainViewModel(LivePingViewModel ping, TracerouteWorkspaceViewModel trace, PortTestViewModel port, UpdatesViewModel updates)
+    public MainViewModel(LivePingViewModel ping, TracerouteWorkspaceViewModel trace, PortTestViewModel port, UpdatesViewModel updates, AppearanceViewModel appearance)
     {
-        Ping = ping; TraceWorkspace = trace; Port = port; Updates = updates; _currentPage = ping;
+        Ping = ping; TraceWorkspace = trace; Port = port; Updates = updates; Appearance = appearance; _currentPage = ping; _sidebarExpanded = ping.Store.Preferences.SidebarExpanded;
         Updates.StopDiagnosticsAsync = PrepareForUpdateAsync;
         Ping.SetPresentationActive(true); TraceWorkspace.SetPresentationActive(false);
         Ping.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Ping.IsActive)) OnPropertyChanged(nameof(IsPingActive)); };
@@ -42,11 +46,12 @@ public partial class MainViewModel : ObservableObject
             "Traceroute" => TraceWorkspace,
             "Port Test" => Port,
             "Updates" => Updates,
+            "Settings" => Appearance,
             "Dashboard" => new PlaceholderViewModel("Dashboard — Coming later. Design pending."),
             "Network Info" => new PlaceholderViewModel("Network Info — Planned"),
             _ => new PlaceholderViewModel($"NetStucked {Version}\nLight theme • probe settings are available inside each diagnostic tool\nPreferences and logs: {Ping.Store.DirectoryPath}")
         };
-        PageSubtitle = page switch { "Live Ping" => "Ping multiple hosts or subnets and monitor response in real time", "Traceroute" => "Trace route hops and monitor path response in real time", "Port Test" => "Test TCP connections to remote endpoints and monitor connection time", "Updates" => "Manage application versions", _ => "" };
+        PageSubtitle = page switch { "Live Ping" => "Ping multiple hosts or subnets and monitor response in real time", "Traceroute" => "Trace route hops and monitor path response in real time", "Port Test" => "Test TCP / UDP ports across hosts and subnets", "Updates" => "Manage application versions", "Settings" => "Appearance and application preferences", _ => "" };
         Ping.SetPresentationActive(ReferenceEquals(CurrentPage, Ping)); TraceWorkspace.SetPresentationActive(ReferenceEquals(CurrentPage, TraceWorkspace));
         Port.SetPresentationActive(ReferenceEquals(CurrentPage, Port));
     }
@@ -55,6 +60,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (TraceWorkspace.RemoveSessionCommand.ExecutionTask is { } closing) await closing;
         await Task.WhenAll(Ping.StopForUpdateAsync(), Port.StopForUpdateAsync(), Task.WhenAll(TraceWorkspace.Sessions.ToArray().Select(s => s.StopForUpdateAsync())));
+        await TraceWorkspace.StopMetadataAsync();
         Ping.Store.Preferences.TraceTarget = Trace.Target;
         await Ping.Store.SaveAsync();
     }

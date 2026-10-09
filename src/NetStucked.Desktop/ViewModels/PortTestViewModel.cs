@@ -31,6 +31,8 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     private readonly Dictionary<int, string> _dnsErrors = new();
     private bool _viewDirty;
     private long _lastViewRefresh;
+    private bool _inputValid;
+    private PortProtocol? _resultProtocol;
     public UserSettingsStore Store { get; }
     public ObservableCollection<PortRow> Rows { get; } = [];
     public StableObservableCollection<PortSample> History { get; } = [];
@@ -39,7 +41,24 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     public bool IsActive => State is SessionState.Starting or SessionState.Running;
     public long ViewRefreshCount { get; private set; }
     public ICollectionView Results { get; }
-    public string[] StatusFilters { get; } = ["All status", "Connected", "Refused", "Timeout", "DNS error", "Unreachable", "Error", "Unknown"];
+    public string[] StatusFilters { get; } = ["All status", "Connected", "Responded", "Refused", "Closed", "No response", "Timeout", "DNS error", "Unreachable", "Error", "Unknown"];
+    public PortProtocol[] Protocols { get; } = [PortProtocol.TCP, PortProtocol.UDP];
+    public ObservableCollection<string> PortTemplateNames { get; } = [];
+    [ObservableProperty] private string? _selectedPortTemplate;
+    [ObservableProperty] private string _portNumbers = "443";
+    [ObservableProperty] private PortProtocol _protocol;
+    [ObservableProperty] private bool _multipleTargets;
+    [ObservableProperty] private bool _continuous;
+    [ObservableProperty] private bool _scopeAcknowledged;
+    [ObservableProperty] private bool _requiresScopeAcknowledgement;
+    [ObservableProperty] private bool _addressesExpanded = true;
+    [ObservableProperty] private bool _historyExpanded = true;
+    [ObservableProperty] private int _noResponse;
+    public string SuccessLabel => (_resultProtocol ?? Protocol) == PortProtocol.UDP ? "Responded" : "Connected";
+    public string FailureLabel => (_resultProtocol ?? Protocol) == PortProtocol.UDP ? "No success %" : "Failure %";
+    public string ProtocolGuide => Protocol == PortProtocol.UDP ? "UDP silence is inconclusive; No response does not mean closed." : "TCP connection test · no credentials required";
+    [RelayCommand] private void ToggleAddresses() => AddressesExpanded = !AddressesExpanded;
+    [RelayCommand] private void ToggleHistory() => HistoryExpanded = !HistoryExpanded;
     public int[] HistoryLimits { get; } = [100, 500];
     [ObservableProperty] private string _targetText = "";
     [ObservableProperty] private string _targetPreview = "0 unique TCP endpoints";
@@ -62,8 +81,12 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     {
         _service = service; _dialogs = dialogs; Store = store; _logger = logger;
         _settings = store.Preferences.Port;
+        _portNumbers = store.Preferences.PortNumbers; _protocol = store.Preferences.PortProtocol;
+        _multipleTargets = store.Preferences.PortMultipleTargets; _continuous = store.Preferences.PortContinuous;
+        foreach (string name in PortScanPlanner.StandardTemplates.Keys.Concat(store.Preferences.PortNumberTemplates.Keys).Distinct()) PortTemplateNames.Add(name);
         foreach (var template in store.Preferences.PortTemplates) Templates.Add(CreateEntry(template));
         TargetText = store.Preferences.PortTargetText;
+        MigrateLegacyInput();
         Results = CollectionViewSource.GetDefaultView(Rows);
         Results.Filter = item => item is PortRow row && Matches(row.Data);
         _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(33), DispatcherPriority.Background, (_, _) => Refresh(), Dispatcher.CurrentDispatcher);
@@ -75,12 +98,33 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
         "All status" => true,
         _ => row.Status == StatusFilter
     };
-    partial void OnTargetTextChanged(string value) { if (_settings is not null) ValidateInput(); }
+    private void InputChanged() { ScopeAcknowledged = false; if (_settings is not null) ValidateInput(); }
+    partial void OnTargetTextChanged(string value) => InputChanged();
+    partial void OnPortNumbersChanged(string value) => InputChanged();
+    partial void OnProtocolChanged(PortProtocol value) { InputChanged(); OnPropertyChanged(nameof(SuccessLabel)); OnPropertyChanged(nameof(FailureLabel)); OnPropertyChanged(nameof(ProtocolGuide)); }
+    partial void OnMultipleTargetsChanged(bool value) => InputChanged();
+    partial void OnScopeAcknowledgedChanged(bool value) => StartCommand.NotifyCanExecuteChanged();
+    partial void OnSelectedPortTemplateChanged(string? value)
+    {
+        if (value is null || !CanEdit) return;
+        if (value == "Standard UDP ports") Protocol = PortProtocol.UDP;
+        else if (PortScanPlanner.StandardTemplates.ContainsKey(value)) Protocol = PortProtocol.TCP;
+        PortNumbers = Store.Preferences.PortNumberTemplates.GetValueOrDefault(value, PortScanPlanner.StandardTemplates.GetValueOrDefault(value, "443"));
+    }
     partial void OnStatusFilterChanged(string value) { _viewDirty = true; RefreshViewKeepingSelection(true); }
     partial void OnSelectedRowChanged(PortRow? value) { if (value is not null) _rememberedHost = value.Data.Key; OnPropertyChanged(nameof(HistoryTitle)); UpdateHistory(); }
     partial void OnHistoryLimitChanged(int value) => UpdateHistory();
     partial void OnStateChanged(SessionState value) { OnPropertyChanged(nameof(PauseLabel)); OnPropertyChanged(nameof(IsActive)); NotifyCommands(); }
-    partial void OnSelectedTemplateChanged(PortTemplateEntry? value) { if (value is not null && CanEdit) TargetText = value.Template.Addresses; }
+    partial void OnSelectedTemplateChanged(PortTemplateEntry? value) { if (value is not null && CanEdit) { TargetText = value.Template.Addresses; MigrateLegacyInput(); } }
+    private void MigrateLegacyInput()
+    {
+        if (string.IsNullOrWhiteSpace(TargetText) || TargetInputParser.Parse(TargetText, 1024).IsValid) return;
+        var old = PortInputParser.Parse(TargetText);
+        if (!old.IsValid || old.Targets.Select(t => t.Port).Distinct().Count() != 1) return;
+        PortNumbers = old.Targets[0].Port.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        MultipleTargets = old.Targets.Select(t => t.Host).Distinct().Count() > 1;
+        TargetText = string.Join(Environment.NewLine, old.Targets.Select(t => $"{t.Host} {t.Description}".TrimEnd()));
+    }
     public void UpdateState() => State = _service.State;
     private PortTemplateEntry CreateEntry(PingTemplate template) => new(template, new AsyncRelayCommand(() => DeleteTemplateAsync(template.Id)));
     private Task DeleteTemplateAsync(Guid id) => ExecuteAsync(async () =>
@@ -103,21 +147,24 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
 
     private PortParseResult ValidateInput()
     {
-        var parsed = PortInputParser.Parse(TargetText, 1024);
-        TargetPreview = $"{parsed.Targets.Count:N0} unique TCP endpoints • authorized targets only";
+        var parsed = PortScanPlanner.Parse(TargetText, PortNumbers, Protocol, MultipleTargets);
+        _inputValid = parsed.IsValid;
+        RequiresScopeAcknowledgement = parsed.Targets.Count > PortScanPlanner.DefaultChecks;
+        TargetPreview = $"{parsed.Targets.Select(t => t.Host).Distinct().Count():N0} hosts · {parsed.Targets.Count:N0} {Protocol} checks • authorized targets only";
         Message = string.Join(Environment.NewLine, parsed.Errors.Take(8));
         if (parsed.Errors.Count > 8) Message += $"\n…and {parsed.Errors.Count - 8} more errors.";
         StartCommand.NotifyCanExecuteChanged();
         return parsed;
     }
 
-    private bool CanStart() => CanEdit && PortInputParser.Parse(TargetText, 1024).IsValid;
+    private bool CanStart() => CanEdit && _inputValid && (!RequiresScopeAcknowledgement || ScopeAcknowledged);
     private bool CanPause() => !_busy && State is SessionState.Running or SessionState.Paused;
     private bool CanStop() => !_busy && State is SessionState.Starting or SessionState.Running or SessionState.Pausing or SessionState.Paused;
     private void NotifyCommands()
     {
         OnPropertyChanged(nameof(CanEdit)); StartCommand.NotifyCanExecuteChanged(); PauseCommand.NotifyCanExecuteChanged();
         StopCommand.NotifyCanExecuteChanged(); SettingsCommand.NotifyCanExecuteChanged();
+        EditPortTemplateCommand.NotifyCanExecuteChanged(); SavePortNumbersCommand.NotifyCanExecuteChanged(); RestorePortTemplateCommand.NotifyCanExecuteChanged();
     }
     private async Task ExecuteAsync(Func<Task> action)
     {
@@ -130,9 +177,10 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     private Task StartAsync() => ExecuteAsync(async () =>
     {
         var parsed = ValidateInput();
-        if (!parsed.IsValid) return;
-        await _service.StartAsync(parsed.Targets, _settings);
-        Store.Preferences.PortTargetText = TargetText;
+        if (!parsed.IsValid || RequiresScopeAcknowledgement && !ScopeAcknowledged) return;
+        await _service.StartAsync(parsed.Targets, _settings with { Continuous = Continuous });
+        _resultProtocol = Protocol; OnPropertyChanged(nameof(SuccessLabel)); OnPropertyChanged(nameof(FailureLabel));
+        PersistInput();
         SelectedRow = null; _rememberedHost = null; _historySequence = -1;
     });
     [RelayCommand(CanExecute = nameof(CanPause))]
@@ -165,6 +213,45 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     });
     [RelayCommand]
     private Task ExportAsync() => ExecuteAsync(() => { Refresh(true); return _dialogs.ExportAsync("NetStucked-ports.csv", CsvExporter.Port(Results.Cast<PortRow>().Select(r => r.Data))); });
+    [RelayCommand(CanExecute = nameof(CanEdit))]
+    private Task EditPortTemplateAsync() => ExecuteAsync(async () =>
+    {
+        string name = SelectedPortTemplate ?? "Standard TCP ports";
+        string? numbers = _dialogs.EditPortTemplate(name, PortNumbers);
+        if (numbers is not null) await SavePortTemplateAsync(name, numbers);
+    });
+    [RelayCommand(CanExecute = nameof(CanEdit))]
+    private Task SavePortNumbersAsync() => ExecuteAsync(async () =>
+    {
+        var parsed = PortScanPlanner.Parse("127.0.0.1", PortNumbers, Protocol, false);
+        if (!parsed.IsValid) throw new ArgumentException(string.Join(Environment.NewLine, parsed.Errors));
+        string? name = _dialogs.AskPortTemplateName(SelectedPortTemplate ?? "");
+        if (name is not null) await SavePortTemplateAsync(name.Trim(), PortNumbers);
+    });
+    private async Task SavePortTemplateAsync(string name, string numbers)
+    {
+        if (name.Length is < 1 or > 80) throw new ArgumentException("Template names must contain 1–80 characters.");
+        var previous = Store.Preferences.PortNumberTemplates;
+        if (!previous.ContainsKey(name) && previous.Count >= 100) throw new ArgumentException("Maximum 100 port templates.");
+        var next = new Dictionary<string, string>(previous) { [name] = numbers }; Store.Preferences.PortNumberTemplates = next;
+        try { await Store.SaveAsync(); } catch { Store.Preferences.PortNumberTemplates = previous; throw; }
+        if (!PortTemplateNames.Contains(name)) PortTemplateNames.Add(name);
+        SelectedPortTemplate = name; PortNumbers = numbers;
+    }
+    [RelayCommand(CanExecute = nameof(CanEdit))]
+    private Task RestorePortTemplateAsync() => ExecuteAsync(async () =>
+    {
+        string name = SelectedPortTemplate ?? "Standard TCP ports";
+        if (!PortScanPlanner.StandardTemplates.TryGetValue(name, out var original)) throw new ArgumentException("Select a built-in port template to restore its default ports.");
+        var previous = Store.Preferences.PortNumberTemplates; var next = new Dictionary<string, string>(previous); next.Remove(name); Store.Preferences.PortNumberTemplates = next;
+        try { await Store.SaveAsync(); } catch { Store.Preferences.PortNumberTemplates = previous; throw; }
+        SelectedPortTemplate = name; PortNumbers = original;
+    });
+    private void PersistInput()
+    {
+        Store.Preferences.PortTargetText = TargetText; Store.Preferences.PortNumbers = PortNumbers; Store.Preferences.PortProtocol = Protocol;
+        Store.Preferences.PortMultipleTargets = MultipleTargets; Store.Preferences.PortContinuous = Continuous;
+    }
 
     public void SetPresentationActive(bool active) { if (active) { UpdateState(); _timer.Start(); } else _timer.Stop(); }
     public void Refresh(bool flush = false)
@@ -196,6 +283,7 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
             if (!flush && budget.Elapsed.TotalMilliseconds >= 4) break;
         }
         TargetCount = update.Totals.Targets; Reachable = update.Totals.Connected; Unreachable = update.Totals.Failed;
+        NoResponse = update.Totals.NoResponse;
         Sent = update.Totals.Attempts; Received = update.Totals.Successful; Loss = update.Totals.FailurePercent;
         RefreshViewKeepingSelection(flush);
         UpdateHistory();
@@ -230,9 +318,9 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     public async Task StopForUpdateAsync()
     {
         foreach (var command in new[] { StartCommand, PauseCommand, StopCommand }) if (command.ExecutionTask is { } task) await task;
-        await _service.StopAsync(); Store.Preferences.PortTargetText = TargetText; UpdateState();
+        await _service.StopAsync(); PersistInput(); UpdateState();
     }
-    public async ValueTask DisposeAsync() { _timer.Stop(); await _service.StopAsync(); LogDiagnostics(); Store.Preferences.PortTargetText = TargetText; }
+    public async ValueTask DisposeAsync() { _timer.Stop(); await _service.StopAsync(); LogDiagnostics(); PersistInput(); }
 }
 
 public sealed record PortTemplateEntry(PingTemplate Template, IAsyncRelayCommand DeleteCommand)

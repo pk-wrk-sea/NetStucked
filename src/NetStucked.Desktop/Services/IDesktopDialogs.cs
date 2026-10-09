@@ -12,5 +12,9 @@ public interface IDesktopDialogs
     PortProbeSettings? EditPortSettings(PortProbeSettings settings) => null;
     void ShowError(string message);
     string? AskTemplateName(string suggested) => null;
+    string? AskPortTemplateName(string suggested) => AskTemplateName(suggested);
     bool ConfirmTemplateDeletion(string name) => false;
+    HopDescriptionEdit? EditHopDescriptions(string text, bool wan) => null;
+    string? EditPortTemplate(string name, string numbers) => null;
 }
+public sealed record HopDescriptionEdit(string Text, bool WanEnabled);

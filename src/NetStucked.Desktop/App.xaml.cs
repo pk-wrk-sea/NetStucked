@@ -18,10 +18,14 @@ public partial class App : Application
         store ??= new UserSettingsStore();
         var services = new ServiceCollection();
         services.AddSingleton(store);
+        services.AddSingleton<ThemeService>(); services.AddSingleton<AppearanceViewModel>();
         services.AddLogging(builder => builder.AddProvider(new LocalLoggerProvider(store.DirectoryPath)));
         services.AddSingleton<IIcmpProbe, IcmpPingProbe>();
         services.AddSingleton<IDnsResolver, DnsResolver>();
         services.AddSingleton<ITcpProbe, TcpPortProbe>();
+        services.AddSingleton<IUdpProbe, UdpPortProbe>();
+        services.AddSingleton<IWanIdentitySource, RipeWanIdentitySource>();
+        services.AddSingleton<HopDescriptionService>();
         services.AddSingleton<IReleaseSource, GitHubReleaseSource>();
         services.AddSingleton<IExternalLinks, ExternalLinks>();
         services.AddSingleton<IApplicationUpdateService, WindowsApplicationUpdateService>();
@@ -45,6 +49,7 @@ public partial class App : Application
         }
         // The executable smoke harness opts into an isolated data directory; ordinary launches use per-user preferences.
         _provider = ConfigureServices(new UserSettingsStore(Environment.GetEnvironmentVariable("NETSTUCKED_QA_DATA_DIRECTORY")));
+        _provider.GetRequiredService<ThemeService>();
         var window = _provider.GetRequiredService<MainWindow>();
         var main = _provider.GetRequiredService<MainViewModel>(); window.DataContext = main;
         main.Updates.InstallationLockChanged += locked => window.IsEnabled = !locked;

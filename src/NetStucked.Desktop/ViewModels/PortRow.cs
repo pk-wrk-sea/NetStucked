@@ -34,6 +34,7 @@ public sealed class PortRow(PortSnapshot data) : ObservableObject
     public int Number => _data.Number;
     public string Host => _data.Host;
     public int Port => _data.Port;
+    public PortProtocol Protocol => _data.Protocol;
     public string Endpoint => _data.Endpoint;
     public string Description => _data.Description;
     public string? ResolvedIp => _data.ResolvedIp;
@@ -54,6 +55,7 @@ public sealed class PortRow(PortSnapshot data) : ObservableObject
         "Number" => value.Number,
         "Host" => value.Host,
         "Port" => value.Port,
+        "Protocol" => value.Protocol,
         "Endpoint" => value.Endpoint,
         "Description" => value.Description,
         "ResolvedIp" => value.ResolvedIp,

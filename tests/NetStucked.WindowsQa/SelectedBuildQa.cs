@@ -143,7 +143,7 @@ internal static partial class Program
 
         using var farm = new LoopbackTcpFarm(2);
         vm.Ping.TargetText = "127.0.0.1 Update shutdown QA"; await vm.Ping.StartCommand.ExecuteAsync(null);
-        vm.Port.TargetText = farm.Targets; await vm.Port.StartCommand.ExecuteAsync(null);
+        SetPortFarm(vm.Port, farm.Targets); await vm.Port.StartCommand.ExecuteAsync(null);
         var first = vm.Trace; first.Target = "127.0.1.1"; await first.StartCommand.ExecuteAsync(null);
         vm.TraceWorkspace.AddSessionCommand.Execute(null); var second = vm.Trace; second.Target = "127.0.2.1"; await second.StartCommand.ExecuteAsync(null);
         await Until(() => { vm.Ping.Refresh(); vm.Port.Refresh(); return vm.Ping.Sent > 0 && first.Engine.CompletedCycles > 0 && second.Engine.CompletedCycles > 0 && vm.Port.Sent > 0; });

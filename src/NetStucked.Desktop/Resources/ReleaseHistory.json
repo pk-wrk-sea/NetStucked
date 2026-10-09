@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.4.0",
+    "Date": "2026-10-09",
+    "Notes": "• Supplied NetStucked branding, Light/Dark/System themes and themed popups.\n• Smooth menu/panel toggles, resizing, input guides and semantic status colors.\n• Shared IP hop descriptions, cached public WAN ASN metadata and five trace sessions with a protected main session.\n• Separate TCP/UDP port input, Host/IP/CIDR × ports, single-pass/continuous checkbox and editable saved/restorable common-port templates.\n• Large scan acknowledgement; UDP silence remains inconclusive."
+  },
+  {
     "Version": "0.3.0",
     "Date": "2026-10-09",
     "Notes": "• Added a published-build selector and one action to install, reinstall or recover the chosen version.\n• Verify GitHub installer identity, SHA-256, size, product version and Windows trust; unsigned builds require acknowledgement.\n• Stop diagnostics, preserve versioned settings backups and restart through an isolated helper.\n• Keep Windows permission prompts and manual release links; no background installation."
