@@ -227,6 +227,11 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
         });
     }
     private void LogDiagnostics() => _logger.LogInformation("Port Test timing {Diagnostics}", System.Text.Json.JsonSerializer.Serialize(_service.Diagnostics));
+    public async Task StopForUpdateAsync()
+    {
+        foreach (var command in new[] { StartCommand, PauseCommand, StopCommand }) if (command.ExecutionTask is { } task) await task;
+        await _service.StopAsync(); Store.Preferences.PortTargetText = TargetText; UpdateState();
+    }
     public async ValueTask DisposeAsync() { _timer.Stop(); await _service.StopAsync(); LogDiagnostics(); Store.Preferences.PortTargetText = TargetText; }
 }
 

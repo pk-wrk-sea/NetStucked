@@ -1,8 +1,10 @@
 # NetStucked verification reports
 
+**Local 0.3.0:** [Selected-build installation/recovery QA](QA_0.3.0.md), with installer integrity/trust checks, real isolated-helper startup, actual network-session drain tests and explicit machine-install limitations. Runnable output: `artifacts/selected-build/0.3.0/final/publish/NetStucked.exe`. Earlier reports remain historical evidence.
+
 **Published 0.2.0 / 0.2.1 TEST BUILD:** [2026-10-09 GitHub publication report](GITHUB_RELEASE_REPORT_2026-10-09.md), with exact package hashes, Windows CI installer builds and live release-menu evidence. Machine installer upgrade/downgrade remains untested. The local reports below are historical evidence from before this publication.
 
-**Current 0.2.0:** [TCP Port Test and manual Updates QA](QA_0.2.0.md), including exact published-code WPF/ICMP/TCP tests, manual GitHub read and a simultaneous polling soak. Release build and 115 tests pass. Runnable output: `artifacts/port-test/0.2.0/final/publish/NetStucked.exe`. The measurements below are historical 0.1.0 evidence; they do not substitute for the current report.
+**Earlier 0.2.0:** [TCP Port Test and manual Updates QA](QA_0.2.0.md), including exact published-code WPF/ICMP/TCP tests, manual GitHub read and a simultaneous polling soak. Release build and 115 tests pass. Runnable output: `artifacts/port-test/0.2.0/final/publish/NetStucked.exe`. The measurements below are historical 0.1.0 evidence; they do not substitute for the current report.
 
 **Previous 0.1.0 follow-up:** [2026-10-08 UI and independent-polling revision](UI_REVISION_2026-10-08.md). Release build and 70 automated tests pass. Current runnable output is `artifacts/ui-refresh/final/publish/NetStucked.exe`. The revision report records exact final published-code WPF/loopback checks, native maximize bounds, templates/history/multiple sessions, settings and performance limits. The [performance report](PERFORMANCE_REPORT_2026-10-08.md), [bug audit](BUG_AUDIT_2026-10-08.md) and bootstrap measurements below belong to older packages; those artifacts remain unchanged.
 

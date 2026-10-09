@@ -23,6 +23,7 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel(LivePingViewModel ping, TracerouteWorkspaceViewModel trace, PortTestViewModel port, UpdatesViewModel updates)
     {
         Ping = ping; TraceWorkspace = trace; Port = port; Updates = updates; _currentPage = ping;
+        Updates.StopDiagnosticsAsync = PrepareForUpdateAsync;
         Ping.SetPresentationActive(true); TraceWorkspace.SetPresentationActive(false);
         Ping.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Ping.IsActive)) OnPropertyChanged(nameof(IsPingActive)); };
         TraceWorkspace.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(TraceWorkspace.IsActive)) OnPropertyChanged(nameof(IsTraceActive)); };
@@ -50,4 +51,11 @@ public partial class MainViewModel : ObservableObject
         Port.SetPresentationActive(ReferenceEquals(CurrentPage, Port));
     }
     public async Task ShutdownAsync() { _activity.Stop(); await Task.WhenAll(Ping.DisposeAsync().AsTask(), TraceWorkspace.DisposeAsync().AsTask(), Port.DisposeAsync().AsTask(), Updates.DisposeAsync().AsTask()); await Ping.Store.SaveAsync(); }
+    public async Task PrepareForUpdateAsync()
+    {
+        if (TraceWorkspace.RemoveSessionCommand.ExecutionTask is { } closing) await closing;
+        await Task.WhenAll(Ping.StopForUpdateAsync(), Port.StopForUpdateAsync(), Task.WhenAll(TraceWorkspace.Sessions.ToArray().Select(s => s.StopForUpdateAsync())));
+        Ping.Store.Preferences.TraceTarget = Trace.Target;
+        await Ping.Store.SaveAsync();
+    }
 }

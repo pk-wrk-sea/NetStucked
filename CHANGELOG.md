@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — 2026-10-09
+
+- Added user-triggered installation/recovery of a selected published build, with actual release notes, a dynamic Install/Reinstall/Recover button, download progress and preparation cancellation.
+- Verify fixed-project HTTPS installer metadata, hash/size, product/version and Windows trust. Explicit acknowledgement is required for unsigned builds; invalid signatures are blocked and Windows prompts remain enabled.
+- Drain diagnostic sessions, save preferences, stage an isolated application/runtime helper, keep bounded verified versioned settings backups, run Inno Setup and restart. Recovery restores a matching settings backup when available; compatible schema-1 preferences otherwise remain in place.
+- Keep release-page/manual fallback and on-demand checking. Published 0.2.x packages are immutable; their own update menus remain manual after downgrading to them.
+
 ## 0.2.0 — 2026-10-09
 
 - Added TCP Port Test for explicit IPv4/IPv6/hostname endpoints, with independent bounded polling, actual connect time/outcomes, pause/resume/stop, local named templates, selected-endpoint history and CSV export.

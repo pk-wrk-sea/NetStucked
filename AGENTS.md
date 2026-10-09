@@ -1,5 +1,9 @@
 # NetStucked engineering rules
 
+- The later human release instruction of 2026-10-09 authorizes publishing 0.3.0 plus a 0.3.1 TEST BUILD and retiring 0.2.x GitHub releases/download assets/Actions build artifacts after preserving local verified backups. Keep 0.2.x Git source history and tags. This is the explicit exception to published-asset preservation below; other published releases remain immutable. The public update/recovery catalog starts at 0.3.0.
+
+- The latest human authorization of 2026-10-09 adds selected-build installation/recovery in 0.3.0 and supersedes the earlier manual-only update restriction for explicit user clicks. See `docs/FEATURES_0.3.0.md`. Always verify fixed-project HTTPS asset identity, SHA-256, size, product/version and Windows trust status. Unsigned installers require explicit acknowledgement; invalid signatures are rejected. Preserve UAC/SmartScreen, await diagnostics shutdown, back up compatible settings and use an isolated restart helper. No scheduled/background installation or credential storage. Preserve published tags/assets and canonical references.
+
 - The user-authorized 2026-10-09 extension adds TCP Port Test and a manual Updates & Recovery page in 0.2.0; see `docs/FEATURES_0.2.0.md`. Settings and Updates belong at the sidebar bottom. Updates may read public GitHub Releases and open project release pages, but never download, install or roll back automatically. Preserve the original 0.1.0 canonical references.
 
 - The human-authorized UI revision of 2026-10-08 supersedes the original PNG layout only for the changes recorded in `docs/UI_REVISION_2026-10-08.md`: compact settings, named templates/history, independent trace sessions, window chrome, tables and polling. Keep the original scope/PNG bytes intact.

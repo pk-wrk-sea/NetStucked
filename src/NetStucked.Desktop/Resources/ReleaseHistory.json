@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.3.0",
+    "Date": "2026-10-09",
+    "Notes": "• Added a published-build selector and one action to install, reinstall or recover the chosen version.\n• Verify GitHub installer identity, SHA-256, size, product version and Windows trust; unsigned builds require acknowledgement.\n• Stop diagnostics, preserve versioned settings backups and restart through an isolated helper.\n• Keep Windows permission prompts and manual release links; no background installation."
+  },
+  {
     "Version": "0.2.0",
     "Date": "2026-10-09",
     "Notes": "• Added TCP Port Test with independent endpoint polling, pause/resume, templates, connection history and CSV export.\n• Added manual GitHub Releases checks, release notes and a manual recovery guide.\n• Moved Settings and Updates to the bottom application group in the sidebar."

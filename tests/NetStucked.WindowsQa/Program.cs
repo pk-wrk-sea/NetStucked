@@ -27,7 +27,7 @@ using NetStucked.Infrastructure;
 
 namespace NetStucked.WindowsQa;
 
-internal static class Program
+internal static partial class Program
 {
     private static int _exitCode;
     private static string? _expectedAvailableVersion;
@@ -35,6 +35,7 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        if (args.FirstOrDefault() == "--verify-installer") return VerifyPublishedInstallerAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
         string output = Path.GetFullPath(args.FirstOrDefault() ?? "artifacts/windows-qa");
         int soakSeconds = args.Length > 1 ? int.Parse(args[1]) : 0;
         _expectedAvailableVersion = args.Length > 3 ? args[3] : null;
@@ -123,6 +124,7 @@ internal static class Program
         Require(provider.GetRequiredService<MultiTargetPingService>().Diagnostics.UiLag.Count > 0, "Ping records actual publish-to-UI timing");
         await CheckUiRevisionAsync(window, vm, dialogs, output);
         await CheckPortAndUpdatesAsync(window, vm, dialogs, store, output);
+        await CheckSelectedBuildAsync(vm, store, measured, measuredTcp);
         vm.NavigateCommand.Execute("Traceroute");
         await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
         Require(Descendants<RadioButton>((DependencyObject)window.Content).Single(b => Equals(b.CommandParameter, "Traceroute")).IsChecked == true, "Sidebar selection follows the active page");
@@ -333,23 +335,28 @@ internal static class Program
         {
             Require(vm.Updates.CurrentVersion == _expectedCurrentVersion, "Live release check runs the requested published application version");
             Require(vm.Updates.StatusTitle != "Unable to check for updates", "Live public GitHub request succeeds");
-            var download = Descendants<Button>((DependencyObject)window.Content).Single(b => AutomationProperties.GetName(b) == "Open available GitHub release for manual installation");
+            var download = Descendants<Button>((DependencyObject)window.Content).Single(b => AutomationProperties.GetName(b) == "Install or recover selected build");
+            Require(vm.Updates.Builds.Count >= 2 && vm.Updates.Builds.All(b => b.Version.CompareTo(new SemanticVersion(0, 3, 0)) >= 0), "Actual public build catalog starts at 0.3.0 and contains no retired 0.2.x build");
             if (_expectedAvailableVersion == "none")
             {
-                Require(vm.Updates.Available is null && vm.Updates.StatusTitle == "No newer published version" && !download.IsEnabled, "Current test build has no newer public update and disables installation action");
-                Require(vm.Updates.PreviousVersion == "Previous documented version: v0.2.0", "Test build records the published 0.2.0 recovery version");
+                Require(vm.Updates.Available is null && vm.Updates.StatusTitle == "No newer published version" && download.IsEnabled && vm.Updates.InstallLabel == "Reinstall v" + vm.Updates.CurrentVersion, "Current test build offers Reinstall and reports no newer public update");
+                vm.Updates.SelectedBuild = vm.Updates.Builds.Single(b => b.Version.ToString() == "0.3.0");
+                Require(vm.Updates.InstallLabel == "Recover v0.3.0" && vm.Updates.InstallCommand.CanExecute(null) && download.IsEnabled, "Actual test build can select the published 0.3.0 installer for Recovery");
+                Require(vm.Updates.PreviousVersion == "Previous documented version: v0.3.0", "Test build records the published 0.3.0 recovery version");
             }
             else
             {
-                Require(vm.Updates.Available?.Version.ToString() == _expectedAvailableVersion && vm.Updates.Badge == "Patch update", "Published 0.2.0 discovers the actual 0.2.1 patch release");
-                Require(vm.Updates.Available?.InstallerPage is not null && vm.Updates.OpenReleaseCommand.CanExecute(null) && download.IsEnabled, "Actual release installer enables the manual download button");
-                Require(vm.Updates.Notes.Contains("TEST BUILD") && vm.Updates.Notes.Contains("Changes from 0.2.0"), "Actual GitHub notes identify the test purpose and changes");
+                Require(vm.Updates.Available?.Version.ToString() == _expectedAvailableVersion && vm.Updates.Badge == "Patch update", "Published baseline discovers the actual test patch release");
+                Require(vm.Updates.Available?.Installer is not null && vm.Updates.SelectedBuild == vm.Updates.Available && vm.Updates.InstallCommand.CanExecute(null) && download.IsEnabled, "Actual hash-verified release installer enables the selected-build Install button");
+                Require(vm.Updates.Notes.Contains("TEST BUILD") && vm.Updates.Notes.Contains("Changes from " + vm.Updates.CurrentVersion), "Actual GitHub notes identify the test purpose and changes");
             }
             await File.WriteAllTextAsync(Path.Combine(output, "live-release-check.json"), JsonSerializer.Serialize(new
             {
                 vm.Updates.CurrentVersion, AvailableVersion = vm.Updates.Available?.Version.ToString(),
                 ReleasePage = vm.Updates.Available?.Page, InstallerPage = vm.Updates.Available?.InstallerPage,
-                vm.Updates.Badge, vm.Updates.DownloadLabel, DownloadButtonEnabled = download.IsEnabled,
+                vm.Updates.Badge, vm.Updates.InstallLabel, InstallerButtonEnabled = download.IsEnabled,
+                SelectedVersion = vm.Updates.SelectedBuild?.Version.ToString(), vm.Updates.SelectedBuild?.Installer,
+                PublicBuildVersions = vm.Updates.Builds.Select(b => b.Version.ToString()).ToArray(),
                 vm.Updates.PreviousVersion, vm.Updates.LastChecked, Source = "Actual public GitHub API; no fixture", InstallerExecuted = false
             }, new JsonSerializerOptions { WriteIndented = true }));
         }

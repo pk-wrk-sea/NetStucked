@@ -37,7 +37,10 @@ public sealed partial record SemanticVersion(int Major, int Minor, int Patch, st
     public override string ToString() => string.Create(CultureInfo.InvariantCulture, $"{Major}.{Minor}.{Patch}{(PreRelease.Length == 0 ? "" : "-" + PreRelease)}{(Metadata.Length == 0 ? "" : "+" + Metadata)}");
 }
 
-public sealed record PublishedRelease(SemanticVersion Version, string Name, string Notes, Uri Page, Uri? InstallerPage, DateTimeOffset? PublishedAt);
+public sealed record PublishedRelease(SemanticVersion Version, string Name, string Notes, Uri Page, Uri? InstallerPage, DateTimeOffset? PublishedAt, ReleaseInstaller? Installer = null)
+{
+    public string DisplayName => $"v{Version} — {Name}";
+}
 public sealed record ReleaseCheck(IReadOnlyList<PublishedRelease> Releases, DateTimeOffset CheckedAt);
 public interface IReleaseSource
 {

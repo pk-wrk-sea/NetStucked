@@ -149,4 +149,9 @@ public partial class TracerouteViewModel : ObservableObject, IAsyncDisposable
     }
     private void LogDiagnostics() => _logger.LogInformation("Traceroute timing {Diagnostics}", System.Text.Json.JsonSerializer.Serialize(_service.Diagnostics));
     public async ValueTask DisposeAsync() { _timer.Stop(); await _service.DisposeAsync(); LogDiagnostics(); }
+    public async Task StopForUpdateAsync()
+    {
+        foreach (var command in new[] { StartCommand, PauseCommand, StopCommand }) if (command.ExecutionTask is { } task) await task;
+        await _service.StopAsync(); UpdateState();
+    }
 }

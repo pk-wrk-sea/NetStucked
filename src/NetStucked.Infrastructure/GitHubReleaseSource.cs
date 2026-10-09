@@ -5,7 +5,7 @@ using NetStucked.Core;
 
 namespace NetStucked.Infrastructure;
 
-/// <summary>Read-only public Releases API. Never downloads or executes an installer.</summary>
+/// <summary>Public release catalog; download/execution is a separate user-triggered operation.</summary>
 public sealed class GitHubReleaseSource : IReleaseSource, IDisposable
 {
     private readonly HttpClient _client;
@@ -43,13 +43,28 @@ public sealed class GitHubReleaseSource : IReleaseSource, IDisposable
                 !row.TryGetProperty("prerelease", out var pre) || pre.ValueKind != JsonValueKind.False) continue;
             string tag = Text(row, "tag_name");
             if (tag.StartsWith('v')) tag = tag[1..];
-            if (!SemanticVersion.TryParse(tag, out var version) || version!.PreRelease.Length > 0) continue;
+            if (!SemanticVersion.TryParse(tag, out var version) || version!.PreRelease.Length > 0 || version.Metadata.Length > 0) continue;
             if (!Uri.TryCreate(Text(row, "html_url"), UriKind.Absolute, out var page) || !ReleaseRepository.IsReleasePage(page)) continue;
             Uri? installer = null;
-            if (row.TryGetProperty("assets", out var assets) && assets.ValueKind == JsonValueKind.Array && assets.EnumerateArray().Any(a => Text(a, "name") == $"NetStucked-{version}-win-x64-setup.exe")) installer = page;
+            ReleaseInstaller? package = null;
+            if (row.TryGetProperty("assets", out var assets) && assets.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var asset in assets.EnumerateArray().Where(a => Text(a, "name") == $"NetStucked-{version}-win-x64-setup.exe"))
+                {
+                    installer = page;
+                    string digest = Text(asset, "digest");
+                    if (Text(asset, "state") != "uploaded" || !digest.StartsWith("sha256:", StringComparison.Ordinal) ||
+                        !asset.TryGetProperty("id", out var id) || !id.TryGetInt64(out long assetId) ||
+                        !asset.TryGetProperty("size", out var size) || !size.TryGetInt64(out long bytes) ||
+                        !Uri.TryCreate(Text(asset, "browser_download_url"), UriKind.Absolute, out var download)) continue;
+                    var candidate = new ReleaseInstaller(assetId, Text(asset, "name"), download, digest[7..].ToLowerInvariant(), bytes);
+                    try { InstallerPolicy.Validate(candidate, version); package = candidate; break; }
+                    catch (InvalidDataException) { /* Browser fallback remains available, but execution is disabled. */ }
+                }
+            }
             string notes = Text(row, "body"); if (notes.Length > 12000) notes = notes[..12000] + "\n… Read the complete notes on GitHub.";
             DateTimeOffset? published = DateTimeOffset.TryParse(Text(row, "published_at"), out var date) ? date : null;
-            releases.Add(new(version, Text(row, "name"), notes, page, installer, published));
+            releases.Add(new(version, Text(row, "name"), notes, page, installer, published, package));
         }
         return new(releases.OrderByDescending(r => r.Version).DistinctBy(r => r.Version.ToString()).ToArray(), DateTimeOffset.Now);
     }

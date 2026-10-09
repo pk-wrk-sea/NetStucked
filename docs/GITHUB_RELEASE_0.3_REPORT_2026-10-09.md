@@ -1,0 +1,7 @@
+# NetStucked 0.3.x publication and legacy-build retirement
+
+Human authorization: publish 0.3.0 and a test build for selected-build Update/Recovery; remove 0.2.x GitHub build downloads because the in-app update path begins at 0.3.0. Preparation is in progress. This report will record actual immutable tags, asset hashes, CI, live-menu validation and deletion receipts after completion.
+
+The pair is 0.3.0 baseline and 0.3.1 TEST BUILD. The test version changes version metadata/release history only and is a normal SemVer release, explicitly TEST BUILD and not Latest, so the checker can discover it. Original 0.2.x source tags/history and approved references remain intact. Twelve legacy release assets have been backed up and hash/size verified locally; six legacy Actions artifacts have been identified by exact source-version metadata for retirement. Keep these backups under `artifacts/github-release/retired-0.2.x`.
+
+The original [local 0.3.0 QA](QA_0.3.0.md) passed 150 tests, actual WPF/loopback diagnostics, native helper acknowledgement, real installer download/hash/trust and Inno compilation. Publication packages will be rebuilt from their committed source/tag and checked again. Actual machine install/upgrade/downgrade, UAC/SmartScreen interaction and clean Windows recovery are NOT TESTED. Installers remain unsigned; explicit acknowledgement and Windows prompts remain in effect. No signing certificate or unrelated private key is accessed.
