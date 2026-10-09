@@ -5,7 +5,9 @@ namespace NetStucked.Core;
 
 public sealed record PortProbeSettings
 {
+    public const int MaxPacketSize = 1400;
     public bool Continuous { get; init; } = true;
+    public int PacketSize { get; init; } = 32;
     public int IntervalMs { get; init; } = 1000;
     public int TimeoutMs { get; init; } = 2000;
     internal int Concurrency => 32;
@@ -19,6 +21,11 @@ public sealed record PortProbeSettings
     {
         if (IntervalMs is < 250 or > 60000 || TimeoutMs is < 500 or > 10000)
             throw new ArgumentException("Interval must be 250–60000 ms; timeout must be 500–10000 ms.");
+        ValidatePacketSize(PacketSize);
+    }
+    public static void ValidatePacketSize(int size)
+    {
+        if (size is < 0 or > MaxPacketSize) throw new ArgumentOutOfRangeException(nameof(size), $"Packet size must be 0–{MaxPacketSize} payload bytes.");
     }
 }
 
@@ -70,12 +77,15 @@ public static class PortInputParser
 }
 
 public enum PortOutcome { Connected, Refused, Timeout, Unreachable, Error, Responded, Closed, NoResponse }
-public sealed record TcpProbeResult(PortOutcome Outcome, double? ConnectMs, string Details);
+public sealed record TcpProbeResult(PortOutcome Outcome, double? ConnectMs, string Details)
+{
+    public int BytesSent { get; init; }
+}
 public interface ITcpProbe
 {
-    Task<TcpProbeResult> ConnectAsync(IPAddress address, int port, int timeoutMs, CancellationToken cancellationToken);
+    Task<TcpProbeResult> ConnectAsync(IPAddress address, int port, int timeoutMs, int packetSize, CancellationToken cancellationToken);
 }
-public interface IUdpProbe { Task<TcpProbeResult> ProbeAsync(IPAddress address, int port, int timeoutMs, CancellationToken cancellationToken); }
+public interface IUdpProbe { Task<TcpProbeResult> ProbeAsync(IPAddress address, int port, int timeoutMs, int packetSize, CancellationToken cancellationToken); }
 public sealed record PortSample(DateTimeOffset Time, long Sequence, string Status, double? ConnectMs, string Details);
 public sealed record PortSnapshot(int Number, string Host, int Port, string Description, string? ResolvedIp, string Status,
     double? Last, double? Average, double? Minimum, double? Maximum, long Attempts, long Connected, double FailurePercent,

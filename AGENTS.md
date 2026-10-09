@@ -1,5 +1,7 @@
 # NetStucked engineering rules
 
+- The 2026-10-09 defect follow-up in `docs/FEATURES_0.4.1.md` supersedes the affected 0.4.0 behavior: theme-aware carets/session text, caption/toolbar/spacing fixes, continuous multiple-target Port Test, inclusive port ranges and bounded configurable TCP/UDP payload transmission authorized by the human's clarification. Preserve published assets and original references.
+
 - The human-reviewed 2026-10-09 extension in `docs/FEATURES_0.4.0.md` authorizes supplied branding, Light/Dark/System themes, collapsible/resizable panels, five trace sessions with shared hop descriptions and bounded TCP/UDP multiple-target port scans. The subsequent human instruction authorizes GitHub publication of 0.4.0. Preserve earlier canonical references and published assets.
 
 - The later human release instruction of 2026-10-09 authorizes publishing 0.3.0 plus a 0.3.1 TEST BUILD and retiring 0.2.x GitHub releases/download assets/Actions build artifacts after preserving local verified backups. Keep 0.2.x Git source history and tags. This is the explicit exception to published-asset preservation below; other published releases remain immutable. The public update/recovery catalog starts at 0.3.0.

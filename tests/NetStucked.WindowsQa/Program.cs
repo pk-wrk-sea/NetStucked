@@ -269,7 +269,7 @@ internal static partial class Program
             try
             {
                 var inputs = Descendants<TextBox>((DependencyObject)dialog.Content).ToArray();
-                Require(inputs.Length == 2, "TCP settings expose only interval and timeout"); inputs[0].Text = "249";
+                Require(inputs.Length == 3, "Port settings expose interval, timeout and TCP/UDP payload size"); inputs[0].Text = "249";
                 Descendants<Button>((DependencyObject)dialog.Content).Single(b => Equals(b.Content, "Save")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 Require(dialog.IsVisible && Descendants<TextBlock>((DependencyObject)dialog.Content).Any(t => t.Text.Contains("250–60000")), "TCP settings reject intervals below 250ms");
             }
@@ -346,7 +346,8 @@ internal static partial class Program
                 Require(vm.Updates.Available is null && vm.Updates.StatusTitle == "No newer published version" && download.IsEnabled && vm.Updates.InstallLabel == "Reinstall v" + vm.Updates.CurrentVersion, "Current test build offers Reinstall and reports no newer public update");
                 vm.Updates.SelectedBuild = vm.Updates.Builds.Single(b => b.Version.ToString() == "0.3.0");
                 Require(vm.Updates.InstallLabel == "Recover v0.3.0" && vm.Updates.InstallCommand.CanExecute(null) && download.IsEnabled, "Actual test build can select the published 0.3.0 installer for Recovery");
-                Require(vm.Updates.PreviousVersion == "Previous documented version: v0.3.0", "Test build records the published 0.3.0 recovery version");
+                string previous = vm.Updates.CurrentVersion == "0.4.1" ? "0.4.0" : "0.3.0";
+                Require(vm.Updates.PreviousVersion == "Previous documented version: v" + previous, "Current build records its actual documented recovery version");
             }
             else
             {
@@ -610,7 +611,7 @@ internal static partial class Program
         }
         private async Task AcceptAsync(TcpListener listener)
         {
-            try { while (true) { using var client = await listener.AcceptTcpClientAsync(_lifetime.Token).ConfigureAwait(false); } }
+            try { while (true) { using var client = await listener.AcceptTcpClientAsync(_lifetime.Token).ConfigureAwait(false); await client.GetStream().CopyToAsync(Stream.Null, _lifetime.Token).ConfigureAwait(false); } }
             catch (OperationCanceledException) when (_lifetime.IsCancellationRequested) { }
         }
         public void Dispose()
@@ -628,13 +629,13 @@ internal static partial class Program
         public int Maximum => Volatile.Read(ref _maximum);
         public int Overlap => Volatile.Read(ref _overlap);
         public void Reset() { if (Active != 0) throw new InvalidOperationException("TCP is still active."); _endpoints.Clear(); _maximum = _overlap = 0; }
-        public async Task<TcpProbeResult> ConnectAsync(IPAddress address, int port, int timeoutMs, CancellationToken token)
+        public async Task<TcpProbeResult> ConnectAsync(IPAddress address, int port, int timeoutMs, int packetSize, CancellationToken token)
         {
             string key = $"{address}:{port}";
             if (_endpoints.AddOrUpdate(key, 1, (_, count) => count + 1) > 1) Interlocked.Increment(ref _overlap);
             int active = Interlocked.Increment(ref _active), previous;
             do { previous = _maximum; } while (active > previous && Interlocked.CompareExchange(ref _maximum, active, previous) != previous);
-            try { return await _real.ConnectAsync(address, port, timeoutMs, token); }
+            try { return await _real.ConnectAsync(address, port, timeoutMs, packetSize, token); }
             finally { Interlocked.Decrement(ref _active); _endpoints.AddOrUpdate(key, 0, (_, count) => count - 1); }
         }
     }

@@ -146,7 +146,7 @@ public class PortTests
         public int Active=>_active; public int Maximum=>_maximum; public int Overlap=>_overlap;
         public ConcurrentQueue<long> Started { get; }=new();
         public Func<int,CancellationToken,Task<TcpProbeResult>> Handler {get;set;}=(_,_)=>Task.FromResult(new TcpProbeResult(PortOutcome.Connected,1,"test adapter"));
-        public async Task<TcpProbeResult> ConnectAsync(IPAddress address,int port,int timeoutMs,CancellationToken token)
+        public async Task<TcpProbeResult> ConnectAsync(IPAddress address,int port,int timeoutMs,int packetSize,CancellationToken token)
         {
             string key=$"{address}:{port}"; if(_endpoints.AddOrUpdate(key,1,(_,v)=>v+1)>1) Interlocked.Increment(ref _overlap);
             int active=Interlocked.Increment(ref _active), previous;

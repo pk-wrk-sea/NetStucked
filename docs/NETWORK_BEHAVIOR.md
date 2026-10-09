@@ -1,5 +1,11 @@
 # Network behavior
 
+## Current Port Test (0.4.1)
+
+Port Test continuously scans the authorized Host/IP/CIDR × selected ports after Start; Pause and Stop await cancellation. Inclusive ranges such as `1000-1005` expand to six ports and deduplicate with other entries. Limits remain 1,024 hosts, 64 unique ports and 16,384 checks, with acknowledgement above 4,096 checks, 32 concurrent probes and 128 send admissions/second.
+
+Packet Size specifies 0–1400 zero-filled payload bytes, default 32, for TCP and UDP. TCP measures actual connect duration, sends all requested bytes under the same timeout and handles partial sends. Send completion does not prove a service-level response; failure after connection has explicit payload-send details. Size zero tests only TCP connection or sends an empty UDP datagram. UDP response time is measured only after a real received datagram; No response remains inconclusive. Actual sent-byte counts are included in details/CSV. Operating-system TCP segmentation and protocol headers are outside this payload-size setting.
+
 TCP Port Test behavior added in 0.2.0 is specified in [FEATURES_0.2.0.md](FEATURES_0.2.0.md): actual cancellable TCP handshakes, DNS isolation, per-endpoint ownership, successful connect times only, independent outcome/history counters and bounded rate/concurrency. The ICMP behavior below remains in use.
 
 Only explicitly selected, authorized targets are probed using cancellable .NET ICMP APIs. No shell ping/tracert process or production test adapter is used. ICMP response/loss describes ICMP traffic; it does not establish all-service availability.

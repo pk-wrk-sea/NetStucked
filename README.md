@@ -1,8 +1,8 @@
-# NetStucked 0.4.0
+# NetStucked 0.4.1
 
 <img src="docs/branding/NetStuckedBanner.png" width="480" alt="NetStucked — Network Engineer's Toolkit" />
 
-Windows 10/11 x64 desktop diagnostics for IP addresses, hostnames and authorized subnets. C# / WPF / .NET 10 / MVVM. Live Ping, continuous ICMP Traceroute and TCP/UDP Port Test use actual network APIs. Light/Dark/System themes, collapsible/resizable panels and shared hop descriptions follow the human-reviewed UI mockup. Port scans use separate hosts and port numbers, single-pass/continuous selection and editable saved/restorable common-port templates. Public WAN descriptions use bounded RIPEstat metadata lookups; generic UDP silence stays inconclusive. Updates & Recovery retains explicit selected-build installation/recovery with verification, backup and restart. The approved layouts in `design/references/` are preserved; sample telemetry is never loaded.
+Windows 10/11 x64 desktop diagnostics for IP addresses, hostnames and authorized subnets. C# / WPF / .NET 10 / MVVM. Live Ping, continuous ICMP Traceroute and TCP/UDP Port Test use actual network APIs. Light/Dark/System themes, collapsible/resizable panels and shared hop descriptions follow the human-reviewed UI mockup. Port Test continuously scans separate hosts and ports, supports inclusive port ranges and saved/restorable templates, and sends a configurable zero-filled TCP/UDP payload (default 32 bytes, 0–1400). Public WAN descriptions use bounded RIPEstat metadata lookups; UDP silence stays inconclusive. Updates & Recovery retains explicit selected-build installation/recovery with verification, backup and restart. The approved layouts in `design/references/` are preserved; sample telemetry is never loaded.
 
 ## Build
 
@@ -18,7 +18,7 @@ pwsh -File scripts/Publish.ps1
 
 Inno Setup 6 is needed only to compile the installer. Preferences/logs are per-user under `%LOCALAPPDATA%\NetStucked`. No administrator privilege or .NET installation is required for the self-contained application. Choose only targets you are authorized to diagnose. ICMP loss does not establish that a remote host or service is offline.
 
-See [0.4.0 authorized features](docs/FEATURES_0.4.0.md), [current QA](docs/QA_0.4.0.md), [selected-build installation/recovery](docs/FEATURES_0.3.0.md), [0.2.0 diagnostics](docs/FEATURES_0.2.0.md), `docs/FEATURE_SPEC.md`, `docs/NETWORK_BEHAVIOR.md` and `docs/DEVELOPMENT.md`. Dashboard, Network Info and background update checks/installations remain deferred.
+See [0.4.1 defect fixes and payload behavior](docs/FEATURES_0.4.1.md), [0.4.0 authorized features](docs/FEATURES_0.4.0.md), [selected-build installation/recovery](docs/FEATURES_0.3.0.md), [0.2.0 diagnostics](docs/FEATURES_0.2.0.md), `docs/FEATURE_SPEC.md`, `docs/NETWORK_BEHAVIOR.md` and `docs/DEVELOPMENT.md`. Dashboard, Network Info and background update checks/installations remain deferred.
 
 ## Published versions
 

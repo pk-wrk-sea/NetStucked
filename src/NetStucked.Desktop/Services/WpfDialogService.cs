@@ -63,7 +63,7 @@ public sealed class WpfDialogService : IDesktopDialogs
     public string? EditPortTemplate(string name, string numbers)
     {
         string? result = null;
-        ShowSettings($"Edit {name}", [("Ports (comma separated)", numbers)], new TextBlock { Text = "Common ports based on IANA service assignments. A port number does not guarantee the service running there.", TextWrapping = TextWrapping.Wrap }, values =>
+        ShowSettings($"Edit {name}", [("Ports (comma separated or ranges, e.g. 443,1000-1005)", numbers)], new TextBlock { Text = "Ranges include both endpoints. Common ports based on IANA service assignments do not guarantee the service running there.", TextWrapping = TextWrapping.Wrap }, values =>
         {
             var parsed = PortScanPlanner.Parse("127.0.0.1", values[0], PortProtocol.TCP, false);
             if (!parsed.IsValid) throw new ArgumentException(string.Join(Environment.NewLine, parsed.Errors));
@@ -111,9 +111,9 @@ public sealed class WpfDialogService : IDesktopDialogs
     {
         PortProbeSettings? result = null;
         ShowSettings("Port Probe Settings", [("Interval (ms, minimum 250)", settings.IntervalMs.ToString()),
-            ("Timeout (ms, minimum 500)", settings.TimeoutMs.ToString())], new StackPanel(), values =>
+            ("Timeout (ms, minimum 500)", settings.TimeoutMs.ToString()), ("Packet size (payload bytes, 0–1400)", settings.PacketSize.ToString())], new TextBlock { Text = "TCP and UDP send zero-filled payloads. Size 0 tests TCP connection only or sends an empty UDP datagram.", TextWrapping = TextWrapping.Wrap }, values =>
         {
-            var edited = settings with { IntervalMs = Int(values[0]), TimeoutMs = Int(values[1]) };
+            var edited = settings with { IntervalMs = Int(values[0]), TimeoutMs = Int(values[1]), PacketSize = Int(values[2]), Continuous = true };
             edited.Validate(); result = edited;
         });
         return result;

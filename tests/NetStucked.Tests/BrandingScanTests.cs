@@ -88,11 +88,14 @@ public sealed class BrandingScanTests
             var store = new UserSettingsStore(path); store.Preferences.Theme = "Dark"; store.Preferences.SidebarExpanded = false;
             store.Preferences.HopDescriptions = HopDescriptionParser.Parse("10.10.10.1 CSW-HQ"); store.Preferences.PortProtocol = PortProtocol.UDP;
             store.Preferences.PortNumberTemplates["Custom"] = "22,65525"; await store.SaveAsync();
+            store.Preferences.Port = store.Preferences.Port with { PacketSize = 128 }; await store.SaveAsync();
             var read = new UserSettingsStore(path); Assert.Null(read.LoadError); Assert.Equal("Dark", read.Preferences.Theme);
             Assert.False(read.Preferences.SidebarExpanded); Assert.Equal("CSW-HQ", read.Preferences.HopDescriptions["10.10.10.1"]);
             Assert.Equal(PortProtocol.UDP, read.Preferences.PortProtocol); Assert.Equal("22,65525", read.Preferences.PortNumberTemplates["Custom"]);
+            Assert.Equal(128, read.Preferences.Port.PacketSize);
             File.WriteAllText(Path.Combine(path, "settings.json"), "{}"); read = new(path);
             Assert.Null(read.LoadError); Assert.Equal("Light", read.Preferences.Theme); Assert.False(read.Preferences.PortContinuous);
+            Assert.Equal(32, read.Preferences.Port.PacketSize);
         }
         finally { if (Directory.Exists(path)) Directory.Delete(path, true); }
     }
@@ -145,9 +148,9 @@ public sealed class BrandingScanTests
     private sealed class TestProbe : ITcpProbe, IUdpProbe
     {
         public bool Block; public int TcpCalls, UdpCalls;
-        public async Task<TcpProbeResult> ConnectAsync(IPAddress address, int port, int timeout, CancellationToken token)
+        public async Task<TcpProbeResult> ConnectAsync(IPAddress address, int port, int timeout, int packetSize, CancellationToken token)
         { Interlocked.Increment(ref TcpCalls); if (Block) await Task.Delay(Timeout.Infinite, token); return new(PortOutcome.Connected, 1, "Test adapter"); }
-        public Task<TcpProbeResult> ProbeAsync(IPAddress address, int port, int timeout, CancellationToken token)
+        public Task<TcpProbeResult> ProbeAsync(IPAddress address, int port, int timeout, int packetSize, CancellationToken token)
         { Interlocked.Increment(ref UdpCalls); return Task.FromResult(new TcpProbeResult(PortOutcome.NoResponse, null, "Test adapter silence")); }
     }
     private sealed class TestDns : IDnsResolver

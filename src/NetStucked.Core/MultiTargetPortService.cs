@@ -181,8 +181,8 @@ public sealed class MultiTargetPortService(ITcpProbe probe, IDnsResolver dns, IU
                         Interlocked.Increment(ref _probeId);
                         TcpProbeResult result;
                         try { result = item.Value.Target.Protocol == PortProtocol.UDP
-                            ? await udp!.ProbeAsync(item.Address!, item.Value.Target.Port, settings.TimeoutMs, operation.Token).ConfigureAwait(false)
-                            : await probe.ConnectAsync(item.Address!, item.Value.Target.Port, settings.TimeoutMs, operation.Token).ConfigureAwait(false); }
+                            ? await udp!.ProbeAsync(item.Address!, item.Value.Target.Port, settings.TimeoutMs, settings.PacketSize, operation.Token).ConfigureAwait(false)
+                            : await probe.ConnectAsync(item.Address!, item.Value.Target.Port, settings.TimeoutMs, settings.PacketSize, operation.Token).ConfigureAwait(false); }
                         catch (OperationCanceledException) { throw; }
                         catch (Exception ex) { result = new(PortOutcome.Error, null, ex.Message); }
                         operation.Token.ThrowIfCancellationRequested();

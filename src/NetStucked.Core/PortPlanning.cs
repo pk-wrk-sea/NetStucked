@@ -18,8 +18,16 @@ public static class PortScanPlanner
         var ports = new List<int>();
         foreach (string value in numbers.Split([',',' ','\t','\r','\n'], StringSplitOptions.RemoveEmptyEntries))
         {
-            if (!int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out int port) || port is < 1 or > 65535) errors.Add($"Invalid port '{value}'. Use numbers 1–65535.");
-            else if (!ports.Contains(port)) ports.Add(port);
+            string[] range = value.Split('-');
+            if (range.Length is < 1 or > 2 || !TryPort(range[0], out int first) || !TryPort(range[^1], out int last) || last < first)
+            { errors.Add($"Invalid port '{value}'. Use 1–65535 or an ascending range such as 1000-1005."); continue; }
+            if (last - first + 1 > MaxPorts) { errors.Add($"Select at most {MaxPorts} ports after expanding ranges."); continue; }
+            for (int port = first; port <= last; port++)
+            {
+                if (ports.Contains(port)) continue;
+                if (ports.Count == MaxPorts) { errors.Add($"Select at most {MaxPorts} ports after expanding ranges."); break; }
+                ports.Add(port);
+            }
         }
         if (ports.Count == 0) errors.Add("Enter at least one port.");
         if (ports.Count > MaxPorts) errors.Add($"Select at most {MaxPorts} ports.");
@@ -31,4 +39,5 @@ public static class PortScanPlanner
         if (errors.Count > 0) return new([], errors);
         return new(hosts.Targets.SelectMany(host => ports.Select(port => new PortTarget(host.Host, port, host.Description) { Protocol = protocol })).ToArray(), []);
     }
+    private static bool TryPort(string text, out int port) => int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out port) && port is >= 1 and <= 65535;
 }

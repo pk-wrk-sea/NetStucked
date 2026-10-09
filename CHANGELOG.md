@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1 — 2026-10-09
+
+- Remove redundant caption labels; fix dark input carets, session text and address-template Save/Probe Settings spacing.
+- Move shared Hop Description before the Traceroute Results filter; show stable lifecycle state without changing per-probe outcome text.
+- Make Port Test continuous and multiple-target by default with both checkboxes removed; support inclusive, deduplicated port ranges in inputs/templates while retaining scope limits.
+- Add bounded Packet Size settings and actual TCP/UDP zero-filled payload transmission, with real sent-byte details, partial-send handling, cancellation and explicit send-failure outcomes. TCP timing measures the connection; UDP silence remains inconclusive.
+
 ## 0.4.0 — 2026-10-09
 
 - Apply the supplied NetStucked brand, Light/Dark/System themes, themed application dialogs, input guides, status colors and smooth collapsible/resizable menu, addresses, history and event panels.

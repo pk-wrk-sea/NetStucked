@@ -1,0 +1,48 @@
+# Feature and navigation registry
+
+Use this canonical inventory with [approval evidence](UI_APPROVAL_REGISTER.md) and the [actual code audit](IMPLEMENTATION_STATUS.md). “Selected/proposed requirements” from the planning brief are not final approval of a page or an implementation commitment.
+
+| ID | Feature / retained requirements | Design approval | Implementation | Verification | Milestone |
+|---|---|---|---|---|---|
+| F00-P | Live Ping: individual IPv4/IPv6/names, bounded IPv4 CIDR, descriptions/templates, independent ICMP, interval/timeout/payload, Sent/Received/Lost/Loss/RTT, filter/sort/columns, selected history, CSV, pause/resume/Stop | Approved + named revisions | Implemented/released | Build/tests + prior loopback/WPF PASS; human/remote acceptance open | M00 |
+| F00-T | IPv4 ICMP trace: real TTL discovery/polling, per-hop statistics/jitter/loss, meaningful route events/CSV, five sessions, shared manual/WAN descriptions | Approved + named revisions | Implemented/released; IPv6/TCP/UDP trace absent | Build/tests + prior loopback/WPF PASS; remote route matrix open | M00 |
+| F01 | Network Info: adapters, IPv4/IPv6/prefix/mask, gateway/DNS/DHCP/MAC/speed, routes, neighbors/ARP, metrics | Concept; UI pending | Placeholder only | NOT TESTED | M01 |
+| F02 | Wi-Fi Manager inside Network Info: saved cards, scan/select adapter, connect/disconnect, add/edit/delete, SSID/signal/IP/Gateway/DNS, service tests/logs; WPA2/3 Personal and staged Enterprise/EAP/cert support where validated | Mockup — Awaiting Approval; local reference missing | Not implemented | NOT TESTED | M01 candidate + A09 |
+| F03 | Diagnostics: dedicated DNS A/AAAA/CNAME/MX/TXT/PTR/SRV, TCP/UDP ports, HTTP/HTTPS, TLS certificates, troubleshooting | TCP/UDP Approved; other tools Concept/UI pending | Port Test implemented/released; dedicated DNS/HTTP/TLS absent | Port build/tests/prior loopback PASS; future tools NOT TESTED | M02 |
+| F03-H | Target-oriented health check and diagnostic/network profiles; preserve independent protocol findings | Concept; UI pending | Not implemented | NOT TESTED | M03 |
+| F04 | Local Monitoring, hybrid-ready: ICMP + TCP secondary, compact groups/table, thresholds/incidents, dedupe/cooldown, maintenance, tray, Windows notification/sound, availability/latency | Mockup — Awaiting Approval; reference missing | Not implemented | NOT TESTED | M04 |
+| F05 | Terminal/Remote Access: real terminal emulator, SSH/password/key/host verification, tabs/split panes/saved sessions/reconnect, explicitly authorized Telnet, serial COM, logs/snippets/SFTP/copy-paste | Mockup — Awaiting Approval; reference missing; post-stable | Not implemented | NOT TESTED | A01 |
+| F06 | Cisco-only IOS/IOS XE/NX-OS/ASA Collector: multiline targets/import/inventory/groups, credential profiles/bounded fallback/keys, parallel timeout/retry, command templates, running-config/version/inventory/operational outputs, results/details/viewer/diff/backup/export/log/progress, facts to inventory/CVE | Mockup v2 — Awaiting Approval; reference missing | Not implemented; scheduled collection explicitly excluded | NOT TESTED | A02 |
+| F07 | MA Inventory: stable Asset ID, hostname/IP/vendor/model/serial/site/role, contract and MA dates/status, observed version/collection time, search/filter/sort, versioned Excel templates/import-preview/header/errors/duplicates/reconciliation/export | Concept | Not implemented | NOT TESTED | A03 |
+| F08 | Device Intelligence: OS-family parsers, model/serial/version/uptime/interfaces/CDP/LLDP/routes, confidence/time/source evidence and config diff | Concept | Not implemented | NOT TESTED | A04 |
+| F09 | One-hop device-centric Topology/Explorer: overview/neighbors, node/link selection, interfaces/VLAN/port-channel, routing/next-hop/default/protocols, config/diff/CVE/MA; evidence freshness and Verified/Discovered/Inferred/Unknown | Mockup — Awaiting Approval; reference missing | Not implemented | NOT TESTED | A05 |
+| F10 | Cisco CVE Assessment: local facts, online/manual advisory metadata sync, applicability/config/version/freshness, Affected/Not Affected by evaluated advisory/Needs Review/Insufficient Data/Stale; official fixed-release evidence | Concept | Not implemented | NOT TESTED | A06 |
+| F11 | Upgrade Planner: findings/severity/evidence/KEV, first-fixed and compatible engineer-approved target, change owner/ID/waves/windows, before/after verification/reassessment, Excel/CSV/HTML plans | Concept | Not implemented | NOT TESTED | A07 |
+| F12 | Durable Ping/Trace/Collector/incident/device histories, search/filter, CSV/JSON/HTML reports, inventory/vulnerability reports, retention | Planned; UI pending | In-memory tool histories and CSV subset only; no SQLite history/report pages | Existing CSV tests PASS; durable/report requirements NOT TESTED | M05; later A02–A07 |
+| F13 | GitHub selected-build Updates & Recovery: SemVer/current version, public notes/catalog, streamed verified download/progress/cancel, explicit action/trust acknowledgement, settings backup, isolated helper/restart/recovery | Approved 0.3.0 | Implemented/released; no background installation | Build/tests + prior public-download/helper checks PASS; machine acceptance open | M07 |
+| F14 | Commercial licensing: Freemium tiers, per-user/two-device proposal, signed offline entitlement/30-day proposal, license API/portal/annual prepaid/renewal/recovery, PromptPay QR/gateway/webhooks/activation | Future Idea / On Hold | Not implemented | NOT TESTED | B01–B05 |
+| F15 | Dashboard/notifications/operational summary | Concept; final UI pending | Dashboard placeholder; tool activity indicators exist | Dashboard NOT TESTED | M06 |
+| F16 | Appearance/branding/compact operational UI | Approved 0.4.0 | Implemented/released | Prior WPF/native checks PASS; human acceptance open | M00 retained + M08 acceptance |
+| F17 | Shared central collector/team monitoring | Future candidate, no approved protocol or service | Not implemented | NOT TESTED | A08 |
+
+## Proposed product navigation versus current application
+
+| Proposed menu order | Current state / placement |
+|---|---|
+| 1 Dashboard | Neutral placeholder |
+| 2 Live Ping | Functional |
+| 3 Traceroute | Functional |
+| 4 Network Info | Placeholder; future Wi-Fi Manager belongs here |
+| 5 Diagnostics | Proposed grouping; current **Port Test** stays its approved separate menu |
+| 6 Network Monitoring | Future; not a functional current menu |
+| 7 Terminal / Remote Access | Post-stable candidate |
+| 8 Config Collector | Post-stable candidate |
+| 9 MA Inventory | Post-stable candidate |
+| 10 CVE & Upgrade Planner | Post-stable candidate |
+| 11 Topology Explorer | Post-stable candidate |
+| 12 History | Planned persistent history; tool history panels already exist |
+| 13 Reports | Proposed |
+| 14 Settings | Functional appearance/preferences; bottom group |
+| Updates & Recovery | Functional separate item beside Settings in bottom group; logical settings category |
+
+No navigation changes are made in this planning task. Future Account/License/Subscription/Billing stay out of current navigation. This registry can later provide entitlement identifiers; it does not activate licensing.

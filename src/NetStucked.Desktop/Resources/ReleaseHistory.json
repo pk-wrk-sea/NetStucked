@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.4.1",
+    "Date": "2026-10-09",
+    "Notes": "• Removed redundant caption labels; fixed dark caret/session text and template button spacing.\n• Moved Hop Description beside the result filter and stabilized the Running label.\n• Port Test always scans multiple targets continuously; supports inclusive port ranges such as 1000-1005.\n• Configurable TCP/UDP payload size, default 32 bytes (0–1400); TCP records successful sends without claiming an application response."
+  },
+  {
     "Version": "0.4.0",
     "Date": "2026-10-09",
     "Notes": "• Supplied NetStucked branding, Light/Dark/System themes and themed popups.\n• Smooth menu/panel toggles, resizing, input guides and semantic status colors.\n• Shared IP hop descriptions, cached public WAN ASN metadata and five trace sessions with a protected main session.\n• Separate TCP/UDP port input, Host/IP/CIDR × ports, single-pass/continuous checkbox and editable saved/restorable common-port templates.\n• Large scan acknowledgement; UDP silence remains inconclusive."

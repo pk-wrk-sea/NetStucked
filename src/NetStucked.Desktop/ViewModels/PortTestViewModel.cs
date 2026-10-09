@@ -47,8 +47,8 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     [ObservableProperty] private string? _selectedPortTemplate;
     [ObservableProperty] private string _portNumbers = "443";
     [ObservableProperty] private PortProtocol _protocol;
-    [ObservableProperty] private bool _multipleTargets;
-    [ObservableProperty] private bool _continuous;
+    public bool MultipleTargets => true;
+    public bool Continuous => true;
     [ObservableProperty] private bool _scopeAcknowledged;
     [ObservableProperty] private bool _requiresScopeAcknowledgement;
     [ObservableProperty] private bool _addressesExpanded = true;
@@ -56,7 +56,7 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     [ObservableProperty] private int _noResponse;
     public string SuccessLabel => (_resultProtocol ?? Protocol) == PortProtocol.UDP ? "Responded" : "Connected";
     public string FailureLabel => (_resultProtocol ?? Protocol) == PortProtocol.UDP ? "No success %" : "Failure %";
-    public string ProtocolGuide => Protocol == PortProtocol.UDP ? "UDP silence is inconclusive; No response does not mean closed." : "TCP connection test · no credentials required";
+    public string ProtocolGuide => Protocol == PortProtocol.UDP ? "UDP payload probe · silence is inconclusive." : "TCP connect + payload send · a successful send does not validate the application protocol.";
     [RelayCommand] private void ToggleAddresses() => AddressesExpanded = !AddressesExpanded;
     [RelayCommand] private void ToggleHistory() => HistoryExpanded = !HistoryExpanded;
     public int[] HistoryLimits { get; } = [100, 500];
@@ -80,9 +80,10 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     public PortTestViewModel(MultiTargetPortService service, IDesktopDialogs dialogs, UserSettingsStore store, ILogger<PortTestViewModel> logger)
     {
         _service = service; _dialogs = dialogs; Store = store; _logger = logger;
-        _settings = store.Preferences.Port;
+        _settings = store.Preferences.Port with { Continuous = true };
+        store.Preferences.Port = _settings;
+        store.Preferences.PortMultipleTargets = store.Preferences.PortContinuous = true;
         _portNumbers = store.Preferences.PortNumbers; _protocol = store.Preferences.PortProtocol;
-        _multipleTargets = store.Preferences.PortMultipleTargets; _continuous = store.Preferences.PortContinuous;
         foreach (string name in PortScanPlanner.StandardTemplates.Keys.Concat(store.Preferences.PortNumberTemplates.Keys).Distinct()) PortTemplateNames.Add(name);
         foreach (var template in store.Preferences.PortTemplates) Templates.Add(CreateEntry(template));
         TargetText = store.Preferences.PortTargetText;
@@ -102,7 +103,6 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     partial void OnTargetTextChanged(string value) => InputChanged();
     partial void OnPortNumbersChanged(string value) => InputChanged();
     partial void OnProtocolChanged(PortProtocol value) { InputChanged(); OnPropertyChanged(nameof(SuccessLabel)); OnPropertyChanged(nameof(FailureLabel)); OnPropertyChanged(nameof(ProtocolGuide)); }
-    partial void OnMultipleTargetsChanged(bool value) => InputChanged();
     partial void OnScopeAcknowledgedChanged(bool value) => StartCommand.NotifyCanExecuteChanged();
     partial void OnSelectedPortTemplateChanged(string? value)
     {
@@ -122,7 +122,6 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
         var old = PortInputParser.Parse(TargetText);
         if (!old.IsValid || old.Targets.Select(t => t.Port).Distinct().Count() != 1) return;
         PortNumbers = old.Targets[0].Port.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        MultipleTargets = old.Targets.Select(t => t.Host).Distinct().Count() > 1;
         TargetText = string.Join(Environment.NewLine, old.Targets.Select(t => $"{t.Host} {t.Description}".TrimEnd()));
     }
     public void UpdateState() => State = _service.State;
@@ -192,7 +191,7 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     {
         var edited = _dialogs.EditPortSettings(_settings);
         if (edited is null) return;
-        _settings = edited; Store.Preferences.Port = _settings; ValidateInput();
+        _settings = edited with { Continuous = true }; Store.Preferences.Port = _settings; InputChanged();
     }
     [RelayCommand]
     private Task SaveAsync() => ExecuteAsync(async () =>

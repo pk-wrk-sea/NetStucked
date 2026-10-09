@@ -142,7 +142,7 @@ public partial class TracerouteViewModel : ObservableObject, IAsyncDisposable
         while (_pendingEvents.Count > 1000) _pendingEvents.Dequeue();
         while (_pendingEvents.Count > 0 && (flush || budget.Elapsed.TotalMilliseconds < 4)) EventRows.Add(_pendingEvents.Dequeue());
         while (EventRows.Count > 1000) EventRows.RemoveAt(0);
-        Message = State == SessionState.Error ? _service.LastError ?? "Error" : $"{State} • {_service.Outcome}";
+        Message = State == SessionState.Error ? _service.LastError ?? "Error" : State.ToString();
     }
     private void RefreshResults()
     {
