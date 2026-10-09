@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 — TEST BUILD — 2026-10-09
+
+- Changed central executable version metadata and recorded history to provide a real manual upgrade/recovery exercise from 0.2.0.
+- No diagnostic behavior or preferences schema changes. This build is on the release-test branch and is not GitHub's Latest main release.
+
 ## 0.2.0 — 2026-10-09
 
 - Added TCP Port Test for explicit IPv4/IPv6/hostname endpoints, with independent bounded polling, actual connect time/outcomes, pause/resume/stop, local named templates, selected-endpoint history and CSV export.

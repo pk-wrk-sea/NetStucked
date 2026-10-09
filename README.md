@@ -1,4 +1,6 @@
-# NetStucked 0.2.0
+# NetStucked 0.2.1 — TEST BUILD
+
+This branch is a manual update/recovery exercise. Version metadata and recorded notes change from 0.2.0 to 0.2.1; diagnostic behavior and preferences schema stay the same. The main/latest release remains [0.2.0](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.2.0). See [the exercise steps](docs/GITHUB_RELEASE_EXERCISE.md). Download this test package from [v0.2.1](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.2.1); the inherited 0.2.0 validation below is historical and the test release has its own published evidence.
 
 Windows 10/11 x64 desktop diagnostics for remote IP addresses, hostnames and authorized IPv4 subnets. C# / WPF / .NET 10 / MVVM. Live Ping, continuous ICMP Traceroute and TCP Port Test use actual network APIs. Updates & Recovery provides manual GitHub release checks, release/version notes and recovery guidance. The approved layouts in `design/references/` are preserved; sample telemetry is never loaded.
 

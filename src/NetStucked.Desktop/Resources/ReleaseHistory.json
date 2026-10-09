@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.2.1",
+    "Date": "2026-10-09",
+    "Notes": "• TEST BUILD for the manual GitHub update and recovery exercise.\n• Changed executable version metadata and recorded history to 0.2.1 so 0.2.0 can detect a real Patch Update.\n• Diagnostic features and preferences schema are unchanged. Return to 0.2.0 using the manual rollback guide."
+  },
+  {
     "Version": "0.2.0",
     "Date": "2026-10-09",
     "Notes": "• Added TCP Port Test with independent endpoint polling, pause/resume, templates, connection history and CSV export.\n• Added manual GitHub Releases checks, release notes and a manual recovery guide.\n• Moved Settings and Updates to the bottom application group in the sidebar."
