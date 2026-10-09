@@ -22,6 +22,10 @@ internal static partial class Program
             var release = catalog.Releases.First(r => r.Installer is not null);
             var store = new UserSettingsStore(Path.Combine(output, "isolated-user-data"));
             store.Preferences.TargetText = "127.0.0.1 QA ไทย";
+            // Seed the authorized 0.4.1 continuous/multiple-target defaults before comparing updater preservation.
+            // Opening the real app otherwise intentionally migrates the legacy false mode flags on shutdown.
+            store.Preferences.Port = store.Preferences.Port with { Continuous = true };
+            store.Preferences.PortMultipleTargets = store.Preferences.PortContinuous = true;
             await store.SaveAsync(token.Token);
             byte[] settings = await File.ReadAllBytesAsync(Path.Combine(store.DirectoryPath, "settings.json"), token.Token);
             using var updater = new WindowsApplicationUpdateService(store);

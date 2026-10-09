@@ -18,6 +18,8 @@ Run date: 2026-10-09, Asia/Bangkok. Scope follows [the human's defect report and
 | Actual TCP polling | PASS | Owned loopback listeners consume payloads; actual connection/send outcomes, pause/resume/cancellation, history, CSV and cleanup |
 | WPF rendering | PASS | Actual controls at 1536×1024, 1280×800 and 125%/150% render scaling; zero binding errors |
 | Canonical references | PASS | Original scope, both approved PNGs and supplied logo source unchanged |
+| Published exact-package / native / 60-second soak | PASS | Frozen ZIP has 411 verified entries; exact WPF assemblies, 254 Ping/32 TCP/two traces and native exit 0; see publication report |
+| Public release and installer preparation | PASS | Actual 0.4.1 menu, public download/hash/version/Windows trust/MOTW and isolated helper; installer not executed |
 | Human GUI/accessibility/monitor transitions, Windows 11 | NOT TESTED | Programmatic renders are not human or multi-monitor acceptance |
 | Remote/private CIDR/TCP/UDP application services | NOT TESTED | Large scopes parsed/previewed; only owned loopback diagnostic targets probed |
 | Machine install/upgrade/recovery/uninstall, UAC/SmartScreen | NOT TESTED | No installer executed |
@@ -25,3 +27,5 @@ Run date: 2026-10-09, Asia/Bangkok. Scope follows [the human's defect report and
 Pre-publication source evidence is under `artifacts/defects/0.4.1`: `verified-build.log`, `verified-tests.log`, `tests/verified.trx`, `verified-windows-qa.log` and actual WPF renders in `verified-windows-qa/`. Publication rebuilds committed source and verifies the exact frozen self-contained package separately under `artifacts/github-release/0.4.1/final`; the subsequent publication report records its immutable hashes and CI results.
 
 Packet Size describes zero-filled application payload bytes, not headers or OS-controlled TCP segmentation. TCP timing is the measured connection duration; successful sends do not prove an application protocol response. Size zero explicitly preserves connect-only TCP/empty UDP behavior. UDP silence stays inconclusive. Limits, large-scope acknowledgement and explicit-click updater trust/backup/shutdown rules remain unchanged.
+
+Published result: [0.4.1 publication report](GITHUB_RELEASE_0.4.1_REPORT_2026-10-09.md). The report retains the initial public-menu failure and explains the test-only current-default fixture correction before the passing installer verification. Published product bytes remain unchanged.
