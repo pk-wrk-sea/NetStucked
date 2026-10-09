@@ -68,7 +68,7 @@ jobs:
           if ((Get-FileHash $zip -Algorithm SHA256).Hash -ne $env:EXPECTED_PORTABLE_SHA) { throw 'Portable bytes do not match the approved hash.' }
           Expand-Archive -LiteralPath $zip -DestinationPath artifacts/release/publish
           $info = (Get-Item artifacts/release/publish/NetStucked.exe).VersionInfo
-          if ($info.ProductVersion -ne $env:APP_VERSION) { throw 'Executable metadata does not match the tag.' }
+          if ($info.ProductVersion.Split('+')[0] -ne $env:APP_VERSION) { throw 'Executable metadata does not match the tag.' }
       - name: Verify exact published application code on Windows
         shell: pwsh
         run: |
