@@ -1,10 +1,12 @@
 # NetStucked verification reports
 
+**Published 0.4.2 — current GitHub Latest:** [Verified source/assets, CI, exact simultaneous-load checks and actual public updater/installer preparation](GITHUB_RELEASE_0.4.2_REPORT_2026-10-09.md). 214 tests pass; 52 original checkout WIP files remain byte-for-byte unchanged. Human acceptance and machine installation remain open.
+
 **0.4.2 diagnostics follow-up:** [Ping capacity/health, actual reply addresses, selectable tables, Port columns and optional hop TCP QA](QA_0.4.2.md). Release build and 214 tests pass. Owned loopback/WPF checks and simultaneous diagnostics evidence are recorded with explicit remote/human/install limits; publication verifies the exact frozen package separately.
 
 **0.4.1 defect follow-up:** [Theme/caption/toolbar/spacing, continuous multiple-target Port Test, ranges and real TCP/UDP payload QA](QA_0.4.1.md). Release build and 196 tests pass; actual WPF carets/session titles/buttons/editors, real loopback payload receipt and zero-binding-error renders are verified. Machine installer scenarios remain NOT TESTED.
 
-**Published 0.4.0:** [Verified source/packages, CI and actual public Updates/installer checks](GITHUB_RELEASE_0.4_REPORT_2026-10-09.md). 0.4.0 is GitHub Latest. The frozen tagged package passed 175 tests, exact WPF/native checks and a 60-second simultaneous-diagnostics soak. Post-publication QA follow-up concerns test cancellation accounting only; published application bytes remain unchanged. Full machine installer scenarios remain NOT TESTED.
+**Published 0.4.0 (historical):** [Verified source/packages, CI and actual public Updates/installer checks](GITHUB_RELEASE_0.4_REPORT_2026-10-09.md). 0.4.0 was GitHub Latest at that publication checkpoint. The frozen tagged package passed 175 tests, exact WPF/native checks and a 60-second simultaneous-diagnostics soak. Post-publication QA follow-up concerns test cancellation accounting only; published application bytes remain unchanged. Full machine installer scenarios remain NOT TESTED.
 
 **Local 0.4.0:** [Branding, themes, panels, shared hop descriptions and TCP/UDP scan QA](QA_0.4.0.md). 175 tests pass; exact-published WPF/native checks, real loopback diagnostics, RIPEstat metadata and installer compilation are verified. Runnable output: `artifacts/ui-branding/0.4.0/final/publish/NetStucked.exe`. This UI task did not commit, push, publish or install the build. Earlier reports and packages below remain historical evidence.
 
