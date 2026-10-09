@@ -1,6 +1,6 @@
 # M02 — Dedicated DNS, TCP/UDP and HTTP/TLS diagnostics
 
-Current authorized 0.6.0 work (human 2026-10-09): DNS Test and HTTP / HTTPS Test plus grouped navigation, Dark version labels and native taskbar branding are implemented; see FEATURES_0.6.0.md / QA_0.6.0.md. Publication status is established only by the eventual GitHub release report. Wi-Fi remains unchanged. Broader adapter/routes/ARP and durable History/Reports were explicitly declined; other unimplemented menu pages show Pending - Coming Soon. Earlier planning snapshots below are historical and do not override this later scope.
+Current **0.6.0 is published as GitHub Latest**: DNS Test, HTTP / HTTPS Test, grouped navigation, Dark version labels and native Taskbar branding. Build, 265 tests, exact portable WPF/native/soak/package/public checks and both release-source CI workflows PASS. See [GITHUB_RELEASE_0.6.0_REPORT_2026-10-09.md](GITHUB_RELEASE_0.6.0_REPORT_2026-10-09.md) and [manual acceptance checklist](FEATURES_0.6.0.md#human-acceptance-checklist). Wi-Fi remains unchanged. Broader adapters/routes/ARP and durable History/Reports were declined; future menu pages show Pending - Coming Soon. Earlier planning/version snapshots below are historical.
 
 ## 1. Milestone and version
 
