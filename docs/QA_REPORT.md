@@ -1,6 +1,6 @@
 # NetStucked verification reports
 
-**0.5.0 combined-source verification:** [approved Wi-Fi + 0.4.2 diagnostics](QA_0.5.0.md). Reviewed Release build/242 tests/exact-publish WPF checks PASS; final clean-commit package/CI/public release verification follows. Wi-Fi hardware/authentication and actual machine installation are NOT TESTED.
+**0.5.0 combined-source verification:** [approved Wi-Fi + 0.4.2 diagnostics](QA_0.5.0.md). Release build/242 tests/exact-publish WPF/native/60-second soak/Windows CI/public release verification PASS; see [publication evidence](GITHUB_RELEASE_0.5.0_REPORT_2026-10-09.md). Wi-Fi hardware/authentication and actual machine installation are NOT TESTED.
 
 **Current local Wi-Fi extension:** [approved Network Info QA](QA_WIFI_2026-10-09.md), including exact published-assembly WPF checks, source-bound owned-loopback IPv4/IPv6 ICMP/DNS/TCP/HTTP, Credential Manager, cancellation/transitions and installer build. Actual Wi-Fi/Enterprise hardware is NOT TESTED; stopped WLAN service is recorded without changing the working machine. This local preview is not a GitHub release. Earlier results below are historical subjects.
 

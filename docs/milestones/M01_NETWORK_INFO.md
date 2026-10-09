@@ -10,7 +10,7 @@ Network Info and separate Wi-Fi candidate. See retained requirements in [feature
 
 ## 3. Approval, implementation and verification
 
-The human's subsequent 2026-10-09 instruction approves Wi-Fi Profile Manager inside Network Info with a compact table replacing individual cards. Reference is now preserved as `design/references/WiFiProfiles_APPROVED_2026-10-09.png`; [scope](../FEATURES_WIFI_2026-10-09.md), [guide](../WIFI_PROFILE_MANAGER.md), [QA](../QA_WIFI_2026-10-09.md). This slice is integrated into 0.5.0; exact combined release verification is recorded in [QA_0.5.0](../QA_0.5.0.md). Actual WLAN hardware/authentication acceptance is blocked by stopped WLAN AutoConfig on the development machine. Broader read-only route/neighbor/adapter-facts scope remains pending; M01 is partially implemented, not complete.
+The human's subsequent 2026-10-09 instruction approves Wi-Fi Profile Manager inside Network Info with a compact table replacing individual cards. Reference is now preserved as `design/references/WiFiProfiles_APPROVED_2026-10-09.png`; [scope](../FEATURES_WIFI_2026-10-09.md), [guide](../WIFI_PROFILE_MANAGER.md), [QA](../QA_WIFI_2026-10-09.md). This approved slice is published in 0.5.0, with 242 tests/exact WPF/native/CI/public verification PASS; see [publication report](../GITHUB_RELEASE_0.5.0_REPORT_2026-10-09.md). Broader M01 and real hardware authentication remain open. Actual WLAN hardware/authentication acceptance is blocked by stopped WLAN AutoConfig on the development machine. Broader read-only route/neighbor/adapter-facts scope remains pending; M01 is partially implemented, not complete.
 
 ## 4. User problem
 

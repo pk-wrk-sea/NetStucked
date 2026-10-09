@@ -1,6 +1,6 @@
 # Product roadmap
 
-Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump and GitHub publication are explicitly requested. See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
+Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump/publication were explicitly authorized; **0.5.0 is now GitHub Latest**, with 242 tests, exact WPF/native/soak/package/public checks and both Windows CI workflows PASS. [Publication report](GITHUB_RELEASE_0.5.0_REPORT_2026-10-09.md). See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
 
 Subsequent approved implementation: M01's Wi-Fi Profile Manager compact-table slice is implemented/tested locally under the 2026-10-09 human request. See [Wi-Fi QA](QA_WIFI_2026-10-09.md). Real authentication/hardware acceptance remains open; wider Network Info routes/neighbors and advanced EAP provisioning remain pending. Central version stays 0.4.1 and this preview is not a GitHub release. Earlier release observations below are historical.
 

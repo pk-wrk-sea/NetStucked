@@ -1,6 +1,6 @@
 # Milestone index — 2026-10-09
 
-Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump and GitHub publication are explicitly requested. See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
+Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump/publication were explicitly authorized; **0.5.0 is now GitHub Latest**, with 242 tests, exact WPF/native/soak/package/public checks and both Windows CI workflows PASS. [Publication report](GITHUB_RELEASE_0.5.0_REPORT_2026-10-09.md). See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
 
 Published baseline verified here: **0.4.0**; current source includes the separately authorized **0.4.1** follow-up, with an isolated audit build and **196 passing tests**. Stable target: **1.0.0**. No milestone is fully complete merely because code/release exists. [IMPLEMENTATION_STATUS](IMPLEMENTATION_STATUS.md) distinguishes subjects, approval and verification.
 

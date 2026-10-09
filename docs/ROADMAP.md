@@ -1,6 +1,6 @@
 # Roadmap entry point
 
-Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump and GitHub publication are explicitly requested. See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
+Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump/publication were explicitly authorized; **0.5.0 is now GitHub Latest**, with 242 tests, exact WPF/native/soak/package/public checks and both Windows CI workflows PASS. [Publication report](GITHUB_RELEASE_0.5.0_REPORT_2026-10-09.md). See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.
 
 The canonical current roadmap is [PRODUCT_ROADMAP](PRODUCT_ROADMAP.md), with [milestone documents](MILESTONE_INDEX.md), [feature registry](FEATURE_REGISTRY.md), [actual status](IMPLEMENTATION_STATUS.md) and [next task](CODEX_NEXT_TASK.md). This retained filename redirects existing references rather than maintaining a competing schedule.
 
