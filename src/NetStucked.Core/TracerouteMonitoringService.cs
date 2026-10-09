@@ -5,7 +5,7 @@ using System.Threading.Channels;
 
 namespace NetStucked.Core;
 
-public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver dns) : AsyncSession
+public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver dns, ITcpProbe? tcpProbe = null) : AsyncSession
 {
     private readonly object _data = new();
     private readonly SortedDictionary<int, HopAccumulator> _hops = new();
@@ -18,6 +18,11 @@ public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver d
     private readonly Dictionary<int, long> _pollStart = new();
     private readonly Dictionary<int, HashSet<string>> _pollObserved = new();
     private readonly Dictionary<string, long> _quietEvents = new();
+    private sealed record TcpCheck(string Ports, long ExpiresMs, DateTimeOffset Time);
+    private readonly Dictionary<string, TcpCheck> _tcpResults = new();
+    private readonly HashSet<string> _tcpPending = new();
+    private ChannelWriter<IPAddress>? _tcpQueue;
+    private bool _checkHopTcp;
     private string _lastOutcome = "";
     private long _revision, _probeId, _cycleId;
     private int _completedCycles;
@@ -27,12 +32,14 @@ public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver d
     public Task StartAsync(string target, TraceSettings settings)
     {
         settings.Validate();
+        if (settings.CheckHopTcp && tcpProbe is null) throw new ArgumentException("A TCP probe adapter is required for optional hop port checks.");
         if (!TargetInputParser.IsValidHost(target) || IPAddress.TryParse(target, out var ip) && ip.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
             throw new ArgumentException("Traceroute requires one IPv4 address or hostname. IPv6 traceroute is not validated in v0.1.0.");
         return StartSessionAsync(() =>
         {
             lock (_data)
             {
+                _checkHopTcp = settings.CheckHopTcp; _tcpResults.Clear(); _tcpPending.Clear(); _tcpQueue = null;
                 _hops.Clear(); _published.Clear(); _events.Clear(); _previousRoute.Clear(); _names.Clear(); _pendingNames.Clear(); _pollStart.Clear(); _pollObserved.Clear(); _quietEvents.Clear(); _lastOutcome = "";
                 _completedCycles = 0; _revision = _probeId = _cycleId = 0; Outcome = "Resolving"; _performance.Reset(SessionId);
                 Log("Info", null, $"Trace started — ICMP, {target}");
@@ -47,6 +54,10 @@ public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver d
         using var rate = new PacketRateBudget(settings.MaxPacketsPerSecond, Math.Min(8, settings.HopConcurrency));
         var names = Channel.CreateBounded<IPAddress>(64);
         var clock = Stopwatch.StartNew();
+        var tcp = Channel.CreateBounded<IPAddress>(64);
+        var ports = settings.CheckHopTcp ? settings.ParseTcpPorts() : [];
+        using var tcpRate = new PacketRateBudget(8, 1);
+        lock (_data) _tcpQueue = settings.CheckHopTcp ? tcp.Writer : null;
         async Task NameWorker()
         {
             try
@@ -75,7 +86,48 @@ public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver d
             }
             catch { await cancellation.CancelAsync().ConfigureAwait(false); throw; }
         }
-        var workers = settings.ReverseDns ? new[] { NameWorker(), NameWorker() } : [];
+        async Task TcpWorker()
+        {
+            try
+            {
+                await foreach (var address in tcp.Reader.ReadAllAsync(token).ConfigureAwait(false))
+                {
+                    string key = address.ToString();
+                    using var operation = await EnterOperationAsync(token).ConfigureAwait(false);
+                    try
+                    {
+                        lock (_data) { if (!_hops.Values.Any(h => h.Address == key)) continue; }
+                        var open = new List<int>();
+                        foreach (int port in ports)
+                        {
+                            await tcpRate.WaitAsync(operation.Token).ConfigureAwait(false);
+                            var reply = await tcpProbe!.ConnectAsync(address, port, settings.TimeoutMs, 0, operation.Token).ConfigureAwait(false);
+                            operation.Token.ThrowIfCancellationRequested();
+                            if (reply.Outcome == PortOutcome.Connected) open.Add(port);
+                        }
+                        lock (_data)
+                        {
+                            if (_tcpResults.Count >= 512 && !_tcpResults.ContainsKey(key)) _tcpResults.Remove(_tcpResults.MinBy(p => p.Value.ExpiresMs).Key);
+                            _tcpResults[key] = new(string.Join(',', open), clock.ElapsedMilliseconds + 30000, DateTimeOffset.Now);
+                        }
+                    }
+                    catch (OperationCanceledException) when (operation.Token.IsCancellationRequested) { token.ThrowIfCancellationRequested(); }
+                    catch (Exception ex) { lock (_data) Log("Error", null, $"TCP hop check {key}: {ex.Message}"); }
+                    finally
+                    {
+                        lock (_data)
+                        {
+                            _tcpPending.Remove(key);
+                            foreach (var hop in _hops.Values.Where(h => h.Address == key)) Publish(hop);
+                        }
+                    }
+                }
+            }
+            catch { await cancellation.CancelAsync().ConfigureAwait(false); throw; }
+        }
+        var workers = new List<Task>();
+        if (settings.ReverseDns) { workers.Add(NameWorker()); workers.Add(NameWorker()); }
+        if (settings.CheckHopTcp) { workers.Add(TcpWorker()); workers.Add(TcpWorker()); }
         IPAddress? destination = IPAddress.TryParse(target, out var literal) ? literal : null;
         try
         {
@@ -96,7 +148,16 @@ public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver d
                         var result = await CycleAsync(destination, settings, rate, names.Writer, clock, null, operation.Token).ConfigureAwait(false);
                         destinationHop = result.DestinationHop;
                         lock (_data) activeHops = _hops.Count == 0 ? 0 : _hops.Keys.Max();
-                        if (!settings.Continuous) return;
+                        if (!settings.Continuous)
+                        {
+                            // One-shot callers retain optional actual TCP results before shutdown.
+                            while (true)
+                            {
+                                lock (_data) { if (_tcpPending.Count == 0) break; }
+                                await Task.Delay(10, operation.Token).ConfigureAwait(false);
+                            }
+                            return;
+                        }
                     }
                     catch (OperationCanceledException) when (operation.Token.IsCancellationRequested) { token.ThrowIfCancellationRequested(); }
                 }
@@ -106,6 +167,7 @@ public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver d
         finally
         {
             await cancellation.CancelAsync().ConfigureAwait(false);
+            lock (_data) _tcpQueue = null;
             try { await Task.WhenAll(workers).ConfigureAwait(false); }
             catch (OperationCanceledException) when (token.IsCancellationRequested) { }
         }
@@ -136,7 +198,7 @@ public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver d
                 _performance.Queue(Stopwatch.GetElapsedTime(queued, start).TotalMilliseconds);
                 long id = Interlocked.Increment(ref _probeId);
                 ProbeResult reply;
-                try { reply = await probe.SendAsync(destination, settings.TimeoutMs, settings.PacketSize, ttl, ttlCancellation.Token).ConfigureAwait(false); }
+                try { reply = await probe.SendTraceAsync(destination, settings.TimeoutMs, settings.PacketSize, ttl, ttlCancellation.Token).ConfigureAwait(false); }
                 catch (OperationCanceledException) { throw; }
                 catch (Exception ex) { reply = new(IPStatus.Unknown, null, null, Error: ex.Message); }
                 ttlCancellation.Token.ThrowIfCancellationRequested();
@@ -235,7 +297,10 @@ public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver d
     private void Publish(HopAccumulator hop, long? cycle = null, long? probe = null)
     {
         _published.TryGetValue(hop.Hop, out var previous);
+        TcpCheck? tcp = hop.Address is string key ? _tcpResults.GetValueOrDefault(key) : null;
+        string tcpStatus = !_checkHopTcp ? "Disabled" : hop.Address is null ? "No responding IP" : _tcpPending.Contains(hop.Address) ? "Checking" : tcp is not null ? "Checked (direct TCP connect to hop IP; refresh about every 30s)" : "Pending";
         _published[hop.Hop] = hop.Snapshot() with { SessionId = SessionId, CycleId = cycle ?? previous?.CycleId ?? _cycleId,
+            TcpOpenPorts = tcp?.Ports ?? "", TcpCheckStatus = tcpStatus, TcpCheckedAt = tcp?.Time,
             ProbeId = probe ?? previous?.ProbeId ?? 0, Revision = ++_revision, PublishedTimestamp = Stopwatch.GetTimestamp() };
     }
     private void Log(string type, int? hop, string message)
@@ -264,6 +329,11 @@ public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver d
             string key = reply.Address!.ToString();
             if (_names.TryGetValue(key, out var cached) && cached.Expires > clock.ElapsedMilliseconds) hop.Hostname = cached.Name;
             else if (_pendingNames.Add(key) && !names.TryWrite(reply.Address!)) _pendingNames.Remove(key);
+        }
+        if (_checkHopTcp && reply.IsHopReply && _tcpQueue is not null)
+        {
+            string key = reply.Address!.ToString();
+            if ((!_tcpResults.TryGetValue(key, out var cachedTcp) || cachedTcp.ExpiresMs <= clock.ElapsedMilliseconds) && _tcpPending.Add(key) && !_tcpQueue.TryWrite(reply.Address)) _tcpPending.Remove(key);
         }
         Publish(hop, cycle, id);
     }
@@ -307,7 +377,7 @@ public sealed class TracerouteMonitoringService(IIcmpProbe probe, IDnsResolver d
                         _performance.Queue(Stopwatch.GetElapsedTime(queued, start).TotalMilliseconds);
                         long id = Interlocked.Increment(ref _probeId);
                         ProbeResult reply;
-                        try { reply = await probe.SendAsync(destination, settings.TimeoutMs, settings.PacketSize, ttl, operation.Token).ConfigureAwait(false); }
+                        try { reply = await probe.SendTraceAsync(destination, settings.TimeoutMs, settings.PacketSize, ttl, operation.Token).ConfigureAwait(false); }
                         catch (OperationCanceledException) { throw; }
                         catch (Exception ex) { reply = new(IPStatus.Unknown, null, null, Error: ex.Message); }
                         operation.Token.ThrowIfCancellationRequested();

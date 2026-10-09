@@ -74,8 +74,8 @@ internal static partial class Program
         // Only loopback addresses are probed. No stored user targets are loaded by this harness.
         store.Preferences.TargetText = ""; store.Preferences.TraceTarget = ""; store.Preferences.PortTargetText = "";
         store.Preferences.Port = new PortProbeSettings { IntervalMs = 250, TimeoutMs = 500 };
-        store.Preferences.Ping = new ProbeSettings { IntervalMs = 250, TimeoutMs = 1000, Concurrency = 64 };
-        store.Preferences.Trace = new TraceSettings { IntervalMs = 250, MaxHops = 5, TimeoutMs = 1000 };
+        store.Preferences.Ping = new ProbeSettings { IntervalMs = 250, TimeoutMs = 500, Concurrency = 32 };
+        store.Preferences.Trace = new TraceSettings { IntervalMs = 250, MaxHops = 5, TimeoutMs = 500 };
         var dialogs = new QaDialogs();
         var measured = new MeasuredRealProbe();
         var measuredTcp = new MeasuredRealTcp();
@@ -129,6 +129,7 @@ internal static partial class Program
         await CheckPortAndUpdatesAsync(window, vm, dialogs, store, output);
         await CheckSelectedBuildAsync(vm, store, measured, measuredTcp);
         await CheckBrandingScanAsync(window, vm, dialogs, provider, output);
+        await CheckDiagnosticsStabilityAsync(window, vm, dialogs, store, output);
         vm.NavigateCommand.Execute("Traceroute");
         await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
         Require(Descendants<RadioButton>((DependencyObject)window.Content).Single(b => Equals(b.CommandParameter, "Traceroute")).IsChecked == true, "Sidebar selection follows the active page");
@@ -249,7 +250,7 @@ internal static partial class Program
                 try
                 {
                     var inputs = Descendants<TextBox>((DependencyObject)dialog.Content).ToArray();
-                    Require(inputs.Length == (trace ? 4 : 3), $"{(trace ? "Trace" : "Ping")} Probe Settings exposes only the requested fields");
+                    Require(inputs.Length == (trace ? 5 : 3), $"{(trace ? "Trace" : "Ping")} Probe Settings exposes the requested fields including optional TCP ports");
                     int interval = trace ? 1 : 0;
                     inputs[interval].Text = "249";
                     var save = Descendants<Button>((DependencyObject)dialog.Content).Single(b => Equals(b.Content, "Save"));
@@ -346,7 +347,7 @@ internal static partial class Program
                 Require(vm.Updates.Available is null && vm.Updates.StatusTitle == "No newer published version" && download.IsEnabled && vm.Updates.InstallLabel == "Reinstall v" + vm.Updates.CurrentVersion, "Current test build offers Reinstall and reports no newer public update");
                 vm.Updates.SelectedBuild = vm.Updates.Builds.Single(b => b.Version.ToString() == "0.3.0");
                 Require(vm.Updates.InstallLabel == "Recover v0.3.0" && vm.Updates.InstallCommand.CanExecute(null) && download.IsEnabled, "Actual test build can select the published 0.3.0 installer for Recovery");
-                string previous = vm.Updates.CurrentVersion == "0.4.1" ? "0.4.0" : "0.3.0";
+                string previous = vm.Updates.CurrentVersion == "0.4.2" ? "0.4.1" : vm.Updates.CurrentVersion == "0.4.1" ? "0.4.0" : "0.3.0";
                 Require(vm.Updates.PreviousVersion == "Previous documented version: v" + previous, "Current build records its actual documented recovery version");
             }
             else
@@ -576,7 +577,8 @@ internal static partial class Program
         public Task SaveTargetsAsync(string text) => Task.CompletedTask;
         public Task ExportAsync(string suggestedName, string csv) { Exports.Add(csv); return Task.CompletedTask; }
         public ProbeSettings? EditPingSettings(ProbeSettings settings) => null;
-        public TraceSettings? EditTraceSettings(TraceSettings settings) => null;
+        public TraceSettings? NextTraceSettings { get; set; }
+        public TraceSettings? EditTraceSettings(TraceSettings settings) { var result = NextTraceSettings; NextTraceSettings = null; return result; }
         public void ShowError(string message) => throw new InvalidOperationException(message);
     }
     private sealed class RecordingLinks : IExternalLinks
@@ -652,14 +654,18 @@ internal static partial class Program
             if (Active != 0) throw new InvalidOperationException("Cannot reset measurement while requests are active.");
             _hosts.Clear(); _maximum = 0; _overlap = 0;
         }
-        public async Task<ProbeResult> SendAsync(IPAddress address, int timeoutMs, int packetSize, int ttl, CancellationToken token)
+        public Task<ProbeResult> SendAsync(IPAddress address, int timeoutMs, int packetSize, int ttl, CancellationToken token)
+            => SendAsync(false, address, timeoutMs, packetSize, ttl, token);
+        public Task<ProbeResult> SendTraceAsync(IPAddress address, int timeoutMs, int packetSize, int ttl, CancellationToken token)
+            => SendAsync(true, address, timeoutMs, packetSize, ttl, token);
+        private async Task<ProbeResult> SendAsync(bool trace, IPAddress address, int timeoutMs, int packetSize, int ttl, CancellationToken token)
         {
             string key = $"{address}:{ttl}";
             int perHost = _hosts.AddOrUpdate(key, 1, (_, value) => value + 1);
             if (perHost > 1) Interlocked.Increment(ref _overlap);
             int active = Interlocked.Increment(ref _active); int previous;
             do { previous = _maximum; } while (active > previous && Interlocked.CompareExchange(ref _maximum, active, previous) != previous);
-            try { return await _real.SendAsync(address, timeoutMs, packetSize, ttl, token); }
+            try { return await (trace ? _real.SendTraceAsync(address, timeoutMs, packetSize, ttl, token) : _real.SendAsync(address, timeoutMs, packetSize, ttl, token)); }
             finally { Interlocked.Decrement(ref _active); _hosts.AddOrUpdate(key, 0, (_, value) => value - 1); }
         }
     }

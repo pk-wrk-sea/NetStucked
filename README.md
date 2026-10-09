@@ -1,4 +1,4 @@
-# NetStucked 0.4.1
+# NetStucked 0.4.2
 
 <img src="docs/branding/NetStuckedBanner.png" width="480" alt="NetStucked — Network Engineer's Toolkit" />
 
@@ -18,7 +18,7 @@ pwsh -File scripts/Publish.ps1
 
 Inno Setup 6 is needed only to compile the installer. Preferences/logs are per-user under `%LOCALAPPDATA%\NetStucked`. No administrator privilege or .NET installation is required for the self-contained application. Choose only targets you are authorized to diagnose. ICMP loss does not establish that a remote host or service is offline.
 
-See [0.4.1 defect fixes and payload behavior](docs/FEATURES_0.4.1.md), [0.4.0 authorized features](docs/FEATURES_0.4.0.md), [selected-build installation/recovery](docs/FEATURES_0.3.0.md), [0.2.0 diagnostics](docs/FEATURES_0.2.0.md), `docs/FEATURE_SPEC.md`, `docs/NETWORK_BEHAVIOR.md` and `docs/DEVELOPMENT.md`. Dashboard, Network Info and background update checks/installations remain deferred.
+See [0.4.2 stability, copying and optional hop TCP checks](docs/FEATURES_0.4.2.md), [0.4.1 defect fixes and payload behavior](docs/FEATURES_0.4.1.md), [0.4.0 authorized features](docs/FEATURES_0.4.0.md), [selected-build installation/recovery](docs/FEATURES_0.3.0.md), [0.2.0 diagnostics](docs/FEATURES_0.2.0.md), `docs/FEATURE_SPEC.md`, `docs/NETWORK_BEHAVIOR.md` and `docs/DEVELOPMENT.md`. Dashboard, Network Info and background update checks/installations remain deferred.
 
 ## Published versions
 

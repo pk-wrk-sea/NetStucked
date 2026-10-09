@@ -7,13 +7,15 @@ namespace NetStucked.Infrastructure;
 
 public sealed class IcmpPingProbe : IIcmpProbe, IDisposable
 {
-    private readonly SemaphoreSlim _applicationSlots = new(128, 128);
-    public async Task<ProbeResult> SendAsync(IPAddress address, int timeoutMs, int packetSize, int ttl, CancellationToken cancellationToken)
+    private readonly IcmpAdmissionController _admission = new();
+    public Task<ProbeResult> SendAsync(IPAddress address, int timeoutMs, int packetSize, int ttl, CancellationToken cancellationToken)
+        => SendAdmittedAsync(address, timeoutMs, packetSize, ttl, false, cancellationToken);
+    public Task<ProbeResult> SendTraceAsync(IPAddress address, int timeoutMs, int packetSize, int ttl, CancellationToken cancellationToken)
+        => SendAdmittedAsync(address, timeoutMs, packetSize, ttl, true, cancellationToken);
+    private async Task<ProbeResult> SendAdmittedAsync(IPAddress address, int timeoutMs, int packetSize, int ttl, bool trace, CancellationToken token)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        await _applicationSlots.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try { return await SendCoreAsync(address, timeoutMs, packetSize, ttl, cancellationToken).ConfigureAwait(false); }
-        finally { _applicationSlots.Release(); }
+        using var admission = await _admission.EnterAsync(trace, token).ConfigureAwait(false);
+        return await SendCoreAsync(address, timeoutMs, packetSize, ttl, token).ConfigureAwait(false);
     }
     private static async Task<ProbeResult> SendCoreAsync(IPAddress address, int timeoutMs, int packetSize, int ttl, CancellationToken cancellationToken)
     {
@@ -37,5 +39,5 @@ public sealed class IcmpPingProbe : IIcmpProbe, IDisposable
             return new(IPStatus.Unknown, null, null, Error: ex.InnerException?.Message ?? ex.Message);
         }
     }
-    public void Dispose() => _applicationSlots.Dispose();
+    public void Dispose() => _admission.Dispose();
 }

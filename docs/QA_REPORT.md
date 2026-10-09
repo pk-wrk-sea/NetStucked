@@ -1,5 +1,7 @@
 # NetStucked verification reports
 
+**0.4.2 diagnostics follow-up:** [Ping capacity/health, actual reply addresses, selectable tables, Port columns and optional hop TCP QA](QA_0.4.2.md). Release build and 214 tests pass. Owned loopback/WPF checks and simultaneous diagnostics evidence are recorded with explicit remote/human/install limits; publication verifies the exact frozen package separately.
+
 **0.4.1 defect follow-up:** [Theme/caption/toolbar/spacing, continuous multiple-target Port Test, ranges and real TCP/UDP payload QA](QA_0.4.1.md). Release build and 196 tests pass; actual WPF carets/session titles/buttons/editors, real loopback payload receipt and zero-binding-error renders are verified. Machine installer scenarios remain NOT TESTED.
 
 **Published 0.4.0:** [Verified source/packages, CI and actual public Updates/installer checks](GITHUB_RELEASE_0.4_REPORT_2026-10-09.md). 0.4.0 is GitHub Latest. The frozen tagged package passed 175 tests, exact WPF/native checks and a 60-second simultaneous-diagnostics soak. Post-publication QA follow-up concerns test cancellation accounting only; published application bytes remain unchanged. Full machine installer scenarios remain NOT TESTED.

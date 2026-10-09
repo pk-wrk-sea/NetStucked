@@ -41,6 +41,8 @@ internal sealed class TargetAccumulator(TargetDefinition target, int number, int
     public string? ResolvedIp { get; set; }
     public string? Error { get; set; }
     private readonly Queue<PingSample> _history = new();
+    private readonly Queue<bool> _recentReplies = new();
+    private string? _replyIp;
     private DateTimeOffset? _lastPing;
     private int? _ttl;
     private DateTimeOffset? _lastSuccess, _reachableSince, _unreachableSince;
@@ -51,6 +53,9 @@ internal sealed class TargetAccumulator(TargetDefinition target, int number, int
     {
         var now = DateTimeOffset.Now;
         Stats.Add(reply.IsEchoReply ? reply.RttMs : null);
+        _replyIp = reply.IsHopReply ? reply.Address?.ToString() : null;
+        _recentReplies.Enqueue(reply.IsEchoReply);
+        if (_recentReplies.Count > 20) _recentReplies.Dequeue();
         _lastPing = now;
         _ttl = reply.IsEchoReply ? reply.ReplyTtl : null;
         if (reply.IsEchoReply)
@@ -68,19 +73,21 @@ internal sealed class TargetAccumulator(TargetDefinition target, int number, int
         }
         _responding = reply.IsEchoReply;
         Error = reply.Error ?? (reply.IsEchoReply ? null : reply.Status.ToString());
-        _history.Enqueue(new(now, Stats.Sent, reply.IsEchoReply ? "Reply" : reply.Status == System.Net.NetworkInformation.IPStatus.TimedOut ? "Timeout" : reply.Status.ToString(), Stats.Last, _ttl, Error) { SessionId = sessionId, ProbeId = probeId });
+        _history.Enqueue(new(now, Stats.Sent, reply.IsEchoReply ? "Reply" : reply.Status == System.Net.NetworkInformation.IPStatus.TimedOut ? "Timeout" : reply.Status.ToString(), Stats.Last, _ttl, _result) { Host = Target.Host, ReplyIpAddress = _replyIp, SessionId = sessionId, ProbeId = probeId });
         while (_history.Count > retention) _history.Dequeue();
     }
 
     public IReadOnlyList<PingSample> History(int limit) => _history.Reverse().Take(limit).ToArray();
     public TargetSnapshot Snapshot(ProbeSettings settings)
     {
+        double recentLoss = Statistics.LossPercent(_recentReplies.Count, _recentReplies.Count(v => v));
+        string? reason = Stats.ConsecutiveFailures > 0 ? $"{Stats.ConsecutiveFailures} consecutive missing ICMP replies" : Stats.Last >= settings.WarningRttMs ? $"RTT {Stats.Last:0.##} ms ≥ {settings.WarningRttMs:0.##} ms" : recentLoss >= settings.WarningLossPercent && recentLoss > 0 ? $"Loss {recentLoss:0.#}% in the last {_recentReplies.Count} completed attempts" : null;
         string status = Stats.Sent == 0 || Error?.StartsWith("DNS:", StringComparison.Ordinal) == true ? "Unknown" : Stats.ConsecutiveFailures >= settings.FailureThreshold ? "Unreachable" :
-            Stats.ConsecutiveFailures > 0 || Stats.Last >= settings.WarningRttMs || Stats.LossPercent >= settings.WarningLossPercent && Stats.Lost > 0 ? "Warn" : "Up";
+            Stats.ConsecutiveFailures > 0 || Stats.Last >= settings.WarningRttMs || recentLoss >= settings.WarningLossPercent && recentLoss > 0 ? "Warn" : "Up";
         return new(Number, Target.Host, Target.Description, ResolvedIp, status, Stats.Last, Stats.Average, Stats.Minimum,
             Stats.Maximum, Stats.Sent, Stats.Received, Stats.Lost, Stats.LossPercent, _lastPing, Error, _ttl)
-        { LastSuccess = _lastSuccess, ReachableSince = _reachableSince, UnreachableSince = _unreachableSince,
-            ResultError = Error?.StartsWith("DNS:", StringComparison.Ordinal) == true ? Error : _result };
+        { ReplyIpAddress = _replyIp, WarningReason = status == "Warn" ? reason : null, LastSuccess = _lastSuccess, ReachableSince = _reachableSince, UnreachableSince = _unreachableSince,
+            ResultError = Error?.StartsWith("DNS:", StringComparison.Ordinal) == true ? Error : status == "Warn" ? $"{_result}. Warn: {reason}" : _result };
     }
 }
 

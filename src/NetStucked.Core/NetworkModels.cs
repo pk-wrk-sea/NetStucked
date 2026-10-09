@@ -18,7 +18,7 @@ public sealed record ProbeSettings
     public double WarningLossPercent { get; init; } = 5;
     public IpFamily AddressFamily { get; init; } = IpFamily.Auto;
     public int DnsConcurrency { get; init; } = 4;
-    public int MaxPacketsPerSecond { get; init; } = 512;
+    public int MaxPacketsPerSecond { get; init; } = 128;
     public int DnsCacheSeconds { get; init; } = 30;
     public int DnsRetrySeconds { get; init; } = 5;
 
@@ -46,11 +46,21 @@ public sealed record TraceSettings
     public bool ReverseDns { get; init; }
     public int HopConcurrency { get; init; } = 32;
     public int MaxPacketsPerSecond { get; init; } = 128;
+    public bool CheckHopTcp { get; init; }
+    public string HopTcpPorts { get; init; } = "22,23,80,443";
     public bool AdaptivePolling { get; init; }
     public int FullSweepIntervalMs { get; init; } = 30000;
 
+    public int[] ParseTcpPorts()
+    {
+        var parsed = PortScanPlanner.Parse("127.0.0.1", HopTcpPorts, PortProtocol.TCP, false);
+        if (!parsed.IsValid || parsed.Targets.Count > 16) throw new ArgumentException("TCP hop checks require 1–16 unique ports (1–65535); comma-separated ports or inclusive ranges.");
+        return parsed.Targets.Select(t => t.Port).ToArray();
+    }
     public void Validate()
     {
+        if (HopTcpPorts is null || HopTcpPorts.Length > 2048) throw new ArgumentException("TCP hop port text must be present and at most 2048 characters.");
+        if (CheckHopTcp) _ = ParseTcpPorts();
         if (MaxHops is < 1 or > 64 || TimeoutMs is < 500 or > 10000 ||
             IntervalMs is < 250 or > 300000 || ProbesPerHop is < 1 or > 3 || PacketSize is < 1 or > 1400 ||
             HopConcurrency is < 1 or > 32 || MaxPacketsPerSecond is < 1 or > 512 || FullSweepIntervalMs is < 1000 or > 300000)
@@ -69,6 +79,8 @@ public sealed record ProbeResult(IPStatus Status, IPAddress? Address, double? Rt
 public interface IIcmpProbe
 {
     Task<ProbeResult> SendAsync(IPAddress address, int timeoutMs, int packetSize, int ttl, CancellationToken cancellationToken);
+    Task<ProbeResult> SendTraceAsync(IPAddress address, int timeoutMs, int packetSize, int ttl, CancellationToken cancellationToken)
+        => SendAsync(address, timeoutMs, packetSize, ttl, cancellationToken);
 }
 
 public interface IDnsResolver
@@ -79,6 +91,8 @@ public interface IDnsResolver
 
 public sealed record PingSample(DateTimeOffset Time, long Sequence, string Result, double? LatencyMs, int? Ttl, string? Details)
 {
+    public string Host { get; init; } = "";
+    public string? ReplyIpAddress { get; init; }
     public string Status => Result == "Reply" ? "Up" : "Unreachable";
     public long SessionId { get; init; }
     public long ProbeId { get; init; }
@@ -87,6 +101,8 @@ public sealed record TargetSnapshot(int Number, string Host, string Description,
     double? Last, double? Average, double? Minimum, double? Maximum, long Sent, long Received, long Lost,
     double LossPercent, DateTimeOffset? LastPing, string? Error, int? Ttl)
 {
+    public string? ReplyIpAddress { get; init; }
+    public string? WarningReason { get; init; }
     public DateTimeOffset? LastSuccess { get; init; }
     public DateTimeOffset? ReachableSince { get; init; }
     public DateTimeOffset? UnreachableSince { get; init; }
@@ -99,6 +115,9 @@ public sealed record TraceHopSnapshot(int Hop, string? Address, string? Hostname
     double? Last, double? Best, double? Average, double? Worst, double? Jitter, long Sent, long Received,
     double LossPercent, int RouteChanges, DateTimeOffset? Updated)
 {
+    public string TcpOpenPorts { get; init; } = "";
+    public string TcpCheckStatus { get; init; } = "Disabled";
+    public DateTimeOffset? TcpCheckedAt { get; init; }
     public long SessionId { get; init; }
     public long CycleId { get; init; }
     public long ProbeId { get; init; }

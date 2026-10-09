@@ -89,7 +89,7 @@ public sealed class WpfDialogService : IDesktopDialogs
     {
         ProbeSettings? result = null;
         ShowSettings("Probe Settings", [("Interval (ms, minimum 250)", settings.IntervalMs.ToString()),
-            ("Timeout (ms, minimum 500)", settings.TimeoutMs.ToString()), ("Packet size (bytes)", settings.PacketSize.ToString())], new StackPanel(), values =>
+            ("Timeout (ms, minimum 500)", settings.TimeoutMs.ToString()), ("Packet size (bytes)", settings.PacketSize.ToString())], new TextBlock { Text = "Sends are paced at up to 128/s, with separate Traceroute capacity. A large scope may run slower than the requested interval. Warn means current RTT ≥100 ms, recent ICMP loss ≥5%, or consecutive missing replies; it does not establish a service outage.", TextWrapping = TextWrapping.Wrap }, values =>
         {
             var edited = settings with { IntervalMs = Int(values[0]), TimeoutMs = Int(values[1]), PacketSize = Int(values[2]) };
             edited.Validate(); result = edited;
@@ -99,10 +99,17 @@ public sealed class WpfDialogService : IDesktopDialogs
     public TraceSettings? EditTraceSettings(TraceSettings settings)
     {
         TraceSettings? result = null;
+        var tcpCheck = new CheckBox { Content = "Optional TCP check on responding hop IPs", IsChecked = settings.CheckHopTcp, Margin = new(0, 6, 0, 6) };
+        var tcpPorts = new TextBox { Text = settings.HopTcpPorts, IsEnabled = settings.CheckHopTcp, MaxLength = 2048 };
+        Behaviors.Watermark.SetText(tcpPorts, "22,23,80,443 or custom ports / ranges");
+        AutomationProperties.SetName(tcpPorts, "Optional hop TCP ports");
+        tcpCheck.Checked += (_, _) => tcpPorts.IsEnabled = true; tcpCheck.Unchecked += (_, _) => tcpPorts.IsEnabled = false;
+        var extra = new StackPanel(); extra.Children.Add(tcpCheck); extra.Children.Add(tcpPorts);
+        extra.Children.Add(new TextBlock { Text = "Direct TCP connects to each responding hop IP (no payload). Up to 16 ports; results refresh about every 30s. ICMP still discovers the route; this is not TCP traceroute.", TextWrapping = TextWrapping.Wrap, Margin = new(0, 8, 0, 0) });
         ShowSettings("Probe Settings", [("Max hops", settings.MaxHops.ToString()), ("Interval (ms, minimum 250)", settings.IntervalMs.ToString()),
-            ("Timeout (ms, minimum 500)", settings.TimeoutMs.ToString()), ("Packet size (bytes)", settings.PacketSize.ToString())], new StackPanel(), values =>
+            ("Timeout (ms, minimum 500)", settings.TimeoutMs.ToString()), ("Packet size (bytes)", settings.PacketSize.ToString())], extra, values =>
         {
-            var edited = settings with { MaxHops = Int(values[0]), IntervalMs = Int(values[1]), TimeoutMs = Int(values[2]), PacketSize = Int(values[3]), Continuous = true };
+            var edited = settings with { CheckHopTcp = tcpCheck.IsChecked == true, HopTcpPorts = tcpPorts.Text, MaxHops = Int(values[0]), IntervalMs = Int(values[1]), TimeoutMs = Int(values[2]), PacketSize = Int(values[3]), Continuous = true };
             edited.Validate(); result = edited;
         });
         return result;

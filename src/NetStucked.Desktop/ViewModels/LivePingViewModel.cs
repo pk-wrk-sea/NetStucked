@@ -87,7 +87,7 @@ public partial class LivePingViewModel : ObservableObject, IAsyncDisposable
     partial void OnHistoryLimitChanged(int value) => UpdateHistory();
     partial void OnStateChanged(SessionState value) { OnPropertyChanged(nameof(PauseLabel)); OnPropertyChanged(nameof(IsActive)); NotifyCommands(); }
     partial void OnSelectedTemplateChanged(PingTemplateEntry? value) { if (value is not null && CanEdit) TargetText = value.Template.Addresses; }
-    private static ProbeSettings Normalize(ProbeSettings settings) => new() { IntervalMs = settings.IntervalMs, TimeoutMs = settings.TimeoutMs, PacketSize = settings.PacketSize, Concurrency = 64, MaxPacketsPerSecond = 2048 };
+    private static ProbeSettings Normalize(ProbeSettings settings) => new() { IntervalMs = settings.IntervalMs, TimeoutMs = settings.TimeoutMs, PacketSize = settings.PacketSize, Concurrency = 32, MaxPacketsPerSecond = 128 };
     public void UpdateState() => State = _service.State;
     private PingTemplateEntry CreateEntry(PingTemplate template) => new(template, new AsyncRelayCommand(() => DeleteTemplateAsync(template.Id)));
     private Task DeleteTemplateAsync(Guid id) => ExecuteAsync(async () =>
@@ -111,7 +111,8 @@ public partial class LivePingViewModel : ObservableObject, IAsyncDisposable
     private TargetParseResult ValidateInput()
     {
         var parsed = TargetInputParser.Parse(TargetText, _settings.MaxTargets);
-        TargetPreview = $"{parsed.Targets.Count:N0} unique hosts • authorized targets only";
+        double requested = parsed.Targets.Count * 1000d / _settings.IntervalMs;
+        TargetPreview = $"{parsed.Targets.Count:N0} unique hosts • requested {requested:0.#}/s • limit 128/s" + (requested > 128 ? $" • paced ≥{parsed.Targets.Count * 1000d / 128:0} ms/host" : "");
         Message = string.Join(Environment.NewLine, parsed.Errors.Take(8).Select(e => e.Line == 0 ? e.Message : $"Line {e.Line}: {e.Message}"));
         if (parsed.Errors.Count > 8) Message += $"\n…and {parsed.Errors.Count - 8} more errors.";
         StartCommand.NotifyCanExecuteChanged();

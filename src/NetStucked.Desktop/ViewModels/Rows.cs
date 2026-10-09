@@ -16,6 +16,7 @@ public class TargetRow(TargetSnapshot data) : ObservableObject
             if (!EqualityComparer<int>.Default.Equals(old.Number, value.Number)) OnPropertyChanged(nameof(Number));
             if (!EqualityComparer<string>.Default.Equals(old.Host, value.Host)) OnPropertyChanged(nameof(Host));
             if (!EqualityComparer<string>.Default.Equals(old.Description, value.Description)) OnPropertyChanged(nameof(Description));
+            if (old.ReplyIpAddress != value.ReplyIpAddress) OnPropertyChanged(nameof(ReplyIpAddress));
             if (!EqualityComparer<string?>.Default.Equals(old.ResolvedIp, value.ResolvedIp)) OnPropertyChanged(nameof(ResolvedIp));
             if (!EqualityComparer<string>.Default.Equals(old.Status, value.Status)) OnPropertyChanged(nameof(Status));
             if (!EqualityComparer<double?>.Default.Equals(old.Last, value.Last)) OnPropertyChanged(nameof(Last));
@@ -38,6 +39,7 @@ public class TargetRow(TargetSnapshot data) : ObservableObject
     public int Number => _data.Number;
     public string Host => _data.Host;
     public string Description => _data.Description;
+    public string? ReplyIpAddress => _data.ReplyIpAddress;
     public string? ResolvedIp => _data.ResolvedIp;
     public string Status => _data.Status;
     public double? Last => _data.Last;
@@ -61,6 +63,7 @@ public class TargetRow(TargetSnapshot data) : ObservableObject
         "Number" => value.Number,
         "Host" => value.Host,
         "Description" => value.Description,
+        "ReplyIpAddress" => value.ReplyIpAddress,
         "ResolvedIp" => value.ResolvedIp,
         "Status" => value.Status,
         "Last" => value.Last,
@@ -93,6 +96,9 @@ public class HopRow(TraceHopSnapshot data, Action<int, string> onDescription) : 
         {
             var old = _data; _data = value;
             if (!EqualityComparer<int>.Default.Equals(old.Hop, value.Hop)) OnPropertyChanged(nameof(Hop));
+            if (old.TcpOpenPorts != value.TcpOpenPorts) OnPropertyChanged(nameof(TcpOpenPorts));
+            if (old.TcpCheckStatus != value.TcpCheckStatus) OnPropertyChanged(nameof(TcpCheckStatus));
+            if (old.TcpCheckStatus != value.TcpCheckStatus || old.TcpCheckedAt != value.TcpCheckedAt) OnPropertyChanged(nameof(TcpCheckDetails));
             if (!EqualityComparer<string?>.Default.Equals(old.Address, value.Address)) OnPropertyChanged(nameof(Address));
             if (!EqualityComparer<string?>.Default.Equals(old.Hostname, value.Hostname)) OnPropertyChanged(nameof(Hostname));
             if (!EqualityComparer<string>.Default.Equals(old.Status, value.Status)) OnPropertyChanged(nameof(Status));
@@ -109,6 +115,9 @@ public class HopRow(TraceHopSnapshot data, Action<int, string> onDescription) : 
         }
     }
     public int Hop => _data.Hop;
+    public string TcpOpenPorts => _data.TcpOpenPorts;
+    public string TcpCheckStatus => _data.TcpCheckStatus;
+    public string TcpCheckDetails => $"{_data.TcpCheckStatus}" + (_data.TcpCheckedAt is { } time ? $" • {time:HH:mm:ss}" : "");
     public string? Address => _data.Address;
     public string? Hostname => _data.Hostname;
     public string Status => _data.Status;
@@ -126,6 +135,7 @@ public class HopRow(TraceHopSnapshot data, Action<int, string> onDescription) : 
     private static object? SortValue(TraceHopSnapshot value, string key) => key.Replace("Data.", "") switch
     {
         "Hop" => value.Hop,
+        "TcpOpenPorts" => value.TcpOpenPorts,
         "Address" => value.Address,
         "Hostname" => value.Hostname,
         "Description" => value.Description,

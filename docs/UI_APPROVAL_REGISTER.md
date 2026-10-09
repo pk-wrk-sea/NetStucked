@@ -4,6 +4,7 @@ Snapshot: 2026-10-09. Source bytes and explicit human decisions govern approval;
 
 | Screen/change | Design approval | Located evidence | Current implementation / remaining verification |
 |---|---|---|---|
+| Ping capacity/health, reply address columns, selectable/copyable tables and optional responding-hop TCP checks | Explicit human defect/feature extension, 2026-10-09 | `docs/FEATURES_0.4.2.md` | Focused implementation; automated evidence and unchecked human acceptance in the 0.4.2 QA report |
 | Original Live Ping | Approved | `design/references/LivePing_APPROVED.png`, `docs/APPROVED_UI_SCOPE.md` | Implemented; actual WPF renders verified historically; full human acceptance open |
 | Original Traceroute | Approved | `design/references/Traceroute_APPROVED.png`, same scope | Implemented IPv4 ICMP; remote multi-hop acceptance open |
 | Compact probe dialogs, framed window, templates/history, tables, independent sessions/polling | Approved human revision | `docs/UI_REVISION_2026-10-08.md` | Implemented; older eight-session limit superseded by five in 0.4.0 |

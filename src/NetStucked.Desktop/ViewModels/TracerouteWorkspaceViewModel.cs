@@ -10,6 +10,7 @@ namespace NetStucked.Desktop.ViewModels;
 
 public partial class TracerouteWorkspaceViewModel : ObservableObject, IAsyncDisposable
 {
+    private readonly ITcpProbe? _tcpProbe;
     private readonly IIcmpProbe _probe;
     private readonly IDnsResolver _dns;
     private readonly IDesktopDialogs _dialogs;
@@ -25,9 +26,9 @@ public partial class TracerouteWorkspaceViewModel : ObservableObject, IAsyncDisp
     [ObservableProperty] private TracerouteViewModel _selectedSession = null!;
     public bool IsActive => Sessions.Any(s => s.IsActive);
 
-    public TracerouteWorkspaceViewModel(IIcmpProbe probe, IDnsResolver dns, IDesktopDialogs dialogs, UserSettingsStore store, ILoggerFactory logs, HopDescriptionService descriptions)
+    public TracerouteWorkspaceViewModel(IIcmpProbe probe, IDnsResolver dns, IDesktopDialogs dialogs, UserSettingsStore store, ILoggerFactory logs, HopDescriptionService descriptions, ITcpProbe? tcpProbe = null)
     {
-        _probe = probe; _dns = dns; _dialogs = dialogs; _store = store; _logs = logs; _descriptions = descriptions;
+        _tcpProbe = tcpProbe; _probe = probe; _dns = dns; _dialogs = dialogs; _store = store; _logs = logs; _descriptions = descriptions;
         foreach (string address in store.Preferences.TraceHistory) RecentAddresses.Add(Entry(address));
         AddSession();
     }
@@ -58,7 +59,7 @@ public partial class TracerouteWorkspaceViewModel : ObservableObject, IAsyncDisp
     private void AddSession()
     {
         if (!CanAddSession()) return;
-        var session = new TracerouteViewModel(new TracerouteMonitoringService(_probe, _dns), _dialogs, _store, _logs.CreateLogger<TracerouteViewModel>(), _descriptions)
+        var session = new TracerouteViewModel(new TracerouteMonitoringService(_probe, _dns, _tcpProbe), _dialogs, _store, _logs.CreateLogger<TracerouteViewModel>(), _descriptions)
         { IsPrimary = Sessions.Count == 0, SessionNumber = ++_nextNumber, RecentAddresses = RecentAddresses, RecordAddressAsync = address => ChangeHistoryAsync(address, true) };
         if (Sessions.Count > 0) session.Target = "";
         session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(TracerouteViewModel.IsActive)) OnPropertyChanged(nameof(IsActive)); if (e.PropertyName == nameof(TracerouteViewModel.Target)) AddSessionCommand.NotifyCanExecuteChanged(); };

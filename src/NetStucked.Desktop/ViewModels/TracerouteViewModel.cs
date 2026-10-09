@@ -70,7 +70,7 @@ public partial class TracerouteViewModel : ObservableObject, IAsyncDisposable
     partial void OnEventFilterChanged(string value) => Events.Refresh();
     partial void OnStateChanged(SessionState value) { OnPropertyChanged(nameof(PauseLabel)); OnPropertyChanged(nameof(IsActive)); NotifyCommands(); }
     public void UpdateState() => State = _service.State;
-    private static TraceSettings Normalize(TraceSettings settings) => new() { MaxHops = settings.MaxHops, IntervalMs = settings.IntervalMs, TimeoutMs = settings.TimeoutMs, PacketSize = settings.PacketSize, Continuous = true };
+    private static TraceSettings Normalize(TraceSettings settings) => settings with { Continuous = true };
     private bool CanStart() => CanEdit && TargetInputParser.IsValidHost(Target.Trim());
     private bool CanPause() => !_busy && State is SessionState.Running or SessionState.Paused;
     private bool CanStop() => !_busy && State is SessionState.Starting or SessionState.Running or SessionState.Pausing or SessionState.Paused;

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.2 — 2026-10-09
+
+- Pace Live Ping at up to 128 native sends/s and reserve separate aggregate Traceroute slots/rate, preventing Ping from occupying trace capacity. Preview effective large-scope intervals.
+- Explain Warn and use the last 20 completed attempts for recent-loss health while retaining accurate cumulative counters.
+- Add actual Reply IP Address to Ping results and Host / Reply IP Address to history and CSV.
+- Enable selectable/copyable table cells and headers, bounded whole-table copy/text views, and preserve editable descriptions, sorting and Port Test column preferences.
+- Add disabled-by-default per-session direct TCP checks on responding hop IPs; show actual successful ports with independent bounded workers/cache and cancellation.
+
 ## 0.4.1 — 2026-10-09
 
 - Remove redundant caption labels; fix dark input carets, session text and address-template Save/Probe Settings spacing.
