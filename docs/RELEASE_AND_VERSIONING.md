@@ -1,6 +1,6 @@
 # Release and versioning register
 
-0.7.0 release preparation (2026-10-15): the human clarified that GitHub publication includes an actual updater release. Central version is now 0.7.0. The approved utility/menu changes are in [the scope and QA record](TOOLS_REVISION_2026-10-15.md); URL provider APIs remain pending. Public latest is still 0.6.0 until the verified draft is published. Earlier snapshots below are historical.
+**0.7.0 is published as GitHub Latest (2026-10-15).** The approved utility/menu revision, exact portable/installer checks, 315 tests, Windows CI and actual public 0.6.0 → 0.7.0 updater/preparation checks passed. See [the publication evidence and limits](GITHUB_RELEASE_0.7.0_REPORT_2026-10-15.md) and [tool scope](TOOLS_REVISION_2026-10-15.md). URL provider APIs and manual/clean-machine acceptance remain open. Earlier snapshots below are historical.
 
 Current **0.6.0 is published as GitHub Latest**: DNS Test, HTTP / HTTPS Test, grouped navigation, Dark version labels and native Taskbar branding. Build, 265 tests, exact portable WPF/native/soak/package/public checks and both release-source CI workflows PASS. See [GITHUB_RELEASE_0.6.0_REPORT_2026-10-09.md](GITHUB_RELEASE_0.6.0_REPORT_2026-10-09.md) and [manual acceptance checklist](FEATURES_0.6.0.md#human-acceptance-checklist). Wi-Fi remains unchanged. Broader adapters/routes/ARP and durable History/Reports were declined; future menu pages show Pending - Coming Soon. Earlier planning/version snapshots below are historical.
 

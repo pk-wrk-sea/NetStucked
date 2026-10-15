@@ -1,54 +1,48 @@
 # NetStucked 0.7.0
 
-Version 0.7.0 (2026-10-15): Subnet Cal / DNS Resolver / MAC Checker and the in-app URL Checker layout replace the retired desktop DNS/HTTP/Wi-Fi surfaces; Port Test is TCP-only. Subnet uses one field and automatic inline validation. URL API integration awaits account keys and a supported Palo Alto endpoint. See [scope, verification and open gates](docs/TOOLS_REVISION_2026-10-15.md) and the [GitHub release](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.7.0). Release preparation is underway; publication evidence is recorded separately.
-
-Earlier 0.5.0 introduced Wi-Fi Profile Manager. Version 0.7.0 removes its desktop menu and functionality under the later human instruction while preserving compatible saved settings and immutable older release assets. Earlier [usage](docs/WIFI_PROFILE_MANAGER.md) and [QA](docs/QA_WIFI_2026-10-09.md) remain historical records.
+Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.7.0 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.7.0).
 
 <img src="docs/branding/NetStuckedBanner.png" width="480" alt="NetStucked — Network Engineer's Toolkit" />
 
-Windows 10/11 x64 desktop diagnostics for IP addresses, hostnames and authorized subnets. C# / WPF / .NET 10 / MVVM. Live Ping, continuous ICMP Traceroute and TCP-only Port Test use actual network APIs. Light/Dark/System themes, collapsible/resizable panels and shared hop descriptions follow the human-reviewed UI mockup. Port Test continuously scans separate hosts and ports, supports inclusive port ranges and saved/restorable templates, and sends a configurable zero-filled TCP payload (default 32 bytes, 0–1400). DNS Resolver supports selectable records and servers; MAC Checker uses bounded MACVendors.com requests. Subnet Cal calculates locally while typing. Public WAN descriptions use bounded RIPEstat metadata lookups. Updates & Recovery retains explicit selected-build installation/recovery with verification, backup and restart. The approved references in `design/references/` are preserved; sample telemetry is never loaded.
+## Current tools
 
-## Build
+- Live Ping and continuous ICMP Traceroute with real network results, independent sessions and bounded probe scheduling.
+- TCP-only Port Test with continuous multiple-target scanning, port ranges, saved templates and configurable TCP payloads.
+- Subnet Cal: one field accepts IPv4/prefix, spaced CIDR or dotted subnet masks; calculates while typing and distinguishes incomplete input from syntax errors.
+- DNS Resolver: selectable DNS records and servers, including NS/SOA, bounded lookups, cancellation and measured export.
+- MAC Checker: actual MACVendors.com manufacturer lookup with bounded requests, rate limits, caching and cancellation. Vendor registration does not establish device identity.
+- URL Checker: approved in-app results layout, explicitly unconfigured. Live VirusTotal/Palo Alto integration awaits provider accounts/keys and a supported Palo Alto API.
 
-Install a .NET 10 SDK, then from the repository root:
+Version 0.7.0 removes Diagnostics, the old DNS and HTTP/HTTPS test screens, and the complete Network Info/Wi-Fi Manager desktop feature. Compatible saved settings and older published releases are preserved. Light/Dark/System themes, shared hop descriptions, selectable tables and explicit Updates & Recovery remain available. Dashboard and other future pages remain pending. See [approved scope and remaining gates](docs/TOOLS_REVISION_2026-10-15.md).
+
+## Update or install
+
+Open **Updates → Check for Updates → Install v0.7.0**. Installers are unsigned: acknowledge the hash-verified unsigned project installer and follow ordinary Windows UAC/SmartScreen prompts. Updates only check/install after an explicit user action.
+
+The [release page](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.7.0) also provides a self-contained Windows x64 portable ZIP, setup EXE, SHA-256 files and provenance manifests. Keep the portable directory together. The application includes its runtime; compiling the installer requires Inno Setup 6. Preferences/logs remain per-user under `%LOCALAPPDATA%\NetStucked`.
+
+## Build and verify
+
+Install a .NET 10 SDK, then run from the repository root:
 
 ```powershell
 dotnet restore NetStucked.sln
-dotnet build NetStucked.sln -c Release
-dotnet test NetStucked.sln -c Release
-dotnet run --project src/NetStucked.Desktop
+dotnet build NetStucked.sln -c Release --no-restore
+dotnet test tests/NetStucked.Tests -c Release --no-build
+dotnet run --project tests/NetStucked.WindowsQa -c Release --no-build -- artifacts/windows-qa 0
 pwsh -File scripts/Publish.ps1
 ```
 
-Inno Setup 6 is needed only to compile the installer. Preferences/logs are per-user under `%LOCALAPPDATA%\NetStucked`. No administrator privilege or .NET installation is required for the self-contained application. Choose only targets you are authorized to diagnose. ICMP loss does not establish that a remote host or service is offline.
+The central version is in `Directory.Build.props`. Default self-contained output is `artifacts/publish/win-x64/NetStucked.exe`; release operations use fresh directories and immutable source tags/packages. Choose only targets you are authorized to diagnose. ICMP loss does not establish a remote service outage; no sample telemetry is used as production data.
 
-See [0.4.2 stability, copying and optional hop TCP checks](docs/FEATURES_0.4.2.md), [0.4.1 defect fixes and payload behavior](docs/FEATURES_0.4.1.md), [0.4.0 authorized features](docs/FEATURES_0.4.0.md), [selected-build installation/recovery](docs/FEATURES_0.3.0.md), [0.2.0 diagnostics](docs/FEATURES_0.2.0.md), `docs/FEATURE_SPEC.md`, `docs/NETWORK_BEHAVIOR.md` and `docs/DEVELOPMENT.md`. Dashboard, Network Info and background update checks/installations remain deferred.
+## Release evidence and open acceptance
 
-## Product milestones and current status
+0.7.0: **315 tests passed**, actual WPF Light/Dark and exact portable DLL/native checks passed, a 60-second owned-loopback soak passed, and branch/PR/main/installer Windows workflows passed. The actual public 0.6.0 production checker finds **Install v0.7.0**. Public installer download/hash/Windows trust/helper preparation passed from both 0.6.0 and 0.7.0; Setup was not executed. See [source, hashes, CI and public updater evidence](docs/GITHUB_RELEASE_0.7.0_REPORT_2026-10-15.md).
 
-The [milestone index](docs/MILESTONE_INDEX.md) consolidates M00–M09, post-stable A01–A09 and On Hold commercial B01–B05. [Implementation status](docs/IMPLEMENTATION_STATUS.md) separates the published 0.4.0 baseline from the 0.4.1 working follow-up and records actual tests/limits. [Roadmap](docs/PRODUCT_ROADMAP.md) reconciles older version proposals with releases; planning does not approve future pages.
+**NOT TESTED:** clean-machine installation/upgrade/recovery/uninstall, physical DPI/mixed-monitor/accessibility, manual installed-UI acceptance, remote network matrices and long soak. URL provider integration and installer signing remain open. A published release does not close the full acceptance milestones.
 
-Current diagnostic/appearance/update functionality is implemented; required human/remote/clean Windows installer acceptance remains open. The [next Codex task](docs/CODEX_NEXT_TASK.md) closes M00/M07 acceptance and current approved follow-up regressions. Network Info is the next proposed new feature after UI approval. See [vision](docs/PRODUCT_VISION.md), [features](docs/FEATURE_REGISTRY.md), [UI approvals](docs/UI_APPROVAL_REGISTER.md), [dependencies](docs/FEATURE_DEPENDENCIES.md) and [security/data policy](docs/SECURITY_AND_DATA_POLICY.md). This milestone task adds no future feature or release.
+## Product and historical records
 
-## Published versions
+[Milestones](docs/MILESTONE_INDEX.md), [implementation status](docs/IMPLEMENTATION_STATUS.md), [features](docs/FEATURE_REGISTRY.md), [next task](docs/CODEX_NEXT_TASK.md), [UI approvals](docs/UI_APPROVAL_REGISTER.md), [architecture](docs/ARCHITECTURE.md), [security/data policy](docs/SECURITY_AND_DATA_POLICY.md) and [release procedure](docs/RELEASE.md) distinguish approved implementation from future scope. Original references in `design/references/` remain unchanged.
 
-- [0.4.1](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.4.1) is GitHub Latest, with dark-input/session fixes, improved toolbars, continuous multiple-target Port Test, inclusive port ranges and configurable TCP/UDP payloads. Download its installer or portable ZIP; see the [verified 0.4.1 publication report](docs/GITHUB_RELEASE_0.4.1_REPORT_2026-10-09.md).
-- [0.4.0](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.4.0) remains available for recovery, with branding, themes, shared hop descriptions and TCP/UDP multiple-target scans. See the [historical publication report](docs/GITHUB_RELEASE_0.4_REPORT_2026-10-09.md).
-- [0.3.0](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.3.0) is the baseline for selected-build installation/recovery.
-- [0.3.1 TEST BUILD](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.3.1) exercises Upgrade to 0.3.1 and Recovery to 0.3.0. It changes version metadata and release history only. It uses normal SemVer, explicitly labeled TEST BUILD and not marked Latest, because the checker excludes prereleases.
-
-All current releases have self-contained Windows x64 portable ZIPs, Inno Setup installers, SHA-256 files and manifests. 0.5.0 is GitHub Latest; 0.4.0 and the older 0.3.x builds remain available for selected-build recovery. Open Updates, check GitHub and select the desired build. 0.2.x releases/downloads and six older Actions build artifacts were deleted by explicit user instruction after verified local backups; their Git source history/tags remain. The [0.3.x publication report](docs/GITHUB_RELEASE_0.3_REPORT_2026-10-09.md) records historical hashes, CI and actual menu/retirement checks. Installers are unsigned; explicit acknowledgement and Windows prompts remain. Actual machine install/upgrade/uninstall/downgrade remains untested. The [older 0.2.x report](docs/GITHUB_RELEASE_REPORT_2026-10-09.md) is historical evidence.
-
-## Current verification and runnable output
-
-**Published 0.5.0 integration:** Wi-Fi Profile Manager is combined with all 0.4.2 diagnostics fixes. See [scope and manual checklist](docs/FEATURES_0.5.0.md) and [combined QA](docs/QA_0.5.0.md). **Published GitHub Latest 0.5.0**: [download](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.5.0), [exact publication report](docs/GITHUB_RELEASE_0.5.0_REPORT_2026-10-09.md). 242 tests, exact WPF/native/package/public updater checks and both CI workflows PASS. The original Wi-Fi source snapshot is backed up under `artifacts/github-release/0.5.0/wifi-source-snapshot`.
-
-**Historical published 0.4.2:** [Release/downloads](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.4.2), [publication evidence and limits](docs/GITHUB_RELEASE_0.4.2_REPORT_2026-10-09.md) and [unchecked human checklist](docs/FEATURES_0.4.2.md#human-acceptance-checklist). 214 tests, exact WPF/native/package checks, simultaneous 254-target Ping / 32-endpoint TCP / two-Traceroute soak and both CI workflows pass. Local frozen output is `artifacts/github-release/0.4.2/final/publish/NetStucked.exe`; keep the directory together. Wi-Fi/planning WIP in the original checkout remains separate and unchanged; use the report's source checkout for this implementation. No machine installer was executed.
-
-The published 0.4.1 output is `artifacts/github-release/0.4.1/final/publish/NetStucked.exe`; keep its full directory together. The [0.4.1 publication report](docs/GITHUB_RELEASE_0.4.1_REPORT_2026-10-09.md) records 196 tests, exact-package checks, immutable asset hashes and verification limits. Earlier output under `artifacts/github-release/0.4.0/final/publish` remains preserved. The [0.4.0 publication report](docs/GITHUB_RELEASE_0.4_REPORT_2026-10-09.md) records exact package hashes, CI, real WPF/loopback/native checks and public installer verification. The original `artifacts/ui-branding/0.4.0/final` package and [local QA](docs/QA_0.4.0.md) remain preserved. No machine installation occurred in this publication task.
-
-The user-requested UI revision includes compact probe dialogs, named address templates, destination history, independent traceroute session tabs, result timestamps, stable manual history scrolling, Fit Columns/resize guide/tooltips, cached navigation, activity indicators and framed monitor-aware window controls. Traceroute polls each known TTL independently; the event log records important changes. Only actual API outcomes populate results. See [the revision report](docs/UI_REVISION_2026-10-08.md) for the implemented behavior and measured validation. Earlier bug-audit and performance packages/reports are preserved as historical evidence.
-
-The original local output is `artifacts/selected-build/0.3.0/final/publish/NetStucked.exe`; keep its full directory together. Release packages are prepared under `artifacts/github-release/0.3.0/final` and `artifacts/github-release/0.3.1/final`. Previous local packages remain preserved, including retired 0.2.x backups under `artifacts/github-release/retired-0.2.x`. The SDK used on this machine is `C:\Users\PK\.codex\cache\netstucked-tools\dotnet\dotnet.exe`; use its full path until .NET 10 is on PATH. The portable application contains its runtime. Checks and installations start only after the user's click.
-
-0.3.0 has 150 passing automated tests, real WPF/ICMP/TCP drain checks, actual GitHub installer download/hash/Windows trust checks and real isolated-helper startup acknowledgement. Its self-contained output and Inno Setup compilation are checked locally; see [0.3.0 QA](docs/QA_0.3.0.md) for precise evidence. Remote multi-hop networking/TCP, human GUI/monitor-DPI/accessibility acceptance, Windows 11 and actual install/upgrade/uninstall/downgrade remain **NOT TESTED**.
+Earlier releases remain available for explicit recovery: [0.6.0](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.6.0), [0.5.0](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.5.0), and earlier supported releases. Their feature/QA/publication reports describe those historical versions. The specifically authorized 0.2.x download retirement preserved Git source tags/history and verified local backups; it does not permit rewriting other published assets. See [release/version register](docs/RELEASE_AND_VERSIONING.md).

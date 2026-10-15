@@ -1,6 +1,6 @@
 # Utility revision — 2026-10-15
 
-Version **0.7.0** release preparation on `codex/tools-rework`, based on `f643f3fe043e8f8bc6eaa12b35ede4ba92ec3127`. The subsequent human clarification requests an actual update release. Prior v0.6.0 assets/source remain immutable. Publication and exact-package evidence will be recorded in the release report; the development verification below predates the version bump.
+Version **0.7.0 is published as GitHub Latest**, with PR #1 merged and immutable source tag/packages. See [publication and exact-package evidence](GITHUB_RELEASE_0.7.0_REPORT_2026-10-15.md). Prior v0.6.0 assets/source remain unchanged. The development verification below predates the version bump; the release report records the final package/public updater checks.
 
 ## Human approval
 
