@@ -55,7 +55,7 @@ try {
     if (-not [NetStuckedQaWindows]::Close([uint32]$qaProcess.Id)) { throw 'Published NetStucked window was not found.' }
     if (-not $qaProcess.WaitForExit(10000)) { throw 'Published app did not close within 10 seconds.' }
     if ($qaProcess.ExitCode -ne 0) { throw "Published app exit code: $($qaProcess.ExitCode)" }
-    'PASS self-contained published application starts its actual WPF window and closes gracefully (exit 0).'
+    'PASS application starts its actual WPF window and closes gracefully (exit 0). Self-contained packaging is verified separately.'
 } finally {
     # This helper owns the launched QA process. Never enumerate or kill unrelated application processes.
     if ($qaProcess -and -not $qaProcess.HasExited) { $qaProcess.Kill(); $qaProcess.WaitForExit(5000) | Out-Null }

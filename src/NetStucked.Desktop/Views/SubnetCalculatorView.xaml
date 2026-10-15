@@ -1,0 +1,10 @@
+<UserControl x:Class="NetStucked.Desktop.Views.SubnetCalculatorView" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:b="clr-namespace:NetStucked.Desktop.Behaviors" Style="{StaticResource {x:Type UserControl}}">
+  <Border Style="{StaticResource Card}">
+    <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+      <StackPanel><TextBlock Text="IPv4 subnet" Style="{StaticResource Heading}"/><TextBlock Text="IP /prefix or IP subnet mask · updates as you type" Style="{StaticResource Muted}" Margin="0,8,0,6"/><TextBox x:Name="SubnetInputBox" Text="{Binding Input, UpdateSourceTrigger=PropertyChanged}" MaxLength="128" b:Watermark.Text="10.10.10.10/23  or  10.10.10.10 255.255.255.0" AutomationProperties.Name="IPv4 address and subnet prefix or mask" FontFamily="Consolas"/></StackPanel>
+      <TextBlock x:Name="SyntaxMessage" Grid.Row="1" Text="{Binding Message}" TextWrapping="Wrap" Margin="0,9,0,12" AutomationProperties.LiveSetting="Polite"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/><Style.Triggers><DataTrigger Binding="{Binding IsInvalid}" Value="True"><Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+      <DataGrid x:Name="SubnetResults" Grid.Row="2" ItemsSource="{Binding Rows}" AutomationProperties.Name="Calculated subnet properties"><DataGrid.Columns><b:CopyableTextColumn Header="Property" Binding="{Binding Property}" Width="220"/><b:CopyableTextColumn Header="Value" Binding="{Binding Value}" Width="*" MinWidth="150"/></DataGrid.Columns></DataGrid>
+      <TextBlock Grid.Row="3" Text="{Binding AddressNote}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+    </Grid>
+  </Border>
+</UserControl>

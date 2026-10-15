@@ -32,7 +32,7 @@ internal static partial class Program
     private static void SetPortFarm(PortTestViewModel vm, string endpoints)
     {
         var parsed = PortInputParser.Parse(endpoints); Require(parsed.IsValid && parsed.Targets.All(t => t.Host == "127.0.0.1"), "TCP QA farm contains only owned loopback endpoints");
-        vm.Protocol = PortProtocol.TCP; vm.TargetText = "127.0.0.1 TCP QA";
+        vm.TargetText = "127.0.0.1 TCP QA";
         vm.PortNumbers = string.Join(',', parsed.Targets.Select(t => t.Port).Distinct());
     }
     private static async Task CheckBrandingScanAsync(Window window, MainViewModel vm, QaDialogs dialogs, ServiceProvider provider, string output)
@@ -96,7 +96,7 @@ internal static partial class Program
         Render(window, output, "Traceroute-dark", 1536, 1024, 1);
 
         vm.NavigateCommand.Execute("Port Test"); var port = vm.Port;
-        port.Protocol = PortProtocol.TCP; port.TargetText = "192.168.0.0/22"; port.PortNumbers = "22,443,80,25,65525,50000";
+        port.TargetText = "192.168.0.0/22"; port.PortNumbers = "22,443,80,25,65525,50000";
         Require(port.RequiresScopeAcknowledgement && !port.StartCommand.CanExecute(null) && port.TargetPreview.Contains("6,132"), "A /22 × six ports is previewed but blocked before acknowledgement");
         port.ScopeAcknowledged = true; Require(port.StartCommand.CanExecute(null), "Explicit acknowledgement enables the current valid large scope");
         port.PortNumbers = "443"; Require(!port.ScopeAcknowledged && !port.RequiresScopeAcknowledgement, "Editing scope resets acknowledgement");
@@ -105,37 +105,11 @@ internal static partial class Program
         await port.SavePortNumbersCommand.ExecuteAsync(null); Require(port.Store.Preferences.PortNumberTemplates["Standard TCP ports"] == "22,443,1000-1005", "Port template saves edited values including ranges");
         await port.RestorePortTemplateCommand.ExecuteAsync(null); Require(port.PortNumbers == PortScanPlanner.StandardTemplates["Standard TCP ports"], "Restore returns a built-in port template to its default ports");
 
-        using var responding = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp); responding.Bind(new IPEndPoint(IPAddress.Loopback, 0));
-        using var silent = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp); silent.Bind(new IPEndPoint(IPAddress.Loopback, 0));
-        using var lifetime = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        var response = Task.Run(async () =>
-        {
-            try
-            {
-                while (true)
-                {
-                    var buffer = new byte[PortProbeSettings.MaxPacketSize];
-                    var received = await responding.ReceiveFromAsync(buffer, SocketFlags.None, new IPEndPoint(IPAddress.Any, 0), lifetime.Token);
-                    Require(received.ReceivedBytes == port.Store.Preferences.Port.PacketSize, "UDP receiver observes the configured payload size");
-                    await responding.SendToAsync(new byte[] { 1 }, SocketFlags.None, received.RemoteEndPoint, lifetime.Token);
-                }
-            }
-            catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
-        });
-        port.TargetText = "127.0.0.1 UDP loopback QA"; port.PortNumbers = $"{((IPEndPoint)responding.LocalEndPoint!).Port},{((IPEndPoint)silent.LocalEndPoint!).Port}";
-        port.Protocol = PortProtocol.UDP;
-        await port.StartCommand.ExecuteAsync(null);
-        await Until(() => { port.Refresh(true); return port.State == SessionState.Running && port.Sent >= 2 && port.NoResponse == 1; });
-        Require(port.Reachable == 1 && port.NoResponse == 1 && port.Unreachable == 0 && port.Rows.Single(r => r.Status == "No response").Last is null, "Actual UDP reply and silent socket stay distinct, with no invented RTT or closed-port claim");
-        long attempts = port.Sent; await Task.Delay(650); port.Refresh(); Require(port.Sent > attempts && port.State == SessionState.Running, "Port Test repeats automatically without a Continuous checkbox");
-        await port.StopCommand.ExecuteAsync(null); await lifetime.CancelAsync(); await response;
-        port.SelectedRow = port.Rows.Single(r => r.Status == "No response"); await port.ExportCommand.ExecuteAsync(null);
-        Require(dialogs.Exports.Last().Contains("UDP") && dialogs.Exports.Last().Contains("No response"), "Port CSV records protocol and inconclusive outcome");
-        Render(window, output, "PortTest-udp-dark", 1536, 1024, 1); Render(window, output, "PortTest-udp-125pct", 1280, 800, 1.25); Render(window, output, "PortTest-udp-150pct", 1280, 800, 1.5);
+        Require(port.Protocol == PortProtocol.TCP, "Port Test exposes TCP only");
         port.ToggleAddressesCommand.Execute(null); port.ToggleHistoryCommand.Execute(null); await Task.Delay(300); Render(window, output, "PortTest-collapsed-dark", 1280, 800, 1); port.ToggleAddressesCommand.Execute(null); port.ToggleHistoryCommand.Execute(null); await Task.Delay(300);
-        vm.Appearance.SelectedTheme = "Light"; port.Protocol = PortProtocol.TCP;
+        vm.Appearance.SelectedTheme = "Light";
         vm.NavigateCommand.Execute("Live Ping"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
-        Console.WriteLine("PASS Branding, dark theme, panel toggles, shared aliases, five-session guard, scan acknowledgement, templates and actual continuous UDP");
+        Console.WriteLine("PASS Branding, dark theme, panel toggles, shared aliases, five-session guard, scan acknowledgement, templates and TCP-only port configuration");
     }
     private static async Task CheckPanelResizeAsync(Window window)
     {

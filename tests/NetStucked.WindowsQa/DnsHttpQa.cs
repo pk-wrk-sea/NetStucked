@@ -58,19 +58,12 @@ internal static partial class Program
         try
         {
             vm.Dns.UseSystemResolvers = false; vm.Dns.ResolverText = dnsEndpoint.ToString(); vm.Dns.TargetText = "first.example\nsecond.example"; vm.Dns.QueryAaaa = true;
-            vm.NavigateCommand.Execute("DNS Test"); await vm.Dns.StartCommand.ExecuteAsync(null);
+            vm.NavigateCommand.Execute("DNS Resolver"); await vm.Dns.StartCommand.ExecuteAsync(null);
             Require(vm.Dns.Results.Count == 4 && vm.Dns.Results.All(r => r.Status == "PASS" && r.ElapsedMs >= 0), "DNS WPF displays actual owned UDP A/AAAA queries, resolver, answer and timing");
             await vm.Dns.ExportCommand.ExecuteAsync(null); Require(dialogs.Exports.Last().Contains("first.example") && dialogs.Exports.Last().Contains(dnsEndpoint.ToString()), "DNS CSV exports the actual query and resolver");
             await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
             foreach (string theme in new[] { "Light", "Dark" }) { vm.Appearance.SelectedTheme = theme; Render(window, output, "DnsTest-owned-" + theme.ToLowerInvariant(), 1536, 1024, 1); Render(window, output, "DnsTest-owned-" + theme.ToLowerInvariant() + "-1280", 1280, 800, 1); }
-            vm.Http.TargetText = $"http://127.0.0.1:{httpPort}/ok\nhttp://127.0.0.1:{httpPort}/redirect";
-            vm.NavigateCommand.Execute("HTTP / HTTPS Test"); await vm.Http.StartCommand.ExecuteAsync(null);
-            Require(vm.Http.Results.Count == 2 && vm.Http.Results.Any(r => r.StatusCode == 200 && r.Status == "PASS") && vm.Http.Results.Any(r => r.Status == "Redirect"), "HTTP WPF displays actual owned headers, status/redirect and timing without response body downloads");
-            await vm.Http.ExportCommand.ExecuteAsync(null); Require(dialogs.Exports.Last().Contains("Redirect") && dialogs.Exports.Last().Contains("127.0.0.1"), "HTTP CSV exports actual outcomes and addresses");
-            foreach (string theme in new[] { "Light", "Dark" }) { vm.Appearance.SelectedTheme = theme; Render(window, output, "HttpTest-owned-" + theme.ToLowerInvariant(), 1536, 1024, 1); Render(window, output, "HttpTest-owned-" + theme.ToLowerInvariant() + "-1280", 1280, 800, 1); }
-            var grid = Descendants<DataGrid>((DependencyObject)window.Content).Single(g => System.Windows.Automation.AutomationProperties.GetName(g) == "Http test results");
-            Require(grid.Columns.OfType<NetStucked.Desktop.Behaviors.CopyableTextColumn>().Any() && Descendants<TextBox>(grid).Any(t => t.IsReadOnly && t.IsReadOnlyCaretVisible), "New diagnostic tables use selectable/copyable text");
-            vm.Http.ToggleAddressesCommand.Execute(null); vm.Http.ToggleDetailsCommand.Execute(null); await Task.Delay(250); Render(window, output, "HttpTest-collapsed-dark", 1280, 800, 1); vm.Http.ToggleAddressesCommand.Execute(null); vm.Http.ToggleDetailsCommand.Execute(null);
+            vm.Appearance.SelectedTheme = "Dark";
             vm.NavigateCommand.Execute("Updates"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle); window.UpdateLayout();
             var versions = Descendants<TextBlock>((DependencyObject)window.Content).Where(t => t.IsVisible && t.Text.StartsWith("v0.", StringComparison.Ordinal)).ToArray();
             Require(versions.Length > 1 && versions.All(t => t.Foreground is SolidColorBrush b && b.Color != Colors.Black), "Version History and current/sidebar version labels are readable in actual Dark theme");
@@ -90,8 +83,8 @@ internal static partial class Program
             // Cancel during a real pending UDP read and await both presentation and transport work.
             using var sink = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0)); vm.Dns.ResolverText = sink.Client.LocalEndPoint!.ToString()!; vm.Dns.TimeoutText = "60000";
             Task running = vm.Dns.StartCommand.ExecuteAsync(null); await Task.Delay(50); await vm.PrepareForUpdateAsync(); await running;
-            Require(!vm.Dns.IsRunning && !vm.Http.IsRunning, "Update preparation cancels and drains new DNS/HTTP sessions");
-            await File.WriteAllTextAsync(Path.Combine(output, "dns-http-qa.json"), System.Text.Json.JsonSerializer.Serialize(new { Status = "PASS", ActualDnsQueries = 4, ActualHttpResponses = 2, DarkVersionLabels = versions.Length, NativeWindowIcons = 2, UpdateDrain = true, WifiMutations = 0, Seconds = clock.Elapsed.TotalSeconds }));
+            Require(!vm.Dns.IsRunning, "Update preparation cancels and drains DNS Resolver session");
+            await File.WriteAllTextAsync(Path.Combine(output, "dns-http-qa.json"), System.Text.Json.JsonSerializer.Serialize(new { Status = "PASS", ActualDnsQueries = 4, DarkVersionLabels = versions.Length, NativeWindowIcons = 2, UpdateDrain = true, WifiMutations = 0, Seconds = clock.Elapsed.TotalSeconds }));
         }
         finally { await stop.CancelAsync(); await Task.WhenAll(dnsServer, httpServer); httpListener.Stop(); }
     }

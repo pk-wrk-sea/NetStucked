@@ -24,7 +24,7 @@ public abstract partial class DiagnosticToolViewModel<T> : ObservableObject, IAs
     [ObservableProperty, NotifyCanExecuteChangedFor(nameof(StartCommand))] private bool _isRunning;
     [ObservableProperty] private T? _selectedRow;
     public bool CanEdit => !IsRunning;
-    public string Details => SelectedRow switch { DnsTestResult dns => dns.Details, HttpTestResult http => http.Details, _ => "Select a result to inspect details." };
+    public string Details => SelectedRow switch { DnsTestResult dns => dns.Details, MacVendorResult mac => mac.Details, _ => "Select a result to inspect details." };
     private CancellationTokenSource? _cancel;
     private Task? _run;
     protected DiagnosticToolViewModel(UserSettingsStore store, IDesktopDialogs dialogs) { Store = store; Dialogs = dialogs; }
@@ -71,12 +71,12 @@ public abstract partial class DiagnosticToolViewModel<T> : ObservableObject, IAs
         if (_run is not null) { try { await _run; } catch (OperationCanceledException) { } }
         if (StartCommand.ExecutionTask is { } execution) await execution;
     }
-    [RelayCommand] private Task Export() => Dialogs.ExportAsync(typeof(T) == typeof(DnsTestResult) ? "dns-results.csv" : "http-results.csv", Csv());
+    [RelayCommand] private Task Export() => Dialogs.ExportAsync(typeof(T) == typeof(DnsTestResult) ? "dns-results.csv" : "mac-vendors.csv", Csv());
     public async ValueTask DisposeAsync() => await StopForUpdateAsync();
     protected static string Row(params object?[] values) => string.Join(',', values.Select(CsvExporter.Cell));
 }
 
-public partial class DnsTestViewModel : DiagnosticToolViewModel<DnsTestResult>
+public partial class DnsResolverViewModel : DiagnosticToolViewModel<DnsTestResult>
 {
     private readonly IDnsTestClient _client;
     [ObservableProperty] private string _resolverText = "";
@@ -90,11 +90,13 @@ public partial class DnsTestViewModel : DiagnosticToolViewModel<DnsTestResult>
     [ObservableProperty] private bool _queryTxt;
     [ObservableProperty] private bool _queryPtr;
     [ObservableProperty] private bool _querySrv;
-    public DnsTestViewModel(IDnsTestClient client, UserSettingsStore store, IDesktopDialogs dialogs) : base(store, dialogs) => _client = client;
+    [ObservableProperty] private bool _queryNs;
+    [ObservableProperty] private bool _querySoa;
+    public DnsResolverViewModel(IDnsTestClient client, UserSettingsStore store, IDesktopDialogs dialogs) : base(store, dialogs) => _client = client;
     protected override async Task<IReadOnlyList<Func<CancellationToken, Task<DnsTestResult>>>> PlanAsync(CancellationToken token)
     {
         int timeout = Timeout(); var names = DiagnosticInput.Lines(TargetText, 128);
-        var types = new[] { (QueryA, DnsRecordType.A), (QueryAaaa, DnsRecordType.AAAA), (QueryCname, DnsRecordType.CNAME), (QueryMx, DnsRecordType.MX), (QueryTxt, DnsRecordType.TXT), (QueryPtr, DnsRecordType.PTR), (QuerySrv, DnsRecordType.SRV) }.Where(x => x.Item1).Select(x => x.Item2).ToArray();
+        var types = new[] { (QueryA, DnsRecordType.A), (QueryAaaa, DnsRecordType.AAAA), (QueryCname, DnsRecordType.CNAME), (QueryMx, DnsRecordType.MX), (QueryTxt, DnsRecordType.TXT), (QueryPtr, DnsRecordType.PTR), (QuerySrv, DnsRecordType.SRV), (QueryNs, DnsRecordType.NS), (QuerySoa, DnsRecordType.SOA) }.Where(x => x.Item1).Select(x => x.Item2).ToArray();
         if (types.Length == 0) throw new ArgumentException("Select at least one DNS record type.");
         if (UseSystemResolvers)
         {
@@ -109,23 +111,4 @@ public partial class DnsTestViewModel : DiagnosticToolViewModel<DnsTestResult>
         return jobs;
     }
     protected override string Csv() => "Time,Query,Type,Resolver,Status,ElapsedMs,Transport,Answers,Details,Error\n" + string.Join('\n', Results.Select(r => Row(r.Time.ToString("O"), r.Name, r.Type, r.Resolver, r.Status, r.ElapsedMs, r.Transport, r.Answers, r.Details, r.Error)));
-}
-
-public partial class HttpTestViewModel : DiagnosticToolViewModel<HttpTestResult>
-{
-    private readonly IHttpTestClient _client;
-    public string[] Methods { get; } = ["GET", "HEAD"];
-    [ObservableProperty] private string _method = "GET";
-    [ObservableProperty] private bool _followRedirects;
-    [ObservableProperty] private string _expectedStatusText = "200";
-    public HttpTestViewModel(IHttpTestClient client, UserSettingsStore store, IDesktopDialogs dialogs) : base(store, dialogs) => _client = client;
-    protected override Task<IReadOnlyList<Func<CancellationToken, Task<HttpTestResult>>>> PlanAsync(CancellationToken token)
-    {
-        token.ThrowIfCancellationRequested(); int timeout = Timeout();
-        if (!Methods.Contains(Method) || !int.TryParse(ExpectedStatusText, out int code) || code is < 100 or > 599) throw new ArgumentException("Choose GET/HEAD and an expected status between 100 and 599.");
-        var urls = DiagnosticInput.Lines(TargetText, 64, caseSensitive: true).Select(DiagnosticInput.HttpUrl).ToArray();
-        IReadOnlyList<Func<CancellationToken, Task<HttpTestResult>>> jobs = urls.Select(url => { var request = new HttpTestRequest(url, Method, timeout, FollowRedirects, code); return new Func<CancellationToken, Task<HttpTestResult>>(t => _client.TestAsync(request, t)); }).ToArray();
-        return Task.FromResult(jobs);
-    }
-    protected override string Csv() => "Time,URL,Result,HTTPStatus,ElapsedMs,RemoteIP,Redirect,TLS,CertificateExpiry,Details,Error\n" + string.Join('\n', Results.Select(r => Row(r.Time.ToString("O"), r.Url, r.Status, r.StatusCode, r.ElapsedMs, r.RemoteAddress, r.Redirect, r.Tls, r.CertificateExpiry, r.Details, r.Error)));
 }

@@ -1,5 +1,7 @@
 # NetStucked 0.5.0
 
+Working revision 2026-10-15 (unreleased): approved Subnet Cal / DNS Resolver / MAC Checker and in-app URL Checker layout replace the retired desktop DNS/HTTP/Wi-Fi surfaces; Port Test is TCP-only. Subnet uses one field and automatic inline validation. URL API integration awaits account keys and a supported Palo Alto endpoint. See [scope, verification and open gates](docs/TOOLS_REVISION_2026-10-15.md). Published 0.6.0 descriptions below refer to the earlier release.
+
 **0.5.0 Wi-Fi integration:** Network Info now contains the approved compact-table **Wi-Fi Profile Manager** with Native WLAN profile/connect controls, Windows-protected authentication, measured Connect & Test and bounded history. See [usage and limits](docs/WIFI_PROFILE_MANAGER.md) and [Wi-Fi QA](docs/QA_WIFI_2026-10-09.md). Real Wi-Fi hardware authentication remains NOT TESTED on this development machine (WLAN service stopped). Combined with 0.4.2 and published as GitHub Latest **0.5.0**. See [combined scope/checklist](docs/FEATURES_0.5.0.md).
 
 <img src="docs/branding/NetStuckedBanner.png" width="480" alt="NetStucked — Network Engineer's Toolkit" />
