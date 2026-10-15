@@ -1,6 +1,6 @@
 # 0.8.0 verification and usage — 2026-10-15
 
-Release candidate on `codex/monitoring-080`; version is 0.8.0. Publication requires the subsequent exact-package/source/CI/public updater report. Human approval is in FEATURES_0.8.0.md. Existing canonical references and older released packages are preserved.
+Published 0.8.0: [exact-package/source/CI/public updater report](GITHUB_RELEASE_0.8.0_REPORT_2026-10-15.md) supersedes the release-candidate status. Human approval is in FEATURES_0.8.0.md. Existing canonical references and older released packages are preserved.
 
 Build: PASS, zero warnings/errors. Unit/adapter suite: 354 passed / 0 failed / 0 skipped. Includes the supplied Cisco MAC/ARP text, strict same-line IP mapping and duplicate rows, IPv6 DNS selection, VirusTotal response/error/bounds/cancellation, monitoring thresholds/maintenance/gaps, fresh-SNMP-only link incidents, counter baselines/rates, persisted Start/Stop intent, 50-device/eight-worker bounds, and real Windows Credential Manager round-trip/profile separation. Real owned UDP agents exercise SNMP v1/v2c system/interface/counter/custom-OID reads; SNMP v3 security selections, validation and cancellation are tested. Positive live Cisco SNMP v3 is NOT TESTED.
 
