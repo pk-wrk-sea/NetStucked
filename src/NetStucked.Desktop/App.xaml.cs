@@ -23,11 +23,6 @@ public partial class App : Application
         services.AddSingleton<IIcmpProbe, IcmpPingProbe>();
         services.AddSingleton<IDnsResolver, DnsResolver>();
         services.AddSingleton<ITcpProbe, TcpPortProbe>();
-        services.AddSingleton<IUdpProbe, UdpPortProbe>();
-        services.AddSingleton<IWifiService, WindowsWifiService>();
-        services.AddSingleton<IWifiCredentialVault, WindowsWifiCredentialVault>();
-        services.AddSingleton<IWifiServiceTests, WifiServiceTests>();
-        services.AddSingleton<NetworkInfoViewModel>();
         services.AddSingleton<IWanIdentitySource, RipeWanIdentitySource>();
         services.AddSingleton<HopDescriptionService>();
         services.AddSingleton<IReleaseSource, GitHubReleaseSource>();
@@ -36,8 +31,9 @@ public partial class App : Application
         services.AddSingleton<IDesktopDialogs>(dialogs ?? new WpfDialogService());
         services.AddSingleton<MultiTargetPingService>();
         services.AddSingleton<IDnsTestClient, DnsTestClient>();
-        services.AddSingleton<IHttpTestClient, HttpTestClient>();
-        services.AddSingleton<DnsTestViewModel>(); services.AddSingleton<HttpTestViewModel>();
+        services.AddSingleton<IMacVendorLookup, MacVendorLookup>();
+        services.AddSingleton<DnsResolverViewModel>(); services.AddSingleton<SubnetCalculatorViewModel>();
+        services.AddSingleton<MacCheckerViewModel>(); services.AddSingleton<UrlCheckerViewModel>();
         services.AddSingleton<MultiTargetPortService>();
         services.AddSingleton<PortTestViewModel>(); services.AddSingleton<UpdatesViewModel>();
         services.AddSingleton<LivePingViewModel>(); services.AddSingleton<TracerouteWorkspaceViewModel>();

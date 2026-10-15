@@ -1,5 +1,9 @@
 # Next Codex task
 
+0.7.0 release preparation (2026-10-15): the human clarified that GitHub publication includes an actual updater release. Central version is now 0.7.0. The approved utility/menu changes are in [the scope and QA record](TOOLS_REVISION_2026-10-15.md); URL provider APIs remain pending. Public latest is still 0.6.0 until the verified draft is published. Earlier snapshots below are historical.
+
+Working revision 2026-10-15 (unreleased): approved Subnet Cal / DNS Resolver / MAC Checker and in-app URL Checker layout replace the retired desktop DNS/HTTP/Wi-Fi surfaces; Port Test is TCP-only. Subnet uses one field and automatic inline validation. URL API integration awaits account keys and a supported Palo Alto endpoint. See [scope, verification and open gates](TOOLS_REVISION_2026-10-15.md). Published 0.6.0 descriptions below refer to the earlier release.
+
 Current **0.6.0 is published as GitHub Latest**: DNS Test, HTTP / HTTPS Test, grouped navigation, Dark version labels and native Taskbar branding. Build, 265 tests, exact portable WPF/native/soak/package/public checks and both release-source CI workflows PASS. See [GITHUB_RELEASE_0.6.0_REPORT_2026-10-09.md](GITHUB_RELEASE_0.6.0_REPORT_2026-10-09.md) and [manual acceptance checklist](FEATURES_0.6.0.md#human-acceptance-checklist). Wi-Fi remains unchanged. Broader adapters/routes/ARP and durable History/Reports were declined; future menu pages show Pending - Coming Soon. Earlier planning/version snapshots below are historical.
 
 Later authorized task: integrate approved Wi-Fi with 0.4.2 and publish **0.5.0**. See [scope](FEATURES_0.5.0.md), [combined QA](QA_0.5.0.md). After publication, human Wi-Fi/hardware and diagnostics acceptance remains next; the earlier queue below is historical, not permission to implement broader M01 pages.

@@ -1,5 +1,7 @@
 # M02 — Dedicated DNS, TCP/UDP and HTTP/TLS diagnostics
 
+Working revision 2026-10-15 (unreleased): approved Subnet Cal / DNS Resolver / MAC Checker and in-app URL Checker layout replace the retired desktop DNS/HTTP/Wi-Fi surfaces; Port Test is TCP-only. Subnet uses one field and automatic inline validation. URL API integration awaits account keys and a supported Palo Alto endpoint. See [scope, verification and open gates](../TOOLS_REVISION_2026-10-15.md). Published 0.6.0 descriptions below refer to the earlier release.
+
 Current **0.6.0 is published as GitHub Latest**: DNS Test, HTTP / HTTPS Test, grouped navigation, Dark version labels and native Taskbar branding. Build, 265 tests, exact portable WPF/native/soak/package/public checks and both release-source CI workflows PASS. See [GITHUB_RELEASE_0.6.0_REPORT_2026-10-09.md](GITHUB_RELEASE_0.6.0_REPORT_2026-10-09.md) and [manual acceptance checklist](FEATURES_0.6.0.md#human-acceptance-checklist). Wi-Fi remains unchanged. Broader adapters/routes/ARP and durable History/Reports were declined; future menu pages show Pending - Coming Soon. Earlier planning/version snapshots below are historical.
 
 ## 1. Milestone and version

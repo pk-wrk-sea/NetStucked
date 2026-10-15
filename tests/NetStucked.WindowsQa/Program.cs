@@ -36,9 +36,10 @@ internal static partial class Program
     public static int Main(string[] args)
     {
         if (args.FirstOrDefault() == "--export-brand") return ExportBrand(Path.GetFullPath(args[1]));
-        if (args.FirstOrDefault() == "--wifi-read") return ReadWifiNativeAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
+        if (args.FirstOrDefault() == "--mac-read") return ReadMacVendorAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--wan-metadata") return ReadWanMetadataAsync(args[1], Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--verify-installer") return VerifyPublishedInstallerAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
+        if (args.FirstOrDefault() == "--public-update-check") return CheckPublicUpdateAsync(Path.GetFullPath(args[1]), args[2], args[3]).GetAwaiter().GetResult();
         string output = Path.GetFullPath(args.FirstOrDefault() ?? "artifacts/windows-qa");
         int soakSeconds = args.Length > 1 ? int.Parse(args[1]) : 0;
         _expectedAvailableVersion = args.Length > 3 ? args[3] : null;
@@ -80,8 +81,7 @@ internal static partial class Program
         var dialogs = new QaDialogs();
         var measured = new MeasuredRealProbe();
         var measuredTcp = new MeasuredRealTcp();
-        var wifi = new QaWifi();
-        await using var provider = App.ConfigureServices(store, dialogs, services => { services.AddSingleton<IIcmpProbe>(measured); services.AddSingleton<ITcpProbe>(measuredTcp); services.AddSingleton<IWifiService>(wifi); services.AddSingleton<IWifiCredentialVault, QaVault>(); });
+        await using var provider = App.ConfigureServices(store, dialogs, services => { services.AddSingleton<IIcmpProbe>(measured); services.AddSingleton<ITcpProbe>(measuredTcp); services.AddSingleton<IMacVendorLookup, QaMacLookup>(); });
         provider.GetRequiredService<ThemeService>();
         var vm = provider.GetRequiredService<MainViewModel>();
         var window = provider.GetRequiredService<MainWindow>();
@@ -165,8 +165,7 @@ internal static partial class Program
         Render(window, output, "LivePing-configured-settled", 1536, 1024, 1);
         vm.NavigateCommand.Execute("Dashboard"); Require(vm.CurrentPage is PlaceholderViewModel, "Dashboard remains neutral placeholder");
         await CheckDnsHttpAsync(window, vm, dialogs, output);
-        try { await CheckNetworkInfoAsync(window, vm, wifi, output); }
-        catch (Exception ex) { Console.Error.WriteLine("Network Info QA: " + ex); await vm.ShutdownAsync(); throw; }
+        await CheckToolsAsync(window, vm, output);
 
         if (soakSeconds > 0)
         {
@@ -174,7 +173,6 @@ internal static partial class Program
             await using var diagnosticFarm = new OwnedDiagnosticFarm();
             vm.Dns.UseSystemResolvers = false; vm.Dns.ResolverText = diagnosticFarm.Resolver; vm.Dns.TimeoutText = "5000"; vm.Dns.Concurrency = 16; vm.Dns.QueryA = true; vm.Dns.QueryAaaa = true;
             vm.Dns.TargetText = string.Join('\n', Enumerable.Range(0, 64).Select(i => "soak" + i + ".example"));
-            vm.Http.TargetText = string.Join('\n', Enumerable.Range(0, 32).Select(i => diagnosticFarm.Url + "soak" + i)); vm.Http.Concurrency = 8;
             measuredTcp.Reset();
             SetPortFarm(vm.Port, tcpFarm.Targets);
             await vm.Port.StartCommand.ExecuteAsync(null);
@@ -207,8 +205,8 @@ internal static partial class Program
                 maximumGap = Math.Max(maximumGap, heartbeat.Elapsed.TotalMilliseconds); heartbeat.Restart();
                 if (elapsed.Elapsed.TotalSeconds >= nextDiagnosticBatch)
                 {
-                    await Task.WhenAll(vm.Dns.StartCommand.ExecuteAsync(null), vm.Http.StartCommand.ExecuteAsync(null));
-                    Require(vm.Dns.Results.Count == 128 && vm.Dns.Results.All(r => r.Status == "PASS") && vm.Http.Results.Count == 32 && vm.Http.Results.All(r => r.Status == "PASS"), "Owned DNS/HTTP batch succeeds while 254 Ping, 32 TCP and two traces run");
+                    await vm.Dns.StartCommand.ExecuteAsync(null);
+                    Require(vm.Dns.Results.Count == 128 && vm.Dns.Results.All(r => r.Status == "PASS"), "Owned DNS batch succeeds while 254 Ping, 32 TCP and two traces run");
                     diagnosticBatches++; nextDiagnosticBatch += 5;
                 }
                 if (elapsed.Elapsed.TotalSeconds >= nextNavigation)
@@ -229,8 +227,8 @@ internal static partial class Program
             }
             await vm.Ping.StopCommand.ExecuteAsync(null); await secondTrace.StopCommand.ExecuteAsync(null); await vm.TraceWorkspace.Sessions[0].StopCommand.ExecuteAsync(null); vm.Ping.Refresh(true);
             await vm.Port.StopCommand.ExecuteAsync(null); vm.Port.Refresh(true);
-            Require(!vm.Dns.IsRunning && !vm.Http.IsRunning, "All DNS/HTTP presentation and network work is drained after coexistence soak");
-            await File.WriteAllTextAsync(Path.Combine(output, "dns-http-soak.json"), JsonSerializer.Serialize(new { Batches = diagnosticBatches, diagnosticFarm.DnsReplies, diagnosticFarm.HttpReplies, DnsRunning = vm.Dns.IsRunning, HttpRunning = vm.Http.IsRunning, ConcurrencyDns = vm.Dns.Concurrency, ConcurrencyHttp = vm.Http.Concurrency }));
+            Require(!vm.Dns.IsRunning, "All DNS presentation and network work is drained after coexistence soak");
+            await File.WriteAllTextAsync(Path.Combine(output, "dns-http-soak.json"), JsonSerializer.Serialize(new { Batches = diagnosticBatches, diagnosticFarm.DnsReplies, diagnosticFarm.HttpReplies, DnsRunning = vm.Dns.IsRunning, ConcurrencyDns = vm.Dns.Concurrency }));
             Require(vm.Port.Rows.Count == 32 && vm.Port.Rows.All(r => r.Connected > 0 && r.Attempts == r.Connected) && measuredTcp.Active == 0 && measuredTcp.Maximum <= 32 && measuredTcp.Overlap == 0, "32 actual TCP endpoints run alongside 254 Ping targets and two trace sessions without TCP overlap; Stop drains all sockets");
             vm.NavigateCommand.Execute("Port Test"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
             Render(window, output, "PortTest-32-soak", 1536, 1024, 1);

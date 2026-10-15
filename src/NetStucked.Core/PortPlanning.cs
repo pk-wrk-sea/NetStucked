@@ -8,7 +8,7 @@ public static class PortScanPlanner
     public static readonly IReadOnlyDictionary<string, string> StandardTemplates = new Dictionary<string, string>
     {
         ["Standard TCP ports"] = "21,22,25,53,80,110,143,443,445,3389",
-        ["Standard UDP ports"] = "53,123,161", ["Web ports"] = "80,443", ["Remote access"] = "22,3389"
+        ["Web ports"] = "80,443", ["Remote access"] = "22,3389"
     };
     public static PortParseResult Parse(string addresses, string numbers, PortProtocol protocol, bool multiple)
     {

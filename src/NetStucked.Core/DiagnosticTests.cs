@@ -4,7 +4,7 @@ using System.Net.Sockets;
 
 namespace NetStucked.Core;
 
-public enum DnsRecordType : ushort { A = 1, CNAME = 5, PTR = 12, MX = 15, TXT = 16, AAAA = 28, SRV = 33 }
+public enum DnsRecordType : ushort { A = 1, NS = 2, CNAME = 5, SOA = 6, PTR = 12, MX = 15, TXT = 16, AAAA = 28, SRV = 33 }
 public sealed record DnsRecord(string Name, string Type, uint Ttl, string Value, string Section);
 public sealed record DnsTestRequest(string Name, DnsRecordType Type, IPEndPoint Server, int TimeoutMs);
 public sealed record DnsTestResult(DateTimeOffset Time, string Name, string Type, string Resolver, string Status, double? ElapsedMs, string Transport, IReadOnlyList<DnsRecord> Records, string Error)

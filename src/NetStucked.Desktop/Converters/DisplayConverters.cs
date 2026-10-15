@@ -37,8 +37,8 @@ public sealed class PageVisibilityConverter : IValueConverter
     {
         string? page = value?.ToString(), surface = parameter?.ToString();
         bool visible = surface == "Other"
-            ? page is not ("Live Ping" or "Traceroute" or "Port Test" or "Diagnostics" or "DNS Test" or "HTTP / HTTPS Test" or "Updates" or "Network Info")
-            : (surface == "Port Test" && page == "Diagnostics") || Equals(value, parameter);
+            ? page is not ("Live Ping" or "Traceroute" or "Port Test" or "DNS Resolver" or "Subnet Cal" or "MAC Checker" or "URL Checker" or "Updates")
+            : Equals(value, parameter);
         return visible ? Visibility.Visible : Visibility.Collapsed;
     }
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;

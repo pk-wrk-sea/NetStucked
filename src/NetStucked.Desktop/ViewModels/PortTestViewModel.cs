@@ -32,7 +32,6 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     private bool _viewDirty;
     private long _lastViewRefresh;
     private bool _inputValid;
-    private PortProtocol? _resultProtocol;
     public UserSettingsStore Store { get; }
     public ObservableCollection<PortRow> Rows { get; } = [];
     public StableObservableCollection<PortSample> History { get; } = [];
@@ -41,12 +40,11 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     public bool IsActive => State is SessionState.Starting or SessionState.Running;
     public long ViewRefreshCount { get; private set; }
     public ICollectionView Results { get; }
-    public string[] StatusFilters { get; } = ["All status", "Connected", "Responded", "Refused", "Closed", "No response", "Timeout", "DNS error", "Unreachable", "Error", "Unknown"];
-    public PortProtocol[] Protocols { get; } = [PortProtocol.TCP, PortProtocol.UDP];
+    public string[] StatusFilters { get; } = ["All status", "Connected", "Refused", "Closed", "Timeout", "DNS error", "Unreachable", "Error", "Unknown"];
     public ObservableCollection<string> PortTemplateNames { get; } = [];
     [ObservableProperty] private string? _selectedPortTemplate;
     [ObservableProperty] private string _portNumbers = "443";
-    [ObservableProperty] private PortProtocol _protocol;
+    public PortProtocol Protocol => PortProtocol.TCP;
     public bool MultipleTargets => true;
     public bool Continuous => true;
     [ObservableProperty] private bool _scopeAcknowledged;
@@ -54,9 +52,9 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     [ObservableProperty] private bool _addressesExpanded = true;
     [ObservableProperty] private bool _historyExpanded = true;
     [ObservableProperty] private int _noResponse;
-    public string SuccessLabel => (_resultProtocol ?? Protocol) == PortProtocol.UDP ? "Responded" : "Connected";
-    public string FailureLabel => (_resultProtocol ?? Protocol) == PortProtocol.UDP ? "No success %" : "Failure %";
-    public string ProtocolGuide => Protocol == PortProtocol.UDP ? "UDP payload probe · silence is inconclusive." : "TCP connect + payload send · a successful send does not validate the application protocol.";
+    public string SuccessLabel => "Connected";
+    public string FailureLabel => "Failure %";
+    public string ProtocolGuide => "TCP connect + payload send · a successful send does not validate the application protocol.";
     [RelayCommand] private void ToggleAddresses() => AddressesExpanded = !AddressesExpanded;
     [RelayCommand] private void ToggleHistory() => HistoryExpanded = !HistoryExpanded;
     public int[] HistoryLimits { get; } = [100, 500];
@@ -83,8 +81,8 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
         _settings = store.Preferences.Port with { Continuous = true };
         store.Preferences.Port = _settings;
         store.Preferences.PortMultipleTargets = store.Preferences.PortContinuous = true;
-        _portNumbers = store.Preferences.PortNumbers; _protocol = store.Preferences.PortProtocol;
-        foreach (string name in PortScanPlanner.StandardTemplates.Keys.Concat(store.Preferences.PortNumberTemplates.Keys).Distinct()) PortTemplateNames.Add(name);
+        _portNumbers = store.Preferences.PortNumbers; store.Preferences.PortProtocol = PortProtocol.TCP;
+        foreach (string name in PortScanPlanner.StandardTemplates.Keys.Concat(store.Preferences.PortNumberTemplates.Keys).Where(name => name != "Standard UDP ports").Distinct()) PortTemplateNames.Add(name);
         foreach (var template in store.Preferences.PortTemplates) Templates.Add(CreateEntry(template));
         TargetText = store.Preferences.PortTargetText;
         MigrateLegacyInput();
@@ -102,13 +100,10 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
     private void InputChanged() { ScopeAcknowledged = false; if (_settings is not null) ValidateInput(); }
     partial void OnTargetTextChanged(string value) => InputChanged();
     partial void OnPortNumbersChanged(string value) => InputChanged();
-    partial void OnProtocolChanged(PortProtocol value) { InputChanged(); OnPropertyChanged(nameof(SuccessLabel)); OnPropertyChanged(nameof(FailureLabel)); OnPropertyChanged(nameof(ProtocolGuide)); }
     partial void OnScopeAcknowledgedChanged(bool value) => StartCommand.NotifyCanExecuteChanged();
     partial void OnSelectedPortTemplateChanged(string? value)
     {
         if (value is null || !CanEdit) return;
-        if (value == "Standard UDP ports") Protocol = PortProtocol.UDP;
-        else if (PortScanPlanner.StandardTemplates.ContainsKey(value)) Protocol = PortProtocol.TCP;
         PortNumbers = Store.Preferences.PortNumberTemplates.GetValueOrDefault(value, PortScanPlanner.StandardTemplates.GetValueOrDefault(value, "443"));
     }
     partial void OnStatusFilterChanged(string value) { _viewDirty = true; RefreshViewKeepingSelection(true); }
@@ -178,7 +173,7 @@ public partial class PortTestViewModel : ObservableObject, IAsyncDisposable
         var parsed = ValidateInput();
         if (!parsed.IsValid || RequiresScopeAcknowledgement && !ScopeAcknowledged) return;
         await _service.StartAsync(parsed.Targets, _settings with { Continuous = Continuous });
-        _resultProtocol = Protocol; OnPropertyChanged(nameof(SuccessLabel)); OnPropertyChanged(nameof(FailureLabel));
+        OnPropertyChanged(nameof(SuccessLabel)); OnPropertyChanged(nameof(FailureLabel));
         PersistInput();
         SelectedRow = null; _rememberedHost = null; _historySequence = -1;
     });

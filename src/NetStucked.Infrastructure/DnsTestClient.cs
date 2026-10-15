@@ -69,6 +69,11 @@ public sealed class DnsTestClient : IDnsTestClient
                     case 1 when length == 4: case 28 when length == 16: value = new IPAddress(message.AsSpan(offset, length)).ToString(); cursor = end; break;
                     case 1: case 28: throw new IOException("Invalid DNS address record length.");
                     case 5: case 12: case 2: value = Name(message, ref cursor); break;
+                    case 6:
+                        value = Name(message, ref cursor) + " " + Name(message, ref cursor);
+                        Need(message, cursor, 20);
+                        for (int field = 0; field < 5; field++) { value += " " + BinaryPrimitives.ReadUInt32BigEndian(message.AsSpan(cursor, 4)); cursor += 4; }
+                        break;
                     case 15: Need(message, cursor, 2); value = U16(message, cursor) + " "; cursor += 2; value += Name(message, ref cursor); break;
                     case 33: Need(message, cursor, 6); value = $"{U16(message, cursor)} {U16(message, cursor + 2)} {U16(message, cursor + 4)} "; cursor += 6; value += Name(message, ref cursor); break;
                     case 16:

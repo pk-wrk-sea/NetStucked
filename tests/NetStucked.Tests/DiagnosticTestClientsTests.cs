@@ -26,6 +26,8 @@ public sealed class DiagnosticTestClientsTests
     [InlineData(DnsRecordType.MX, "10 mail.example")]
     [InlineData(DnsRecordType.TXT, "hello world")]
     [InlineData(DnsRecordType.SRV, "10 20 443 service.example")]
+    [InlineData(DnsRecordType.NS, "ns.example")]
+    [InlineData(DnsRecordType.SOA, "ns.example hostmaster.example 1 2 3 4 5")]
     public void ReadsRequestedRecordsWithActualTtlAndSection(DnsRecordType type, string expected)
     {
         var query = WifiDnsQuery.Request("test.example", 1234, (ushort)type);
@@ -60,9 +62,10 @@ public sealed class DiagnosticTestClientsTests
     }
     [Fact] public async Task ActualUdpQueryAndTruncatedTcpFallbackUseTheSameQuestion()
     {
-        using var udp = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
-        var endpoint = (IPEndPoint)udp.Client.LocalEndPoint!;
-        var listener = new TcpListener(endpoint); listener.Start();
+        var fixture = BindDnsFixture();
+        using var udp = fixture.Udp;
+        var endpoint = fixture.Endpoint;
+        var listener = fixture.Tcp;
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         Task server = Task.Run(async () =>
         {
@@ -118,6 +121,19 @@ public sealed class DiagnosticTestClientsTests
     [Theory] [InlineData("ftp://host/path")] [InlineData("https://user:pass@host/")] [InlineData("not a url")]
     public void HttpRejectsUnsupportedSchemeAndEmbeddedCredentials(string url) => Assert.Throws<ArgumentException>(() => DiagnosticInput.HttpUrl(url));
 
+    private static (UdpClient Udp, TcpListener Tcp, IPEndPoint Endpoint) BindDnsFixture()
+    {
+        // TCP and UDP have independent Windows excluded ranges. Acquire both transports
+        // on the same owned port; release a candidate when either bind is unavailable.
+        for (int attempt = 0; attempt < 16; attempt++)
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0); listener.Start();
+            var endpoint = (IPEndPoint)listener.LocalEndpoint;
+            try { return (new UdpClient(endpoint), listener, endpoint); }
+            catch (SocketException ex) when (ex.SocketErrorCode is SocketError.AccessDenied or SocketError.AddressAlreadyInUse) { listener.Stop(); }
+        }
+        throw new IOException("Could not bind an owned TCP/UDP DNS fixture after 16 attempts.");
+    }
     internal static byte[] Answer(byte[] query, DnsRecordType type)
     {
         byte[] payload = type switch
@@ -126,7 +142,9 @@ public sealed class DiagnosticTestClientsTests
             DnsRecordType.CNAME => Name("alias.example"), DnsRecordType.PTR => Name("host.example"),
             DnsRecordType.MX => new byte[] { 0, 10 }.Concat(Name("mail.example")).ToArray(),
             DnsRecordType.TXT => new byte[] { 5 }.Concat(Encoding.ASCII.GetBytes("hello")).Concat(new byte[] { 5 }).Concat(Encoding.ASCII.GetBytes("world")).ToArray(),
-            DnsRecordType.SRV => new byte[] { 0, 10, 0, 20, 1, 187 }.Concat(Name("service.example")).ToArray(), _ => []
+            DnsRecordType.SRV => new byte[] { 0, 10, 0, 20, 1, 187 }.Concat(Name("service.example")).ToArray(),
+            DnsRecordType.NS => Name("ns.example"),
+            DnsRecordType.SOA => Name("ns.example").Concat(Name("hostmaster.example")).Concat(Enumerable.Range(1, 5).SelectMany(i => new byte[] { 0, 0, 0, (byte)i })).ToArray(), _ => []
         };
         byte[] result = query.Concat(new byte[] { 0xc0, 0x0c, 0, (byte)type, 0, 1, 0, 0, 0, 60, (byte)(payload.Length >> 8), (byte)payload.Length }).Concat(payload).ToArray(); result[2] = 0x81; result[3] = 0x80; result[7] = 1; return result;
     }
