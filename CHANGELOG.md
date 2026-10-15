@@ -1,11 +1,11 @@
 # Changelog
 
-## Unreleased — utility revision (2026-10-15)
+## 0.7.0 — 2026-10-15
 
 - Replace retired desktop DNS/HTTP/Wi-Fi screens and the Diagnostics entry with Subnet Cal, DNS Resolver, MAC Checker and the URL Checker provider layout; Port Test is TCP-only.
 - Calculate IPv4 CIDR/dotted masks on each edit in one field; distinguish incomplete and invalid input without retaining stale subnet results.
 - Add NS/SOA DNS lookup, bounded actual MACVendors.com lookup/cache/queue/cooldown, and explicit pending URL API configuration without invented results.
-- Verification, approval and remaining provider/manual gates: `docs/TOOLS_REVISION_2026-10-15.md`. Version remains 0.6.0; no publication.
+- Verification, approval and remaining provider/manual gates: `docs/TOOLS_REVISION_2026-10-15.md`. Version 0.7.0 publication is authorized; actual release/package evidence is recorded separately.
 
 ## 0.6.0 — 2026-10-09
 

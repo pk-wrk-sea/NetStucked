@@ -1,10 +1,10 @@
 # Utility revision — 2026-10-15
 
-Working change on `codex/tools-rework`, based on `f643f3fe043e8f8bc6eaa12b35ede4ba92ec3127`. Central version remains **0.6.0**. This source revision is unreleased and submitted for GitHub review; published v0.6.0 assets/source are unchanged.
+Version **0.7.0** release preparation on `codex/tools-rework`, based on `f643f3fe043e8f8bc6eaa12b35ede4ba92ec3127`. The subsequent human clarification requests an actual update release. Prior v0.6.0 assets/source remain immutable. Publication and exact-package evidence will be recorded in the release report; the development verification below predates the version bump.
 
 ## Human approval
 
-The human requested a mockup before implementation, then approved the complete menu/tool revision on 2026-10-15. The final clarification specifies Subnet Cal's single text field, automatic calculation and inline incomplete/error messages. URL results must appear in the app through APIs after provider accounts/keys are prepared. The later human request authorizes committing and pushing this completed source revision to GitHub for review. No new release version/tag or replacement of published assets was requested.
+The human requested a mockup before implementation, then approved the complete menu/tool revision on 2026-10-15. The final clarification specifies Subnet Cal's single text field, automatic calculation and inline incomplete/error messages. URL results must appear in the app through APIs after provider accounts/keys are prepared. After requesting GitHub publication, the human asked why version 0.7.0 was unavailable for update. This clarifies authorization to merge and publish the actual 0.7.0 packages/tag and verify public updater eligibility, preserving older published assets.
 
 ## Implemented desktop scope
 
@@ -50,4 +50,4 @@ Regular launches use the normal per-user preferences; automated QA uses isolated
 - [ ] VirusTotal account/key and supported Palo Alto API provisioned, then integration implemented/tested.
 - [ ] Clean Windows installer/recovery and physical DPI/accessibility acceptance.
 
-This slice does not close the full M02/M07/M08 milestones or authorize a release.
+This slice does not close the full M02/M07/M08 milestones. The later human clarification authorizes the 0.7.0 release; publication does not imply completion of the outstanding provider/manual gates.
