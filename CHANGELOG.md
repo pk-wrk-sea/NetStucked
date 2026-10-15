@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.0 — 2026-10-15
+
+- Add local Monitoring for 50 configured devices with ICMP/TCP and read-only SNMP v1/v2c/v3, Test SNMP, selected interfaces/bandwidth/errors/system/custom OIDs, explicit Start/Stop auto-resume, maintenance, bounded incidents and local notification cooldown.
+- X hides to Tray; explicit Exit/update drains collection. Restore an existing profile instance on relaunch and mark sleep/network observation gaps separately.
+- Rename Subnet Calculator; optional active-adapter IPv6 DNS servers and wrapped/resizable answers; process pasted MAC/ARP text and IP mapping only after Check.
+- Add Windows-protected personal VirusTotal key and bounded existing-report API lookup; embed Palo Alto Test A Site with its actual provider verification controls.
+- Ctrl+mouse wheel zooms result tables/text; improve bounded atomic replacement retry and WPF async disposal. Scope/QA/remaining gates: docs/FEATURES_0.8.0.md and docs/QA_0.8.0.md.
+
 ## 0.7.0 — 2026-10-15
 
 - Replace retired desktop DNS/HTTP/Wi-Fi screens and the Diagnostics entry with Subnet Cal, DNS Resolver, MAC Checker and the URL Checker provider layout; Port Test is TCP-only.

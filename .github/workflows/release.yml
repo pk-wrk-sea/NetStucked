@@ -80,6 +80,10 @@ jobs:
           dotnet (Join-Path $qa NetStucked.WindowsQa.dll) artifacts/release/windows-qa 0 artifacts/release/publish
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & ./scripts/SmokePublished.ps1 -PublishDirectory artifacts/release/publish
+          if ([Version]$env:APP_VERSION -ge [Version]'0.8.0') {
+            dotnet (Join-Path $qa NetStucked.WindowsQa.dll) --native-monitor-check artifacts/release/native-monitor-qa artifacts/release/publish/NetStucked.exe
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
       - name: Compile Inno Setup installer from the frozen package
         shell: pwsh
         run: |
@@ -103,5 +107,6 @@ jobs:
           path: |
             artifacts/release/test-results
             artifacts/release/windows-qa
+            artifacts/release/native-monitor-qa
             artifacts/release/installer-build.json
             artifacts/installer

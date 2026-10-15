@@ -1,5 +1,7 @@
 # UI approval register
 
+Approved **0.8.0 release candidate (2026-10-15)**: local Monitoring/SNMP/tray/auto-resume, utility refinements, protected VirusTotal lookup and embedded Palo Alto Test A Site are implemented. See [approved scope](FEATURES_0.8.0.md) and [verification/usage/limits](QA_0.8.0.md). No mockup was requested. Public Latest remains 0.7.0 until exact packaging/CI/publication completes; earlier snapshots below are historical.
+
 **0.7.0 is published as GitHub Latest (2026-10-15).** The approved utility/menu revision, exact portable/installer checks, 315 tests, Windows CI and actual public 0.6.0 → 0.7.0 updater/preparation checks passed. See [the publication evidence and limits](GITHUB_RELEASE_0.7.0_REPORT_2026-10-15.md) and [tool scope](TOOLS_REVISION_2026-10-15.md). URL provider APIs and manual/clean-machine acceptance remain open. Earlier snapshots below are historical.
 
 Earlier source-review snapshot (superseded by published 0.7.0): approved Subnet Cal / DNS Resolver / MAC Checker and in-app URL Checker layout replace the retired desktop DNS/HTTP/Wi-Fi surfaces; Port Test is TCP-only. Subnet uses one field and automatic inline validation. URL API integration awaits account keys and a supported Palo Alto endpoint. See [scope, verification and open gates](TOOLS_REVISION_2026-10-15.md). Published 0.6.0 descriptions below refer to the earlier release.

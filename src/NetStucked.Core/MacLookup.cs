@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace NetStucked.Core;
 
 public sealed record MacAddressInfo(string Address, string Oui, string AddressType, bool CanIdentifyVendor);
-public sealed record MacVendorResult(DateTimeOffset Time, string Address, string Oui, string? Vendor, string AddressType, string Status, string Details);
+public sealed record MacVendorResult(DateTimeOffset Time, string Address, string Oui, string? Vendor, string AddressType, string Status, string Details, string IpAddress = "", int SourceLine = 0);
 public interface IMacVendorLookup
 {
     Task<MacVendorResult> LookupAsync(MacAddressInfo address, int timeoutMs, CancellationToken token);

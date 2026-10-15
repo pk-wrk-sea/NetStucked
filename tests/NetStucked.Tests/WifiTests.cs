@@ -102,8 +102,16 @@ public sealed class WifiTests
     }
     [Fact] public async Task DnsTruncatedUdpFallsBackToRealBoundedTcp()
     {
-        using var udp = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0)); int port = ((IPEndPoint)udp.Client.LocalEndPoint!).Port;
-        using var tcp = new TcpListener(IPAddress.Loopback, port); tcp.Start(); using var deadline = new CancellationTokenSource(5000);
+        // Reserve both transports; Windows TCP and UDP excluded-port ranges can differ.
+        UdpClient? boundUdp = null; TcpListener? boundTcp = null;
+        for (int attempt = 0; attempt < 16 && boundUdp is null; attempt++)
+        {
+            var candidate = new TcpListener(IPAddress.Loopback, 0); candidate.Start();
+            try { boundUdp = new UdpClient((IPEndPoint)candidate.LocalEndpoint); boundTcp = candidate; }
+            catch (SocketException) { candidate.Stop(); }
+        }
+        using var udp = boundUdp ?? throw new IOException("Could not reserve an owned DNS fixture endpoint.");
+        using var tcp = boundTcp!; int port = ((IPEndPoint)tcp.LocalEndpoint).Port; using var deadline = new CancellationTokenSource(5000);
         var server = Task.Run(async () =>
         {
             var query = await udp.ReceiveAsync(deadline.Token); var truncated = DnsReply(query.Buffer); truncated[2] |= 2; await udp.SendAsync(truncated, query.RemoteEndPoint, deadline.Token);

@@ -31,7 +31,8 @@ public static class ColumnLayout
             var column = grid.Columns.FirstOrDefault(c => ColumnKey(c) == preference.Key.Replace("Data.", ""));
             if (column is null) continue;
             if (preference.Key != "Data.LastPing") column.Visibility = preference.Visible ? Visibility.Visible : Visibility.Collapsed;
-            if (double.IsFinite(preference.Width) && preference.Width is >= 35 and <= 1200) { column.MinWidth = preference.Width; column.Width = preference.Width; }
+            double maximum = GetKey(grid) == "DnsTest" ? 4000 : 1200;
+            if (double.IsFinite(preference.Width) && preference.Width >= 35 && preference.Width <= maximum) { column.MinWidth = GetKey(grid) == "DnsTest" ? 35 : preference.Width; column.Width = preference.Width; }
             column.DisplayIndex = Math.Clamp(preference.Order, 0, grid.Columns.Count - 1);
         }
         GridTools.StretchLast(grid);

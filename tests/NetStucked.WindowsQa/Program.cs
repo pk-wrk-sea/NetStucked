@@ -40,6 +40,8 @@ internal static partial class Program
         if (args.FirstOrDefault() == "--wan-metadata") return ReadWanMetadataAsync(args[1], Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--verify-installer") return VerifyPublishedInstallerAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--public-update-check") return CheckPublicUpdateAsync(Path.GetFullPath(args[1]), args[2], args[3]).GetAwaiter().GetResult();
+        if (args.FirstOrDefault() == "--palo-site-check") return CheckPaloSite(Path.GetFullPath(args[1]));
+        if (args.FirstOrDefault() == "--native-monitor-check") return CheckNativeMonitoringAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         string output = Path.GetFullPath(args.FirstOrDefault() ?? "artifacts/windows-qa");
         int soakSeconds = args.Length > 1 ? int.Parse(args[1]) : 0;
         _expectedAvailableVersion = args.Length > 3 ? args[3] : null;
@@ -81,9 +83,11 @@ internal static partial class Program
         var dialogs = new QaDialogs();
         var measured = new MeasuredRealProbe();
         var measuredTcp = new MeasuredRealTcp();
-        await using var provider = App.ConfigureServices(store, dialogs, services => { services.AddSingleton<IIcmpProbe>(measured); services.AddSingleton<ITcpProbe>(measuredTcp); services.AddSingleton<IMacVendorLookup, QaMacLookup>(); });
+        await using var provider = App.ConfigureServices(store, dialogs, services => { services.AddSingleton<IIcmpProbe>(measured); services.AddSingleton<ITcpProbe>(measuredTcp); services.AddSingleton<IMacVendorLookup, QaMacLookup>(); services.AddSingleton<ISecretVault, QaSecretVault>(); services.AddSingleton<ISnmpClient, QaSnmpClient>(); services.AddSingleton<IMonitorProbe, QaMonitorProbe>(); });
         provider.GetRequiredService<ThemeService>();
         var vm = provider.GetRequiredService<MainViewModel>();
+        try
+        {
         var window = provider.GetRequiredService<MainWindow>();
         app.MainWindow = window; window.DataContext = vm;
         window.ShowActivated = false; window.ShowInTaskbar = false; window.Opacity = 0;
@@ -132,6 +136,7 @@ internal static partial class Program
         await CheckSelectedBuildAsync(vm, store, measured, measuredTcp);
         await CheckBrandingScanAsync(window, vm, dialogs, provider, output);
         await CheckDiagnosticsStabilityAsync(window, vm, dialogs, store, output);
+        await Check080Async(window, vm, output);
         vm.NavigateCommand.Execute("Traceroute");
         await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
         Require(Descendants<RadioButton>((DependencyObject)window.Content).Single(b => Equals(b.CommandParameter, "Traceroute")).IsChecked == true, "Sidebar selection follows the active page");
@@ -250,6 +255,8 @@ internal static partial class Program
         Require(measured.Active == 0 && measuredTcp.Active == 0 && vm.Port.State == SessionState.Stopped, "Window shutdown awaits Ping, Traceroute, TCP and release checks");
         Console.WriteLine("WINDOWS QA PASSED; images are actual WPF renders, not manual desktop screenshots.");
         window.Close();
+        }
+        catch (Exception ex) { Console.Error.WriteLine("PRIMARY QA FAILURE " + ex); await vm.ShutdownAsync(); throw; }
     }
 
     private static void CheckSettingsDialogs()
