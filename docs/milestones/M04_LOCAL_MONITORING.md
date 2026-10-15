@@ -1,5 +1,7 @@
 # M04 — Local monitoring, incidents and alerts
 
+Later approval, 2026-10-15: the human explicitly requests implementation without a mockup. [0.8.0 scope](../FEATURES_0.8.0.md) supersedes the earlier missing-mockup gate for local Monitoring/SNMP/tray only. [QA](../QA_0.8.0.md) separates implemented/automated checks from outstanding real-device/manual acceptance. Full SQLite/history/central-service acceptance remains outside this slice.
+
 ## 1. Milestone and version
 
 **M04** / 0.8.0 proposed (brief originally 0.5.0). Planning snapshot 2026-10-09; not a version bump or publication instruction. [Milestone index](../MILESTONE_INDEX.md).

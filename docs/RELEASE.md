@@ -1,5 +1,7 @@
 # Release operations
 
+Approved **0.8.0 release candidate (2026-10-15)**: local Monitoring/SNMP/tray/auto-resume, utility refinements, protected VirusTotal lookup and embedded Palo Alto Test A Site are implemented. See [approved scope](FEATURES_0.8.0.md) and [verification/usage/limits](QA_0.8.0.md). No mockup was requested. Public Latest remains 0.7.0 until exact packaging/CI/publication completes; earlier snapshots below are historical.
+
 **0.7.0 is published as GitHub Latest (2026-10-15).** The approved utility/menu revision, exact portable/installer checks, 315 tests, Windows CI and actual public 0.6.0 → 0.7.0 updater/preparation checks passed. See [the publication evidence and limits](GITHUB_RELEASE_0.7.0_REPORT_2026-10-15.md) and [tool scope](TOOLS_REVISION_2026-10-15.md). URL provider APIs and manual/clean-machine acceptance remain open. Earlier snapshots below are historical.
 
 Current integration (later human authorization, 2026-10-09): **0.5.0** combines the approved Network Info Wi-Fi slice with published **0.4.2** diagnostics. Version bump/publication were explicitly authorized; **0.5.0 is now GitHub Latest**, with 242 tests, exact WPF/native/soak/package/public checks and both Windows CI workflows PASS. [Publication report](GITHUB_RELEASE_0.5.0_REPORT_2026-10-09.md). See [0.5.0 scope](FEATURES_0.5.0.md) and [combined verification](QA_0.5.0.md); earlier audit/preview version and release statements below are historical snapshots. Wi-Fi hardware authentication and broader M01 routes/neighbors remain open.

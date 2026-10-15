@@ -1,4 +1,6 @@
-# NetStucked 0.7.0
+# NetStucked 0.8.0 release candidate
+
+0.8.0 implementation: local Monitoring with SNMP v1/v2c/v3/Test/interfaces/bandwidth, Start-intent auto-resume, System Tray/instance restore, utility refinements and Ctrl+wheel result zoom. VirusTotal existing-report API uses your protected personal key; Palo Alto displays its actual Test A Site with provider verification. See [scope](docs/FEATURES_0.8.0.md) and [QA/usage/limits](docs/QA_0.8.0.md). Public Latest is 0.7.0 until verified 0.8.0 publication; the earlier release description below is historical.
 
 Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.7.0 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.7.0).
 

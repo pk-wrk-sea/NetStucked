@@ -104,7 +104,7 @@ public sealed class UserSettingsStore
         try
         {
             await File.WriteAllTextAsync(temporary, json, Encoding.UTF8, token).ConfigureAwait(false);
-            File.Move(temporary, path, true);
+            await AtomicFileReplace.MoveAsync(temporary, path, token).ConfigureAwait(false);
         }
         finally { if (File.Exists(temporary)) File.Delete(temporary); }
     }

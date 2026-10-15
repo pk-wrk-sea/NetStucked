@@ -6,9 +6,11 @@ namespace NetStucked.Desktop.Behaviors;
 
 public sealed class CopyableTextColumn : DataGridTextColumn
 {
+    public bool Wrap { get; set; }
     protected override FrameworkElement GenerateElement(DataGridCell cell, object dataItem)
     {
         var text = new TextBox { Style = ElementStyle is { TargetType: var type } && type == typeof(TextBox) ? ElementStyle : (Style)cell.FindResource("TableText"), IsReadOnly = true };
+        if (Wrap) { text.TextWrapping = TextWrapping.Wrap; text.AcceptsReturn = true; text.MaxHeight = 300; text.VerticalScrollBarVisibility = ScrollBarVisibility.Auto; }
         // TextBox.Text defaults to TwoWay even when IsReadOnly. Display cells must never
         // attempt writes to measured/read-only models; retain the original binding for editing.
         if (Binding is Binding source)

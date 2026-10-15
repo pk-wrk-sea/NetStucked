@@ -48,8 +48,9 @@ public abstract partial class DiagnosticToolViewModel<T> : ObservableObject, IAs
         IsRunning = true; _cancel = new CancellationTokenSource();
         try
         {
+            Results.Clear(); SelectedRow = default;
             var jobs = await PlanAsync(_cancel.Token);
-            Results.Clear(); SelectedRow = default; Message = $"Running · 0 / {jobs.Count}";
+            Message = $"Running · 0 / {jobs.Count}";
             _run = Parallel.ForEachAsync(jobs, new ParallelOptions { MaxDegreeOfParallelism = Concurrency, CancellationToken = _cancel.Token }, async (job, token) =>
             {
                 var row = await job(token).ConfigureAwait(false);
@@ -81,6 +82,7 @@ public partial class DnsResolverViewModel : DiagnosticToolViewModel<DnsTestResul
     private readonly IDnsTestClient _client;
     [ObservableProperty] private string _resolverText = "";
     [ObservableProperty] private bool _useSystemResolvers = true;
+    [ObservableProperty] private bool _includeIpv6Dns;
     public bool CustomResolvers => !UseSystemResolvers;
     partial void OnUseSystemResolversChanged(bool value) => OnPropertyChanged(nameof(CustomResolvers));
     [ObservableProperty] private bool _queryA = true;
@@ -100,7 +102,7 @@ public partial class DnsResolverViewModel : DiagnosticToolViewModel<DnsTestResul
         if (types.Length == 0) throw new ArgumentException("Select at least one DNS record type.");
         if (UseSystemResolvers)
         {
-            var servers = await Task.Run(() => NetworkInterface.GetAllNetworkInterfaces().Where(n => n.OperationalStatus == OperationalStatus.Up).SelectMany(n => n.GetIPProperties().DnsAddresses).Distinct().Take(4).Select(a => a.ToString()).ToArray(), token);
+            var servers = await Task.Run(() => DnsServerSelection.Filter(NetworkInterface.GetAllNetworkInterfaces().Where(n => n.OperationalStatus == OperationalStatus.Up).SelectMany(n => n.GetIPProperties().DnsAddresses), IncludeIpv6Dns), token);
             ResolverText = string.Join(Environment.NewLine, servers);
             if (servers.Length == 0) throw new ArgumentException("No active adapter DNS servers were found; enter resolver IPs.");
         }

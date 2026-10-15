@@ -26,9 +26,9 @@ internal static partial class Program
     private static async Task CheckToolsAsync(Window window, MainViewModel vm, string output)
     {
         var names = Descendants<RadioButton>((DependencyObject)window.Content).Select(AutomationProperties.GetName).ToArray();
-        Require(new[] { "Subnet Cal", "DNS Resolver", "MAC Checker", "URL Checker" }.All(names.Contains), "All approved utility menus exist");
+        Require(new[] { "Subnet Calculator", "DNS Resolver", "MAC Checker", "URL Checker" }.All(names.Contains), "All approved utility menus exist");
         Require(new[] { "Diagnostics", "DNS Test", "HTTP / HTTPS Test", "Network Info" }.All(n => !names.Contains(n)), "Retired diagnostics and Wi-Fi menus are absent");
-        vm.NavigateCommand.Execute("Subnet Cal"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+        vm.NavigateCommand.Execute("Subnet Calculator"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
         var view = Descendants<NetStucked.Desktop.Views.SubnetCalculatorView>((DependencyObject)window.Content).Single();
         var input = (TextBox)view.FindName("SubnetInputBox"); var status = (TextBlock)view.FindName("SyntaxMessage");
         Require(!Descendants<ComboBox>(view).Any() && !Descendants<Button>(view).Any(b => b.Content is string label && label.Contains("Calculate", StringComparison.Ordinal)), "Subnet uses one input with no CIDR selector or Calculate button");
@@ -54,7 +54,7 @@ internal static partial class Program
             vm.NavigateCommand.Execute("URL Checker"); vm.Url.Target = "https://example.com"; vm.Url.CheckCommand.Execute(null);
             Require(vm.Url.Message.Contains("No request was sent"), "URL Checker truthfully blocks API lookup until provider access is configured");
             Render(window, output, "URL-" + theme.ToLowerInvariant(), 1280, 800, 1);
-            vm.NavigateCommand.Execute("Subnet Cal");
+            vm.NavigateCommand.Execute("Subnet Calculator");
         }
         vm.NavigateCommand.Execute("DNS Resolver"); Require(vm.Dns.QueryNs == false && vm.Dns.QuerySoa == false, "DNS Resolver exposes optional NS/SOA records");
         Render(window, output, "DNS-Resolver-dark", 1280, 800, 1);

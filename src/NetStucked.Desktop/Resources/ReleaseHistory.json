@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.8.0",
+    "Date": "2026-10-15",
+    "Notes": "• Added local Monitoring for up to 50 configured devices: ICMP/TCP, SNMP v1/v2c/v3, Test SNMP, selected interfaces/bandwidth, custom OIDs and bounded incidents.\n• Previously started monitors resume on startup; X hides to System Tray, explicit Exit/update drains work, and sleep/network gaps remain distinct from device downtime.\n• Renamed Subnet Calculator; optional IPv6 DNS servers and wrapped/resizable answers; MAC/ARP text and same-line IP mapping are processed after Check.\n• Added protected VirusTotal key configuration and existing-report API lookup, plus embedded Palo Alto Test A Site.\n• Ctrl+mouse wheel zooms result tables/text; live Cisco/real-key and clean-machine acceptance remain open."
+  },
+  {
     "Version": "0.7.0",
     "Date": "2026-10-15",
     "Notes": "• Added Subnet Cal with one-field CIDR/dotted-mask input, automatic calculation and incomplete/invalid syntax feedback.\n• Added DNS Resolver with selectable records and DNS servers, including NS/SOA, and bounded MACVendors.com vendor lookup.\n• Removed Diagnostics, old DNS/HTTP tests and Network Info/Wi-Fi Manager from the desktop; Port Test is TCP-only.\n• Added the in-app URL Checker layout; live VirusTotal/Palo Alto integration awaits provider accounts/keys and a supported Palo Alto API."

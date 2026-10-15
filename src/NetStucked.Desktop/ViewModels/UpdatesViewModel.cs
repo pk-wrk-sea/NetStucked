@@ -169,6 +169,9 @@ public partial class UpdatesViewModel : ObservableObject, IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
+        // Async DI disposal can resume on a pool thread; command subscribers belong to WPF.
+        if (System.Windows.Application.Current?.Dispatcher is { } dispatcher && !dispatcher.CheckAccess())
+        { await dispatcher.InvokeAsync(() => DisposeAsync().AsTask()).Task.Unwrap(); return; }
         _disposed = true; CheckCommand.NotifyCanExecuteChanged();
         await _lifetime.CancelAsync();
         if (CheckCommand.ExecutionTask is { } pending) await pending;

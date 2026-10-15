@@ -11,6 +11,8 @@ namespace NetStucked.Desktop.Services;
 
 public sealed partial class WpfDialogService : IDesktopDialogs
 {
+    public bool Confirm(string title, string message) => MessageBox.Show(Application.Current.MainWindow, message, title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+
     public async Task<string?> LoadTargetsAsync()
     {
         var dialog = new OpenFileDialog { Title = "Load target list", Filter = "UTF-8 target lists (*.txt)|*.txt|All files|*.*", CheckFileExists = true };

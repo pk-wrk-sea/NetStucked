@@ -14,6 +14,7 @@ public interface IDesktopDialogs
     string? AskTemplateName(string suggested) => null;
     string? AskPortTemplateName(string suggested) => AskTemplateName(suggested);
     bool ConfirmTemplateDeletion(string name) => false;
+    bool Confirm(string title, string message) => false;
     HopDescriptionEdit? EditHopDescriptions(string text, bool wan) => null;
     string? EditPortTemplate(string name, string numbers) => null;
 }

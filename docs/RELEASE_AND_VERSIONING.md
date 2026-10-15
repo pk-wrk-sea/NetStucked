@@ -1,5 +1,7 @@
 # Release and versioning register
 
+Approved **0.8.0 release candidate (2026-10-15)**: local Monitoring/SNMP/tray/auto-resume, utility refinements, protected VirusTotal lookup and embedded Palo Alto Test A Site are implemented. See [approved scope](FEATURES_0.8.0.md) and [verification/usage/limits](QA_0.8.0.md). No mockup was requested. Public Latest remains 0.7.0 until exact packaging/CI/publication completes; earlier snapshots below are historical.
+
 **0.7.0 is published as GitHub Latest (2026-10-15).** The approved utility/menu revision, exact portable/installer checks, 315 tests, Windows CI and actual public 0.6.0 → 0.7.0 updater/preparation checks passed. See [the publication evidence and limits](GITHUB_RELEASE_0.7.0_REPORT_2026-10-15.md) and [tool scope](TOOLS_REVISION_2026-10-15.md). URL provider APIs and manual/clean-machine acceptance remain open. Earlier snapshots below are historical.
 
 Current **0.6.0 is published as GitHub Latest**: DNS Test, HTTP / HTTPS Test, grouped navigation, Dark version labels and native Taskbar branding. Build, 265 tests, exact portable WPF/native/soak/package/public checks and both release-source CI workflows PASS. See [GITHUB_RELEASE_0.6.0_REPORT_2026-10-09.md](GITHUB_RELEASE_0.6.0_REPORT_2026-10-09.md) and [manual acceptance checklist](FEATURES_0.6.0.md#human-acceptance-checklist). Wi-Fi remains unchanged. Broader adapters/routes/ARP and durable History/Reports were declined; future menu pages show Pending - Coming Soon. Earlier planning/version snapshots below are historical.
