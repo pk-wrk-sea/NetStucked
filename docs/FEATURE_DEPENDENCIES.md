@@ -1,5 +1,7 @@
 # Feature dependencies
 
+**2026-10-19 / 0.9.0:** Config Collector is approved and implemented in the existing theme; [scope](FEATURES_0.9.0.md), [architecture and failure matrix](CONFIG_COLLECTOR_2026-10-19.md), [QA and open real-device gates](QA_0.9.0.md). Source/package publication is in preparation; this is not yet a Released claim. Older collector-v2/backlog snapshots below are superseded only for this named slice.
+
 Solid arrows describe required capabilities, not permission or a requirement to finish every preceding UI. All future modules/interfaces below are **proposed**, absent from current production code.
 
 ```mermaid

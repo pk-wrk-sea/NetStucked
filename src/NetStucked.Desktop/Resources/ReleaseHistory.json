@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.9.0",
+    "Date": "2026-10-19",
+    "Notes": "• Config Collector now collects from explicit device lists using verified SSH or explicitly enabled Telnet.\n• Added memory-only AUTH1/AUTH2, restricted fallback, immutable run options and prompt-aware read-only commands.\n• Stream protected TXT/JSON captures with hashes, bounded preview, cancellation and error CSV.\n• Uses the existing Light/Dark/System theme, resizable tables/panels and Ctrl+wheel result zoom.\n• Tested with owned SSH/Telnet loopback fixtures; real Cisco and other vendor acceptance remains open."
+  },
+  {
     "Version": "0.8.0",
     "Date": "2026-10-15",
     "Notes": "• Added local Monitoring for up to 50 configured devices: ICMP/TCP, SNMP v1/v2c/v3, Test SNMP, selected interfaces/bandwidth, custom OIDs and bounded incidents.\n• Previously started monitors resume on startup; X hides to System Tray, explicit Exit/update drains work, and sleep/network gaps remain distinct from device downtime.\n• Renamed Subnet Calculator; optional IPv6 DNS servers and wrapped/resizable answers; MAC/ARP text and same-line IP mapping are processed after Check.\n• Added protected VirusTotal key configuration and existing-report API lookup, plus embedded Palo Alto Test A Site.\n• Ctrl+mouse wheel zooms result tables/text; live Cisco/real-key and clean-machine acceptance remain open."

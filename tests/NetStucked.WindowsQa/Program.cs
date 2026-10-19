@@ -35,6 +35,7 @@ internal static partial class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        if (args.FirstOrDefault() == "--collector-ssh-check") return CheckCollectorSshAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--export-brand") return ExportBrand(Path.GetFullPath(args[1]));
         if (args.FirstOrDefault() == "--mac-read") return ReadMacVendorAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--wan-metadata") return ReadWanMetadataAsync(args[1], Path.GetFullPath(args[2])).GetAwaiter().GetResult();
@@ -42,8 +43,9 @@ internal static partial class Program
         if (args.FirstOrDefault() == "--public-update-check") return CheckPublicUpdateAsync(Path.GetFullPath(args[1]), args[2], args[3]).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--palo-site-check") return CheckPaloSite(Path.GetFullPath(args[1]));
         if (args.FirstOrDefault() == "--native-monitor-check") return CheckNativeMonitoringAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
-        string output = Path.GetFullPath(args.FirstOrDefault() ?? "artifacts/windows-qa");
-        int soakSeconds = args.Length > 1 ? int.Parse(args[1]) : 0;
+        bool collectorOnly = args.FirstOrDefault() == "--collector-ui-check";
+        string output = Path.GetFullPath(collectorOnly ? args[1] : args.FirstOrDefault() ?? "artifacts/windows-qa");
+        int soakSeconds = !collectorOnly && args.Length > 1 ? int.Parse(args[1]) : 0;
         _expectedAvailableVersion = args.Length > 3 ? args[3] : null;
         _expectedCurrentVersion = args.Length > 4 ? args[4] : null;
         if (args.Length > 2)
@@ -64,7 +66,7 @@ internal static partial class Program
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Error;
         _ = application.Dispatcher.InvokeAsync(async () =>
         {
-            try { await RunAsync(application, output, soakSeconds, listener); }
+            try { if (collectorOnly) await RunCollectorOnlyAsync(application, output, listener); else await RunAsync(application, output, soakSeconds, listener); }
             catch (Exception ex) { _exitCode = 1; Console.Error.WriteLine("FAIL " + ex); }
             finally { application.Shutdown(); }
         });
@@ -83,7 +85,7 @@ internal static partial class Program
         var dialogs = new QaDialogs();
         var measured = new MeasuredRealProbe();
         var measuredTcp = new MeasuredRealTcp();
-        await using var provider = App.ConfigureServices(store, dialogs, services => { services.AddSingleton<IIcmpProbe>(measured); services.AddSingleton<ITcpProbe>(measuredTcp); services.AddSingleton<IMacVendorLookup, QaMacLookup>(); services.AddSingleton<ISecretVault, QaSecretVault>(); services.AddSingleton<ISnmpClient, QaSnmpClient>(); services.AddSingleton<IMonitorProbe, QaMonitorProbe>(); });
+        await using var provider = App.ConfigureServices(store, dialogs, services => { services.AddSingleton<IIcmpProbe>(measured); services.AddSingleton<ITcpProbe>(measuredTcp); services.AddSingleton<IMacVendorLookup, QaMacLookup>(); services.AddSingleton<ISecretVault, QaSecretVault>(); services.AddSingleton<ISnmpClient, QaSnmpClient>(); services.AddSingleton<IMonitorProbe, QaMonitorProbe>(); services.AddSingleton<ICollectorTransport, QaCollectorTransport>(); });
         provider.GetRequiredService<ThemeService>();
         var vm = provider.GetRequiredService<MainViewModel>();
         try
@@ -136,6 +138,7 @@ internal static partial class Program
         await CheckSelectedBuildAsync(vm, store, measured, measuredTcp);
         await CheckBrandingScanAsync(window, vm, dialogs, provider, output);
         await CheckDiagnosticsStabilityAsync(window, vm, dialogs, store, output);
+        await CheckCollectorAsync(window, vm, provider.GetRequiredService<ICollectorTransport>() as QaCollectorTransport ?? throw new InvalidOperationException(), output);
         await Check080Async(window, vm, output);
         vm.NavigateCommand.Execute("Traceroute");
         await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
