@@ -1,5 +1,7 @@
 # A01 — SSH Terminal / Remote Access
 
+**0.10.1 follow-up:** Human approval replaces Terminal manual fingerprint entry with interactive host-key acceptance, saved-key recognition and explicit changed-key review. See [scope and actual QA](../FEATURES_0.10.1.md). The full A01 backlog remains open.
+
 **Current first-slice extension, 2026-10-19:** The Terminal first slice is approved, implemented and published as 0.10.0; see the linked QA and publication limits. See [scope](../FEATURES_0.10.0.md), [architecture](../TERMINAL_2026-10-19.md), [QA/open gates](../QA_0.10.0.md). This supersedes the missing-mockup gate for this named existing-theme slice. Full A01, Serial, SFTP, splits and recording remain open. Older criteria below are retained as broader backlog.
 
 ## 1. Milestone and version

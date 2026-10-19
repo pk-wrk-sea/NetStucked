@@ -1,5 +1,7 @@
 # Security and data policy
 
+**2026-10-19 / 0.10.1 host-key UX follow-up:** The human requested SecureCRT-style host-key handling. Terminal no longer requires a fingerprint field: first use asks Accept Once / Accept & Save / Cancel, saved keys are recognized, changed keys require explicit review, and saved keys can be viewed/removed. [Scope and verification](FEATURES_0.10.1.md). This supersedes manual pin entry for Terminal only; Collector remains unchanged. Publication and real-device/manual acceptance are tracked separately.
+
 **2026-10-19 / 0.10.0 published as GitHub Latest:** The approved first Terminal slice is implemented and published. [Scope](FEATURES_0.10.0.md), [architecture](TERMINAL_2026-10-19.md), [QA](QA_0.10.0.md), [immutable source/assets/CI/public-download evidence and updater limits](GITHUB_RELEASE_0.10.0_REPORT_2026-10-19.md). Release build, 424 tests, 30 actual owned SSH/emulator assertions, 272 exact-payload WPF/60-second assertions, native checks and four Windows CI runs pass. The anonymous production updater is BLOCKED here by GitHub HTTP 403/rate limit, including an after-reset retry; this is not a PASS. Full A01 and real-device/Windows Clipboard/manual acceptance remain open. Earlier Terminal placeholder gates below are superseded only for this slice.
 
 ## Current application

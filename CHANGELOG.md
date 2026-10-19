@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.1 - 2026-10-19
+
+- Replace Terminal fingerprint entry with first-use Accept Once / Accept & Save / Cancel, saved-host recognition and explicit changed-key confirmation before authentication.
+- Add a nonsecret per-user host-key database and a themed viewer/removal window. Preserve legacy profile fields without allowing them to bypass the new trust flow.
+- Pause the SSH connection timer during host-key review; cancellation closes the prompt and drains the connection. See docs/FEATURES_0.10.1.md for QA and open gates.
+
 ## 0.10.0 - 2026-10-19
 
 - Add real offline xterm.js Terminal in the existing Light/Dark/System theme, with five independent SSH/Telnet tabs and bounded input, output and scrollback.

@@ -107,6 +107,7 @@ public partial class TerminalView : UserControl, ITerminalRenderer
     }
     private async void Connect_Click(object sender,RoutedEventArgs e) {string password=Password.Password,passphrase=Passphrase.Password;Password.Clear();Passphrase.Clear();await Vm.ConnectAsync(password,passphrase);}
     private void Key_Click(object sender,RoutedEventArgs e) {var dialog=new Microsoft.Win32.OpenFileDialog{Title="Choose SSH private key",CheckFileExists=true};if(dialog.ShowDialog()==true)Vm.SelectedTab.KeyPath=dialog.FileName;}
+    private async void HostKeys_Click(object sender,RoutedEventArgs e) {await Vm.RefreshHostKeysCommand.ExecuteAsync(null);new TerminalKnownHostsWindow{Owner=Window.GetWindow(this),DataContext=Vm}.ShowDialog();}
     private async void Copy_Click(object sender,RoutedEventArgs e) {try{await SendAsync(new{kind="copy",tab=Vm.SelectedTab.Id});}catch{Vm.SelectedTab.Message="Copy unavailable. Open the terminal first.";}}
     private async void Paste_Click(object sender,RoutedEventArgs e) {try{await PasteAsync(Vm.SelectedTab);}catch(System.Runtime.InteropServices.COMException){Vm.SelectedTab.Message="Clipboard is busy. Try again.";}catch{await RendererFailedAsync();}}
     private async Task PasteAsync(TerminalTabViewModel tab)
