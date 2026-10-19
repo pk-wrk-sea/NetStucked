@@ -1,0 +1,9 @@
+<Project>
+  <!-- Tmds.Ssh 0.26.0 transitively includes its library's PublicAPI.txt analyzer.
+       Remove only this dependency build tool; retain SDK, security and xUnit analyzers. -->
+  <Target Name="ExcludeTransitiveLibraryApiAnalyzer" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Analyzer Remove="@(Analyzer)" Condition="$([System.String]::Copy('%(Analyzer.Identity)').ToLowerInvariant().Contains('microsoft.codeanalysis.publicapianalyzers'))" />
+    </ItemGroup>
+  </Target>
+</Project>

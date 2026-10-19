@@ -104,10 +104,12 @@ public sealed class WifiTests
     {
         // Reserve both transports; Windows TCP and UDP excluded-port ranges can differ.
         UdpClient? boundUdp = null; TcpListener? boundTcp = null;
-        for (int attempt = 0; attempt < 16 && boundUdp is null; attempt++)
+        for (int attempt = 0; attempt < 128 && boundUdp is null; attempt++)
         {
-            var candidate = new TcpListener(IPAddress.Loopback, 0); candidate.Start();
-            try { boundUdp = new UdpClient((IPEndPoint)candidate.LocalEndpoint); boundTcp = candidate; }
+            // TCP ephemeral allocation can repeatedly select a UDP-excluded contiguous range.
+            // Independent random local binds avoid relying on the two protocols' allocator overlap.
+            var candidate = new TcpListener(IPAddress.Loopback, Random.Shared.Next(10000, 60000));
+            try { candidate.Start(); boundUdp = new UdpClient((IPEndPoint)candidate.LocalEndpoint); boundTcp = candidate; }
             catch (SocketException) { candidate.Stop(); }
         }
         using var udp = boundUdp ?? throw new IOException("Could not reserve an owned DNS fixture endpoint.");

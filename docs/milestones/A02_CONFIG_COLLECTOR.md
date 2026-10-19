@@ -1,5 +1,7 @@
 # A02 — Cisco Config Collector
 
+**2026-10-19 superseding adaptation:** the human explicitly requested the attached collector requirements in the current app theme. The bounded SSH/Telnet/memory-only AUTH/prompt-aware capture slice is implemented for 0.9.0; [scope](../FEATURES_0.9.0.md), [architecture/matrix/plan](../CONFIG_COLLECTOR_2026-10-19.md), [actual QA and limits](../QA_0.9.0.md). Older v2, inventory/group/diff/parser and scheduling statements below are historical backlog, not additional authorization or completion claims. Real Cisco acceptance/full A02 DoD stays open.
+
 ## 1. Milestone and version
 
 **A02** / Post-1.0.0 candidate; exact 1.x version unassigned. Planning snapshot 2026-10-09; not a version bump or publication instruction. [Milestone index](../MILESTONE_INDEX.md).
@@ -10,7 +12,7 @@ Cisco Config Collector. See retained requirements in [feature registry](../FEATU
 
 ## 3. Approval, implementation and verification
 
-Mockup v2 — Awaiting Approval, reported but not located. Selected Cisco-only/no-scheduling constraints retained; not implemented. See [actual audit](../IMPLEMENTATION_STATUS.md) and [UI approval register](../UI_APPROVAL_REGISTER.md). None of the outstanding checks below are implied complete by documentation.
+Current theme adaptation explicitly approved 2026-10-19 and implemented/tested in the named slice. Original v2 mockup remains unlocated; broader backlog is not approved/completed by this adaptation. See the current scope/QA above.
 
 ## 4. User problem
 
@@ -34,7 +36,7 @@ These checkboxes track remaining milestone acceptance, not just code presence.
 
 ## 7. UI and UX
 
-UI BLOCKED until Collector v2 approved. Targets must resemble approved Live Ping panel, with dense results/logs and configuration detail/diff; do not invent v2 design.
+The 2026-10-19 instruction authorizes the existing-theme collector UI: resizable target/options editor, commands/AUTH tabs, dense results and bounded selected preview. Original v2/diff screens are not reconstructed or claimed approved.
 
 ## 8. Architecture and module ownership
 

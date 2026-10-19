@@ -1,8 +1,10 @@
-# NetStucked 0.8.0
+# NetStucked 0.9.0 (release preparation)
 
 Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.8.0 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.8.0).
 
 <img src="docs/branding/NetStuckedBanner.png" width="480" alt="NetStucked — Network Engineer's Toolkit" />
+
+Config Collector 0.9.0 adds explicit-start SSH/Telnet collection, verified host pins, memory-only AUTH profiles and protected streamed TXT/JSON captures in the existing theme. [Usage and limits](docs/CONFIG_COLLECTOR_2026-10-19.md) - [QA](docs/QA_0.9.0.md). The published 0.8.0 download remains unchanged until 0.9.0 publication.
 
 ## Tools
 

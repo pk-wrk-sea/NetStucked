@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.0 — 2026-10-19
+
+- Replace the Config Collector placeholder with explicit-start multiline SSH/Telnet collection, memory-only AUTH profiles, verified host keys and bounded authentication fallback.
+- Freeze run options; execute read-only commands after actual device prompts; stream protected TXT/JSON evidence with hashes, bounded previews, error CSV and cancel/drain.
+- Use the existing Light/Dark/System theme, adjustable panels/columns and shared result zoom. Owned SSH/Telnet and WPF verification does not establish real Cisco/vendor acceptance. See docs/FEATURES_0.9.0.md and docs/QA_0.9.0.md.
+
 ## 0.8.0 — 2026-10-15
 
 - Add local Monitoring for 50 configured devices with ICMP/TCP and read-only SNMP v1/v2c/v3, Test SNMP, selected interfaces/bandwidth/errors/system/custom OIDs, explicit Start/Stop auto-resume, maintenance, bounded incidents and local notification cooldown.

@@ -71,6 +71,9 @@ public partial class App : Application
         services.AddSingleton<IMonitorStore, MonitorStore>();
         services.AddSingleton<IMonitorProbe, MonitorProbe>();
         services.AddSingleton<MonitoringService>(); services.AddSingleton<MonitoringViewModel>();
+        services.AddSingleton<ICollectorTransport, CollectorTransport>();
+        services.AddSingleton<ICollectorCaptureFactory, CollectorCaptureFactory>();
+        services.AddSingleton<CollectorController>(); services.AddSingleton<ConfigCollectorViewModel>();
         services.AddSingleton<DnsResolverViewModel>(); services.AddSingleton<SubnetCalculatorViewModel>();
         services.AddSingleton<MacCheckerViewModel>(); services.AddSingleton<UrlCheckerViewModel>();
         services.AddSingleton<MultiTargetPortService>();
