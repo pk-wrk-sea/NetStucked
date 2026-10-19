@@ -1,10 +1,10 @@
-# NetStucked 0.9.0 (release preparation)
+# NetStucked 0.9.0
 
-Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.8.0 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.8.0).
+Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.9.0 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.9.0).
 
 <img src="docs/branding/NetStuckedBanner.png" width="480" alt="NetStucked — Network Engineer's Toolkit" />
 
-Config Collector 0.9.0 adds explicit-start SSH/Telnet collection, verified host pins, memory-only AUTH profiles and protected streamed TXT/JSON captures in the existing theme. [Usage and limits](docs/CONFIG_COLLECTOR_2026-10-19.md) - [QA](docs/QA_0.9.0.md). The published 0.8.0 download remains unchanged until 0.9.0 publication.
+Config Collector 0.9.0 adds explicit-start SSH/Telnet collection, verified host pins, memory-only AUTH profiles and protected streamed TXT/JSON captures in the existing theme. [Usage and limits](docs/CONFIG_COLLECTOR_2026-10-19.md) - [QA](docs/QA_0.9.0.md). Published packages and actual verification limits: [release evidence](docs/GITHUB_RELEASE_0.9.0_REPORT_2026-10-19.md).
 
 ## Tools
 
@@ -23,7 +23,7 @@ Diagnostics/old DNS/HTTP test and Network Info/Wi-Fi Manager desktop surfaces we
 
 **Updates → Check for Updates → Install v0.8.0**. Acknowledge the hash-verified unsigned project installer and follow ordinary Windows UAC/SmartScreen prompts. Checking/installation starts only after an explicit user action.
 
-The [release page](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.8.0) provides a self-contained .NET Windows x64 portable ZIP, setup EXE, SHA-256 files and provenance manifests. Keep the portable directory together. Preferences/logs live under `%LOCALAPPDATA%\NetStucked`; keys/credentials use Windows-protected storage.
+The [release page](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.9.0) provides a self-contained .NET Windows x64 portable ZIP, setup EXE, SHA-256 files and provenance manifests. Keep the portable directory together. Preferences/logs live under `%LOCALAPPDATA%\NetStucked`; keys/credentials use Windows-protected storage.
 
 ## Build and verification
 

@@ -1,6 +1,6 @@
 # Architecture — retained 0.4.x and proposed module boundaries
 
-**2026-10-19 / 0.9.0:** Config Collector is approved and implemented in the existing theme; [scope](FEATURES_0.9.0.md), [architecture and failure matrix](CONFIG_COLLECTOR_2026-10-19.md), [QA and open real-device gates](QA_0.9.0.md). Source/package publication is in preparation; this is not yet a Released claim. Older collector-v2/backlog snapshots below are superseded only for this named slice.
+**2026-10-19 / 0.9.0:** Config Collector is approved and implemented in the existing theme; [scope](FEATURES_0.9.0.md), [architecture and failure matrix](CONFIG_COLLECTOR_2026-10-19.md), [QA and open real-device gates](QA_0.9.0.md). Published as GitHub Latest; [asset, CI and updater evidence including staging limits](GITHUB_RELEASE_0.9.0_REPORT_2026-10-19.md). Older collector-v2/backlog snapshots below are superseded only for this named slice.
 
 The approved 2026-10-09 Network Info extension adds Core Wi-Fi/security/test contracts; Infrastructure Native WLAN/EAP, Windows Credential Manager and source-aware ICMP/DNS/TCP/HTTP adapters; and Desktop cached NetworkInfo View/ViewModel/dialogs. Bounded nonsecret preferences/test results remain schema-1 JSON. WLAN keys, EAP user data and certificate private keys stay in Windows-managed storage. See [Wi-Fi behavior](WIFI_PROFILE_MANAGER.md). Wider routes/neighbors and advanced EAP provisioning remain future scope.
 

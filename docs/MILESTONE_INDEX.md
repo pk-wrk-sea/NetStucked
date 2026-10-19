@@ -1,6 +1,6 @@
 # Milestone index — 2026-10-09
 
-**2026-10-19 / 0.9.0:** Config Collector is approved and implemented in the existing theme; [scope](FEATURES_0.9.0.md), [architecture and failure matrix](CONFIG_COLLECTOR_2026-10-19.md), [QA and open real-device gates](QA_0.9.0.md). Source/package publication is in preparation; this is not yet a Released claim. Older collector-v2/backlog snapshots below are superseded only for this named slice.
+**2026-10-19 / 0.9.0:** Config Collector is approved and implemented in the existing theme; [scope](FEATURES_0.9.0.md), [architecture and failure matrix](CONFIG_COLLECTOR_2026-10-19.md), [QA and open real-device gates](QA_0.9.0.md). Published as GitHub Latest; [asset, CI and updater evidence including staging limits](GITHUB_RELEASE_0.9.0_REPORT_2026-10-19.md). Older collector-v2/backlog snapshots below are superseded only for this named slice.
 
 **0.8.0 is published as GitHub Latest (2026-10-15).** Local Monitoring/SNMP/tray/auto-resume and utility/URL/result-zoom refinements passed 354 tests, exact portable/installer Windows CI, native saved-monitor resume/instance restoration and the actual public 0.7.0 updater/preparation path. See [publication evidence and limits](GITHUB_RELEASE_0.8.0_REPORT_2026-10-15.md), [scope](FEATURES_0.8.0.md) and [usage/QA](QA_0.8.0.md). Real Cisco/key/captcha/manual/clean-machine acceptance remains open; earlier snapshots below are historical.
 

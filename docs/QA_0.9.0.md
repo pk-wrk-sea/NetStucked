@@ -10,4 +10,4 @@ The first large-SSH transport attempt exposed an upstream Shell disposal race; t
 
 NOT TESTED: real Cisco/other vendor devices, hardware enable/paging variants, real IPv6 SSH/Telnet endpoints, long-running resource plateau, hostile-server fuzzing, actual disk-full/ACL denial matrix (storage failure is injected), physical/mixed DPI, keyboard/screen-reader/high-contrast human acceptance, clean-machine Setup/upgrade/recovery/uninstall. Setup is never executed on this working machine. This report does not close the full A02 Definition of Done.
 
-Final versioned package, CI, public assets and updater results are recorded separately after those checks complete.
+0.9.0 is published as GitHub Latest. Exact package/CI/native/SSH/public updater checks passed; additional anonymous installer staging was blocked by HTTP 403 rate-limit responses. No Setup was executed. See [publication evidence and all limits](GITHUB_RELEASE_0.9.0_REPORT_2026-10-19.md).
