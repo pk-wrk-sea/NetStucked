@@ -44,11 +44,12 @@ internal static partial class Program
         if (args.FirstOrDefault() == "--palo-site-check") return CheckPaloSite(Path.GetFullPath(args[1]));
         if (args.FirstOrDefault() == "--native-monitor-check") return CheckNativeMonitoringAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         bool collectorOnly = args.FirstOrDefault() == "--collector-ui-check";
-        string output = Path.GetFullPath(collectorOnly ? args[1] : args.FirstOrDefault() ?? "artifacts/windows-qa");
-        int soakSeconds = !collectorOnly && args.Length > 1 ? int.Parse(args[1]) : 0;
+        bool terminalOnly = args.FirstOrDefault() == "--terminal-ui-check";
+        string output = Path.GetFullPath(collectorOnly || terminalOnly ? args[1] : args.FirstOrDefault() ?? "artifacts/windows-qa");
+        int soakSeconds = !collectorOnly && !terminalOnly && args.Length > 1 ? int.Parse(args[1]) : 0;
         _expectedAvailableVersion = args.Length > 3 ? args[3] : null;
         _expectedCurrentVersion = args.Length > 4 ? args[4] : null;
-        if (args.Length > 2)
+        if (args.Length > 2 && !terminalOnly)
         {
             string published = Path.GetFullPath(args[2]);
             foreach (string file in new[] { "NetStucked.Core.dll", "NetStucked.Infrastructure.dll", "NetStucked.dll" })
@@ -66,7 +67,7 @@ internal static partial class Program
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Error;
         _ = application.Dispatcher.InvokeAsync(async () =>
         {
-            try { if (collectorOnly) await RunCollectorOnlyAsync(application, output, listener); else await RunAsync(application, output, soakSeconds, listener); }
+            try { if (terminalOnly) await RunTerminalOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (collectorOnly) await RunCollectorOnlyAsync(application, output, listener); else await RunAsync(application, output, soakSeconds, listener); }
             catch (Exception ex) { _exitCode = 1; Console.Error.WriteLine("FAIL " + ex); }
             finally { application.Shutdown(); }
         });

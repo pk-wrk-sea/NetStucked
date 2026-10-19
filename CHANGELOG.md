@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.0 - 2026-10-19
+
+- Add real offline xterm.js Terminal in the existing Light/Dark/System theme, with five independent SSH/Telnet tabs and bounded input, output and scrollback.
+- Verify SHA-256 host keys; support password and encrypted OpenSSH private keys without automatic reconnect or credential fallback. Save nonsecret profiles only.
+- Add keyboard/control input, guarded multiline paste, Copy/Paste, resize, Ctrl+wheel zoom and awaited tab/Exit/update cleanup. Block remote OSC52 clipboard writes and external browser resources/navigation.
+- Owned SSH/Telnet/emulator and existing-app regressions are recorded in docs/QA_0.10.0.md; real devices, physical DPI/accessibility and Windows clipboard/manual acceptance remain open.
+
 ## 0.9.0 — 2026-10-19
 
 - Replace the Config Collector placeholder with explicit-start multiline SSH/Telnet collection, memory-only AUTH profiles, verified host keys and bounded authentication fallback.

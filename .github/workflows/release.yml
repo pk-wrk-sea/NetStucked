@@ -88,12 +88,18 @@ jobs:
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
       - name: Verify exact collector transport with owned SSH fixture
-        if: startsWith(env.APP_VERSION, '0.9.')
         shell: pwsh
         run: |
+          if ([Version]$env:APP_VERSION -lt [Version]'0.9.0') { exit 0 }
           python -m pip install --disable-pip-version-check paramiko==4.0.0
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --collector-ssh-check artifacts/release/collector-ssh-qa tests/fixtures/collector_ssh_server.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify exact terminal emulator with owned SSH fixture
+        shell: pwsh
+        run: |
+          if ([Version]$env:APP_VERSION -lt [Version]'0.10.0') { exit 0 }
+          dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --terminal-ui-check artifacts/release/terminal-qa tests/fixtures/terminal_ssh_server.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Compile Inno Setup installer from the frozen package
         shell: pwsh
