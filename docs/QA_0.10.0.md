@@ -1,6 +1,6 @@
 # 0.10.0 Terminal verification
 
-Source verification is separate from frozen-package and publication verification. Final release evidence will identify the immutable source and exact payload. Scope: [FEATURES_0.10.0](FEATURES_0.10.0.md). Full A01 acceptance remains open.
+0.10.0 is published as GitHub Latest. [Publication report](GITHUB_RELEASE_0.10.0_REPORT_2026-10-19.md) identifies immutable source, exact payload, CI and public-updater limits. Source verification remains separate from frozen-package and publication verification. Scope: [FEATURES_0.10.0](FEATURES_0.10.0.md). Full A01 acceptance remains open.
 
 PASS during implementation: .NET 10 Release build with no warnings/errors; 26 focused Terminal cases covering input/paste validation, secret serialization exclusion, geometry limits, real owned loopback raw Telnet negotiation/interactive login/IAC escaping/split CRLF, cancellation during connect and blocked output, generation isolation, input saturation, resize, disconnect, no auto reconnect, safe errors, nonsecret profile roundtrip and corrupt-profile backup. The final full suite passes 424/424 tests (no skips).
 
@@ -20,3 +20,7 @@ dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.Windows
 ```
 
 The terminal fixture binds only 127.0.0.1, generates ephemeral host/client keys and deletes its client key on exit. Test input/commands are sent only to that owned endpoint. No working-network targets or real credentials are loaded.
+
+Final exact-payload PASS: 496-file ZIP verified entry-by-entry, 272 WPF/60-second loopback assertions, 30 actual terminal/SSH/emulator assertions, 12 actual Collector SSH assertions, native smoke and two saved-monitor resume/instance-restoration launches. Branch, PR, merged-main and installer Windows workflows pass. All six downloaded GitHub asset digests/sizes/provenance and installer Windows identity/trust match. Anonymous public Setup download also matches SHA-256; Setup was not executed.
+
+Production public 0.9.0 updater: BLOCKED by anonymous GitHub API HTTP 403, remaining=0. Retry after the advertised 04:12:03 UTC reset still receives an earlier-dated 403 response. Same-version/Reinstall/Recovery and installer/helper preparation via that public catalog are therefore NOT VERIFIED for 0.10.0; authenticated administrative Latest metadata is checked separately and is not substituted for production acceptance. No quota workaround or token was added to the application.

@@ -1,6 +1,6 @@
 # A01 — SSH Terminal / Remote Access
 
-**Current first-slice extension, 2026-10-19:** The Terminal first slice is approved and in development for 0.10.0. See [scope](../FEATURES_0.10.0.md), [architecture](../TERMINAL_2026-10-19.md), [QA/open gates](../QA_0.10.0.md). This supersedes the missing-mockup gate for this named existing-theme slice. Full A01, Serial, SFTP, splits and recording remain open. Older criteria below are retained as broader backlog.
+**Current first-slice extension, 2026-10-19:** The Terminal first slice is approved, implemented and published as 0.10.0; see the linked QA and publication limits. See [scope](../FEATURES_0.10.0.md), [architecture](../TERMINAL_2026-10-19.md), [QA/open gates](../QA_0.10.0.md). This supersedes the missing-mockup gate for this named existing-theme slice. Full A01, Serial, SFTP, splits and recording remain open. Older criteria below are retained as broader backlog.
 
 ## 1. Milestone and version
 
