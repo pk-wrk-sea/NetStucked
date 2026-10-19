@@ -11,6 +11,7 @@
     <EmbeddedResource Include="Resources/Icons/*.svg" LogicalName="NetStucked.Icons.%(Filename)%(Extension)" />
     <None Update="Resources/Icons/LICENSE" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Resources/ThirdParty/*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Resources/Terminal/*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <EmbeddedResource Include="Resources/ReleaseHistory.json" LogicalName="NetStucked.ReleaseHistory.json" />
     <ProjectReference Include="../NetStucked.Core/NetStucked.Core.csproj" />
     <ProjectReference Include="../NetStucked.Infrastructure/NetStucked.Infrastructure.csproj" />

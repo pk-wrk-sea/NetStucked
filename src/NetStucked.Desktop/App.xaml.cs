@@ -71,6 +71,7 @@ public partial class App : Application
         services.AddSingleton<IMonitorStore, MonitorStore>();
         services.AddSingleton<IMonitorProbe, MonitorProbe>();
         services.AddSingleton<MonitoringService>(); services.AddSingleton<MonitoringViewModel>();
+        services.AddSingleton<ITerminalTransport, TerminalTransport>(); services.AddSingleton<ITerminalProfileStore, TerminalProfileStore>(); services.AddSingleton<TerminalWorkspaceViewModel>();
         services.AddSingleton<ICollectorTransport, CollectorTransport>();
         services.AddSingleton<ICollectorCaptureFactory, CollectorCaptureFactory>();
         services.AddSingleton<CollectorController>(); services.AddSingleton<ConfigCollectorViewModel>();

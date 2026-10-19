@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.10.0",
+    "Date": "2026-10-19",
+    "Notes": "Real offline ANSI/xterm Terminal with five SSH/Telnet tabs, SHA-256 host pins, password/OpenSSH-key authentication, guarded paste, zoom and nonsecret profiles. Sessions persist across navigation and drain on Exit/update. Owned fixtures verified; real devices, Serial/SFTP and manual Windows acceptance remain open."
+  },
+  {
     "Version": "0.9.0",
     "Date": "2026-10-19",
     "Notes": "• Config Collector now collects from explicit device lists using verified SSH or explicitly enabled Telnet.\n• Added memory-only AUTH1/AUTH2, restricted fallback, immutable run options and prompt-aware read-only commands.\n• Stream protected TXT/JSON captures with hashes, bounded preview, cancellation and error CSV.\n• Uses the existing Light/Dark/System theme, resizable tables/panels and Ctrl+wheel result zoom.\n• Tested with owned SSH/Telnet loopback fixtures; real Cisco and other vendor acceptance remains open."

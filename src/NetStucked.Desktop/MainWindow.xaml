@@ -30,6 +30,7 @@
       <views:SubnetCalculatorView DataContext="{Binding Subnet}" Visibility="{Binding DataContext.SelectedPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource PageVisibility}, ConverterParameter='Subnet Calculator'}"/>
       <views:MacCheckerView DataContext="{Binding Mac}" Visibility="{Binding DataContext.SelectedPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource PageVisibility}, ConverterParameter='MAC Checker'}"/>
       <views:UrlCheckerView DataContext="{Binding Url}" Visibility="{Binding DataContext.SelectedPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource PageVisibility}, ConverterParameter='URL Checker'}"/>
+      <views:TerminalView x:Name="TerminalSurface" DataContext="{Binding Terminal}" Visibility="{Binding DataContext.SelectedPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource PageVisibility}, ConverterParameter=Terminal}"/>
       <ContentControl Content="{Binding CurrentPage}" Visibility="{Binding SelectedPage, Converter={StaticResource PageVisibility}, ConverterParameter=Other}"/>
     </Grid></AdornerDecorator>
   </Grid></Border>
