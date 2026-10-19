@@ -5,7 +5,7 @@ using NetStucked.Core;
 using Tmds.Ssh;
 
 namespace NetStucked.Infrastructure;
-public sealed class TerminalTransport : ITerminalTransport
+public sealed class TerminalTransport(ITerminalHostTrust? hostTrust = null) : ITerminalTransport
 {
     public async Task<ITerminalConnection> ConnectAsync(TerminalRequest request, CancellationToken token)
     {
@@ -13,7 +13,7 @@ public sealed class TerminalTransport : ITerminalTransport
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token); deadline.CancelAfter(TimeSpan.FromSeconds(15));
         if (profile.Protocol == TerminalProtocol.Telnet)
             return new RawTelnet(await TelnetCollectorConnection.ConnectRawAsync(profile.Host, profile.Port, profile.AllowTelnet, deadline.Token).ConfigureAwait(false));
-        string? observed = null;
+        string? observed = null; CollectorException? trustFailure = null;
         Credential credential;
         char[]? keyData = null;
         if (profile.Authentication == TerminalAuthentication.PrivateKey)
@@ -34,21 +34,36 @@ public sealed class TerminalTransport : ITerminalTransport
         var settings = new SshClientSettings
         {
             HostName = profile.Host, Port = profile.Port, UserName = profile.Username, Credentials = [credential],
-            AutoConnect = false, AutoReconnect = false, BatchMode = true, BannerHandler = null,
+            AutoConnect = false, AutoReconnect = false, BatchMode = hostTrust is null, BannerHandler = null,
             UserKnownHostsFilePaths = [], GlobalKnownHostsFilePaths = [], UpdateKnownHostsFileAfterAuthentication = false,
             DefaultWindowSize = 256 * 1024, ConnectTimeout = TimeSpan.FromSeconds(15),
-            HostAuthentication = (context, _) =>
+            HostAuthentication = async (context, callbackToken) =>
             {
                 string actual = "SHA256:" + context.ConnectionInfo.ServerKey.Key.SHA256FingerPrint;
+                if (hostTrust is not null)
+                {
+                    context.SuspendConnectTimeout();
+                    try
+                    {
+                        bool accepted = await hostTrust.VerifyAsync(profile.Host, profile.Port, context.ConnectionInfo.ServerKey.Key.Type.ToString(), actual, callbackToken).ConfigureAwait(false);
+                        if (!accepted) trustFailure = new CollectorException(CollectorFailure.HostKey, "SSH host key was not accepted. No login credentials were sent.");
+                        return accepted;
+                    }
+                    catch (CollectorException ex) { trustFailure = ex; return false; }
+                    finally { context.ResumeConnectTimeout(); }
+                }
                 bool trusted = CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(actual), Encoding.ASCII.GetBytes(profile.HostPin.TrimEnd('=')));
                 if (!trusted) observed = actual;
-                return ValueTask.FromResult(trusted);
+                return trusted;
             }
         };
         var client = new SshClient(settings);
         try
         {
+            // The library pauses its connect timer only while the operator reviews a host key.
+            deadline.CancelAfter(Timeout.InfiniteTimeSpan);
             await client.ConnectAsync(deadline.Token).ConfigureAwait(false);
+            deadline.CancelAfter(TimeSpan.FromSeconds(15));
             var process = await client.ExecuteShellAsync(new ExecuteOptions
             {
                 AllocateTerminal = true, TerminalType = "xterm-256color", TerminalSize = new(request.Columns, request.Rows), WindowSize = 256 * 1024,
@@ -60,6 +75,7 @@ public sealed class TerminalTransport : ITerminalTransport
         {
             client.Dispose();
             if (token.IsCancellationRequested) throw new OperationCanceledException(token);
+            if (trustFailure is not null) throw trustFailure;
             if (observed is not null) throw new CollectorException(CollectorFailure.HostKey, "SSH host key untrusted/mismatched. Independently verify " + observed + " before entering a pin.");
             if (ex is OperationCanceledException) throw new CollectorException(CollectorFailure.Timeout, "SSH connect/authentication timed out.");
             throw new CollectorException(CollectorFailure.UnsupportedAuthentication, "SSH login failed. Check password/key/passphrase and supported authentication; no fallback or algorithm weakening was attempted.");

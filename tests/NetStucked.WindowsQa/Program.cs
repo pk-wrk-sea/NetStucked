@@ -596,6 +596,8 @@ internal static partial class Program
         public List<string> Exports { get; } = [];
         public string? TemplateName { get; set; }
         public bool ConfirmDelete { get; set; }
+        public bool ConfirmGeneral { get; set; }
+        public bool Confirm(string title, string message) { Confirmations++; return ConfirmGeneral; }
         public int Confirmations { get; private set; }
         public string? AskTemplateName(string suggested) => TemplateName;
         public bool ConfirmTemplateDeletion(string name) { Confirmations++; return ConfirmDelete; }

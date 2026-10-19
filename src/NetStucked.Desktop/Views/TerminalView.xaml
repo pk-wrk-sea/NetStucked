@@ -3,7 +3,7 @@
     <Grid.ColumnDefinitions><ColumnDefinition Width="300" MinWidth="240"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*" MinWidth="250"/></Grid.ColumnDefinitions>
     <Border Style="{StaticResource Card}"><Grid>
       <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-      <TextBlock Text="Connection" Style="{StaticResource Heading}" Margin="0,0,0,10"/>
+      <DockPanel Margin="0,0,0,10"><Button DockPanel.Dock="Right" Content="Host keys…" Click="HostKeys_Click" AutomationProperties.Name="Manage SSH host keys"/><TextBlock Text="Connection" Style="{StaticResource Heading}" VerticalAlignment="Center"/></DockPanel>
       <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"><StackPanel IsEnabled="{Binding SelectedTab.CanEdit}">
         <TextBlock Text="Saved profile"/><ComboBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}" DisplayMemberPath="Name" AutomationProperties.Name="Terminal saved profile"/>
         <UniformGrid Columns="2" Margin="0,6,0,10"><Button Content="Save profile" Command="{Binding SaveProfileCommand}" Margin="0,0,3,0"/><Button Content="Delete" Command="{Binding DeleteProfileCommand}" Margin="3,0,0,0"/></UniformGrid>
@@ -17,8 +17,7 @@
           <TextBlock Text="Authentication" Margin="0,8,0,0"/><ComboBox ItemsSource="{Binding Authentications}" SelectedItem="{Binding SelectedTab.Authentication}" AutomationProperties.Name="Terminal authentication"/>
           <StackPanel Visibility="{Binding SelectedTab.IsPassword, Converter={StaticResource BoolVisibility}}"><TextBlock Text="Password · this connection only" Margin="0,8,0,0"/><PasswordBox x:Name="Password" MaxLength="512" AutomationProperties.Name="Terminal password"/></StackPanel>
           <StackPanel Visibility="{Binding SelectedTab.IsPrivateKey, Converter={StaticResource BoolVisibility}}"><TextBlock Text="OpenSSH private-key file" Margin="0,8,0,0"/><DockPanel><Button DockPanel.Dock="Right" Content="…" Click="Key_Click" AutomationProperties.Name="Choose terminal private key"/><TextBox Text="{Binding SelectedTab.KeyPath, UpdateSourceTrigger=PropertyChanged}" MaxLength="1000"/></DockPanel><TextBlock Text="Key passphrase · this connection only" Margin="0,8,0,0"/><PasswordBox x:Name="Passphrase" MaxLength="512"/></StackPanel>
-          <TextBlock Text="Verified host fingerprint · SHA256:…" Margin="0,10,0,0"/><TextBox Text="{Binding SelectedTab.HostPin, UpdateSourceTrigger=PropertyChanged}" MaxLength="100" AutomationProperties.Name="Terminal SSH fingerprint"/>
-          <TextBlock Text="Unknown or changed keys are blocked. Verify the reported fingerprint with the device owner before reconnecting." Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+          <TextBlock Text="New SSH hosts ask for confirmation on Connect. Save the key to recognize the device next time." Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,10,0,0"/>
         </StackPanel>
       </StackPanel></ScrollViewer>
       <StackPanel Grid.Row="2" Margin="0,10,0,0"><TextBlock Text="{Binding Message}" Style="{StaticResource Muted}" TextWrapping="Wrap"/><Button Content="Connect" Click="Connect_Click" IsEnabled="{Binding SelectedTab.CanEdit}" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0"/></StackPanel>

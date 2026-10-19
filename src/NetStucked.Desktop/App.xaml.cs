@@ -71,6 +71,9 @@ public partial class App : Application
         services.AddSingleton<IMonitorStore, MonitorStore>();
         services.AddSingleton<IMonitorProbe, MonitorProbe>();
         services.AddSingleton<MonitoringService>(); services.AddSingleton<MonitoringViewModel>();
+        services.AddSingleton<ITerminalKnownHostStore, TerminalKnownHostStore>();
+        services.AddSingleton<ITerminalHostKeyPrompt, TerminalHostKeyPrompt>();
+        services.AddSingleton<ITerminalHostTrust, TerminalHostTrust>();
         services.AddSingleton<ITerminalTransport, TerminalTransport>(); services.AddSingleton<ITerminalProfileStore, TerminalProfileStore>(); services.AddSingleton<TerminalWorkspaceViewModel>();
         services.AddSingleton<ICollectorTransport, CollectorTransport>();
         services.AddSingleton<ICollectorCaptureFactory, CollectorCaptureFactory>();

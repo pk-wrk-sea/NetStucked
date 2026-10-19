@@ -1,0 +1,14 @@
+<Window x:Class="NetStucked.Desktop.Views.TerminalHostKeyDialog" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="SSH host key" Width="650" MinWidth="520" SizeToContent="Height" MaxHeight="720" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" ResizeMode="CanResize">
+  <ScrollViewer VerticalScrollBarVisibility="Auto" Background="{DynamicResource CanvasBrush}"><StackPanel Margin="22">
+    <TextBlock Text="{Binding Title}" Style="{StaticResource Heading}" FontSize="18"/>
+    <TextBlock Text="{Binding Explanation}" TextWrapping="Wrap" Margin="0,10,0,16"/>
+    <TextBlock Text="Host / Port" Style="{StaticResource Muted}"/><TextBox Text="{Binding Challenge.Presented.Endpoint, Mode=OneWay}" IsReadOnly="True" Margin="0,4,0,10"/>
+    <TextBlock Text="Key type" Style="{StaticResource Muted}"/><TextBlock Text="{Binding Challenge.Presented.Algorithm}" Margin="0,4,0,12"/>
+    <StackPanel Visibility="{Binding Challenge.Changed, Converter={StaticResource BoolVisibility}}"><TextBlock Text="Previously saved fingerprint" Foreground="{DynamicResource WarningBrush}"/><TextBox Text="{Binding Challenge.Previous.Fingerprint, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" Margin="0,4,0,12" AutomationProperties.Name="Previous SSH fingerprint"/></StackPanel>
+    <TextBlock Text="Server fingerprint · SHA-256" Style="{StaticResource Muted}"/><TextBox Text="{Binding Challenge.Presented.Fingerprint, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" Margin="0,4,0,12" AutomationProperties.Name="Presented SSH fingerprint"/>
+    <TextBlock Text="Verify this key with the device owner if you are unsure. Login credentials are sent only after you accept." TextWrapping="Wrap" Style="{StaticResource Muted}"/>
+    <CheckBox x:Name="ReplacementConsent" Content="I verified this changed key and want to continue" Visibility="{Binding Challenge.Changed, Converter={StaticResource BoolVisibility}}" Margin="0,14,0,0" AutomationProperties.Name="Confirm changed SSH host key"/>
+    <WrapPanel HorizontalAlignment="Right" Margin="0,20,0,0"><Button Content="Accept Once" Click="Once_Click" MinWidth="105" Margin="0,0,8,6" AutomationProperties.Name="Accept SSH key once"/><Button Content="{Binding SaveLabel}" Click="Save_Click" Style="{StaticResource PrimaryButton}" MinWidth="130" Margin="0,0,8,6" AutomationProperties.Name="Accept and save SSH key"/><Button Content="Cancel" IsCancel="True" IsDefault="True" MinWidth="85" Margin="0,0,0,6"/></WrapPanel>
+    <TextBlock x:Name="ValidationMessage" Foreground="{DynamicResource WarningBrush}" TextWrapping="Wrap"/>
+  </StackPanel></ScrollViewer>
+</Window>

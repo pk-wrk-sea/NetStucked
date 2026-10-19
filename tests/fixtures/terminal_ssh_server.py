@@ -68,7 +68,7 @@ def serve(peer):
         transport.add_server_key(host_key)
         server = Server()
         transport.start_server(server=server)
-        channel = transport.accept(5)
+        channel = transport.accept(60)  # Operator may review the first-use host-key dialog.
         if channel is None or not server.shell.wait(5):
             return
         channel.sendall("\x1b[2J\x1b[H\x1b[31mRED\x1b[0m\r\nUnicode ไทย\r\nfixture#".encode())

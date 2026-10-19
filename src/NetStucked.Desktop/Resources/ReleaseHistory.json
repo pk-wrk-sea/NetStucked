@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.10.1",
+    "Date": "2026-10-19",
+    "Notes": "Terminal now asks to accept a new SSH host key instead of requiring manual fingerprint input. Accept Once, Accept & Save, recognize saved hosts, review changed keys and manage saved keys. Host-key review pauses the connection timer; credentials remain memory-only."
+  },
+  {
     "Version": "0.10.0",
     "Date": "2026-10-19",
     "Notes": "Real offline ANSI/xterm Terminal with five SSH/Telnet tabs, SHA-256 host pins, password/OpenSSH-key authentication, guarded paste, zoom and nonsecret profiles. Sessions persist across navigation and drain on Exit/update. Owned fixtures verified; real devices, Serial/SFTP and manual Windows acceptance remain open."

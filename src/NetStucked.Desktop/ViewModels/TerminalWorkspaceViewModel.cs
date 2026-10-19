@@ -36,7 +36,7 @@ public partial class TerminalTabViewModel : ObservableObject
     [ObservableProperty] private bool _allowTelnet;
     [ObservableProperty] private bool _busy;
     [ObservableProperty] private TerminalState _state;
-    [ObservableProperty] private string _message = "Choose an authorized host, verify its SSH fingerprint, then Connect.";
+    [ObservableProperty] private string _message = "Enter an authorized host and Connect. New SSH host keys ask for confirmation.";
     public bool CanEdit => !Busy && State is not (TerminalState.Connected or TerminalState.Connecting or TerminalState.Disconnecting);
     public bool IsSsh => Protocol == TerminalProtocol.Ssh;
     public bool IsTelnet => !IsSsh;
@@ -56,11 +56,15 @@ public partial class TerminalWorkspaceViewModel : ObservableObject, IAsyncDispos
     private readonly ITerminalTransport _transport;
     private readonly ITerminalProfileStore _store;
     private readonly IDesktopDialogs _dialogs;
+    private readonly ITerminalKnownHostStore _knownHosts;
     private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
     private bool _loaded, _disposed, _stopping;
     public ITerminalRenderer? Renderer { get; set; }
     public ObservableCollection<TerminalTabViewModel> Tabs { get; } = [];
     public ObservableCollection<TerminalProfile> Profiles { get; } = [];
+    public ObservableCollection<TerminalKnownHost> KnownHosts { get; } = [];
+    [ObservableProperty] private TerminalKnownHost? _selectedKnownHost;
+    [ObservableProperty] private string _hostKeysMessage = "";
     public IReadOnlyList<TerminalProtocol> Protocols { get; } = Enum.GetValues<TerminalProtocol>();
     public IReadOnlyList<TerminalAuthentication> Authentications { get; } = Enum.GetValues<TerminalAuthentication>();
     [ObservableProperty] private TerminalTabViewModel _selectedTab;
@@ -68,8 +72,8 @@ public partial class TerminalWorkspaceViewModel : ObservableObject, IAsyncDispos
     [ObservableProperty] private string _message = "Up to 5 independent sessions · credentials stay in memory · no automatic connections";
     partial void OnSelectedProfileChanged(TerminalProfile? value) { if (value is not null && SelectedTab.CanEdit) SelectedTab.Load(value); }
     partial void OnSelectedTabChanged(TerminalTabViewModel value) => SelectedProfile = null;
-    public TerminalWorkspaceViewModel(ITerminalTransport transport, ITerminalProfileStore store, IDesktopDialogs dialogs)
-    { _transport = transport; _store = store; _dialogs = dialogs; _selectedTab = CreateTab(); Tabs.Add(_selectedTab); }
+    public TerminalWorkspaceViewModel(ITerminalTransport transport, ITerminalProfileStore store, IDesktopDialogs dialogs, ITerminalKnownHostStore knownHosts)
+    { _transport = transport; _store = store; _dialogs = dialogs; _knownHosts = knownHosts; _selectedTab = CreateTab(); Tabs.Add(_selectedTab); }
     private TerminalTabViewModel CreateTab()
     {
         var tab = new TerminalTabViewModel(_transport);
@@ -102,7 +106,8 @@ public partial class TerminalWorkspaceViewModel : ObservableObject, IAsyncDispos
         tab.Busy = true; long revision = ++tab.Revision;
         try
         {
-            var request = new TerminalRequest(tab.Profile(), new(password, passphrase)); request.Validate();
+            // Legacy per-profile pins remain round-trippable for older builds; the host-key database governs this UI.
+            var request = new TerminalRequest(tab.Profile() with { HostPin = "" }, new(password, passphrase)); request.Validate();
             await DrainTabAsync(tab);
             // Renderer is ready before any network connection or credentials are sent.
             await Renderer!.BeginAsync(tab.Id, Guid.Empty);
@@ -170,6 +175,17 @@ public partial class TerminalWorkspaceViewModel : ObservableObject, IAsyncDispos
         if (tab.State != TerminalState.Connected || SelectedTab != tab) return false;
         if (!TerminalInputPolicy.ValidPaste(text)) { tab.Message = "Paste blocked: maximum 65,536 characters; no control characters except newline and tab."; return false; }
         return !TerminalInputPolicy.RequiresConfirmation(text) || _dialogs.Confirm("Confirm multiline paste", "This paste contains line breaks and may execute multiple commands on " + tab.Host + ". Send it?");
+    }
+    [RelayCommand] private async Task RefreshHostKeysAsync()
+    {
+        try { var hosts = await _knownHosts.LoadAsync(CancellationToken.None); KnownHosts.Clear(); foreach (var host in hosts.OrderBy(h => h.Host).ThenBy(h => h.Port)) KnownHosts.Add(host); HostKeysMessage = KnownHosts.Count + " saved host key(s)."; }
+        catch (Exception ex) when (ex is System.IO.IOException or System.IO.InvalidDataException or UnauthorizedAccessException) { HostKeysMessage = "Saved SSH host keys could not be read. Check terminal-known-hosts.json and folder access."; }
+    }
+    [RelayCommand] private async Task RemoveHostKeyAsync()
+    {
+        if (SelectedKnownHost is not { } host || !_dialogs.Confirm("Remove saved host key", "Forget the saved SSH identity for " + host.Endpoint + "? You will be asked again next connection.")) return;
+        try { bool removed = await _knownHosts.RemoveAsync(host, CancellationToken.None); await RefreshHostKeysAsync(); if (!removed) HostKeysMessage = "This key changed since the list was loaded. Review the refreshed list."; }
+        catch (Exception ex) when (ex is System.IO.IOException or System.IO.InvalidDataException or UnauthorizedAccessException) { HostKeysMessage = "Unable to remove saved key. Check folder access; no key was approved."; }
     }
     public async Task StopForUpdateAsync() { _stopping = true; try { foreach (var tab in Tabs.ToArray()) { await StopTabAsync(tab); await tab.Connecting; } } finally { _stopping = false; } }
     public async ValueTask DisposeAsync()
