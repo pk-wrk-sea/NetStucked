@@ -1,8 +1,8 @@
 # NetStucked 0.11.0
 
-0.11.0 integrated review: actual-state Dashboard, stable-ID MA Inventory and versioned Excel preview/import/audit, offline Cisco evidence/one-hop Topology/config comparison, and engineer-reviewed CVE/device upgrade plans with Excel/CSV/HTML reports. [Scope](docs/FEATURES_0.11.0.md) - [review guide and QA](docs/QA_0.11.0.md). Published Latest remains 0.10.1 until the new frozen artifacts are verified.
+0.11.0 integrated review: actual-state Dashboard, stable-ID MA Inventory and versioned Excel preview/import/audit, offline Cisco evidence/one-hop Topology/config comparison, and engineer-reviewed CVE/device upgrade plans with Excel/CSV/HTML reports. [Scope](docs/FEATURES_0.11.0.md) - [review guide and QA](docs/QA_0.11.0.md). Published as GitHub Latest; [source/assets/CI and updater limits](docs/GITHUB_RELEASE_0.11.0_REPORT_2026-10-20.md). Check for Updates may be denied by GitHub HTTP 403; verified direct downloads are available.
 
-Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.10.1 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.10.1).
+Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.11.0 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.11.0).
 
 <img src="docs/branding/NetStuckedBanner.png" width="480" alt="NetStucked — Network Engineer's Toolkit" />
 

@@ -25,7 +25,7 @@ Existing settings/monitoring/Terminal formats are unchanged. Older app versions 
 - Actual new-menu WPF workflow: 42 assertions PASS in `artifacts/all-menus/engineering-ui-final.log`, with owned constructed Cisco/advisory fixtures, real persistence/XLSX, explicit import/review/approval and post-change invalidation. 28 renders cover Light/Dark at 1536×1024 and 1100×700, including every new tab. These are WPF renders, not physical-DPI/manual accessibility evidence.
 - Exact old 0.10.1 native binary: start/graceful Exit 0 using an isolated profile containing new engineering data; engineering file SHA-256 is unchanged. `artifacts/all-menus/compatibility-0101.log`. This is binary/data coexistence evidence, not Setup downgrade/rollback acceptance.
 - Actual public NVD/CISA adapter: PASS for CVE-2023-20198, metadata identity/description, one Cisco reference and KEV listed; `artifacts/all-menus/public-advisory/advisory.json`. No device data or configuration was sent and no device applicability was asserted.
-- Final frozen-payload/native/SSH/CI/public-download evidence: pending publication verification, not implied by the above.
+- Final frozen-payload/native/SSH/CI/public direct-download evidence: PASS; [publication report](GITHUB_RELEASE_0.11.0_REPORT_2026-10-20.md). The first new-version public catalog check passed, but older/subsequent API requests and installer staging were BLOCKED by GitHub 403; direct download remains verified. No Setup ran.
 
 ## Sources and access policy checked at implementation
 

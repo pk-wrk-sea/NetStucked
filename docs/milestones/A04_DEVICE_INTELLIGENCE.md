@@ -2,6 +2,12 @@
 
 **2026-10-20 implementation extension:** The human approved all current menus in the existing theme for one integrated review. The relevant functional workflow is implemented in 0.11.0; see [scope](../FEATURES_0.11.0.md) and [actual QA/open acceptance](../QA_0.11.0.md). Older concept/UI gates below are superseded for this implementation. Broader original milestone criteria are retained; unchecked real-device/human acceptance is not closed by a build or fixture test.
 
+Current-menu delivery acceptance (2026-10-20):
+
+- [x] Versioned conservative Cisco text facts retain original source/hash/command/line/time.
+- [x] Owned constructed platform/unknown/conflict/hash fixtures pass; real Cisco corpus is not claimed.
+- [ ] Human/real-device acceptance and broader original milestone criteria below remain open.
+
 ## 1. Milestone and version
 
 **A04** / Post-1.0.0 candidate; exact 1.x version unassigned. Planning snapshot 2026-10-09; not a version bump or publication instruction. [Milestone index](../MILESTONE_INDEX.md).
