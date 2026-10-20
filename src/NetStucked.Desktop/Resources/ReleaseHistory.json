@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.11.0",
+    "Date": "2026-10-20",
+    "Notes": "All current menus now have functional workflows. Added actual-data Dashboard, stable-ID MA Inventory with versioned Excel preview/import and edit audit, hash-verified Cisco observations and one-hop Topology with capture comparison. Added NVD/CISA metadata, explicit engineer applicability review and evidence-linked device upgrade plans with Excel/CSV/HTML export. No discovery, automatic vulnerability verdict, device upgrade execution or plaintext secrets. Real-device and human acceptance remain open."
+  },
+  {
     "Version": "0.10.1",
     "Date": "2026-10-19",
     "Notes": "Terminal now asks to accept a new SSH host key instead of requiring manual fingerprint input. Accept Once, Accept & Save, recognize saved hosts, review changed keys and manage saved keys. Host-key review pauses the connection timer; credentials remain memory-only."

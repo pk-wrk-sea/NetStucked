@@ -71,7 +71,7 @@ internal static partial class Program
             var updatesView = Descendants<NetStucked.Desktop.Views.UpdatesView>((DependencyObject)window.Content).Single();
             var updatesScroll = (ScrollViewer)updatesView.Content; updatesScroll.ScrollToEnd(); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
             Render(window, output, "Updates-version-history-dark", 1280, 800, 1); updatesScroll.ScrollToHome();
-            foreach (string page in new[] { "Dashboard", "Topology Explorer", "MA Inventory", "CVE & Upgrade Planner" }) { vm.NavigateCommand.Execute(page); Require(vm.CurrentPage is PlaceholderViewModel { Message: "Pending - Coming Soon" }, "Pending navigation: " + page); }
+            foreach (string page in new[] { "Dashboard", "Topology Explorer", "MA Inventory", "CVE & Upgrade Planner" }) { vm.NavigateCommand.Execute(page); Require(vm.CurrentPage is not PlaceholderViewModel, "Implemented navigation: " + page); }
             Render(window, output, "Pending-page-dark", 1280, 800, 1);
             var hwnd = new WindowInteropHelper(window).Handle;
             for (int size = 0; size < 2; size++)

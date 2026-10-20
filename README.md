@@ -1,4 +1,6 @@
-# NetStucked 0.10.1
+# NetStucked 0.11.0
+
+0.11.0 integrated review: actual-state Dashboard, stable-ID MA Inventory and versioned Excel preview/import/audit, offline Cisco evidence/one-hop Topology/config comparison, and engineer-reviewed CVE/device upgrade plans with Excel/CSV/HTML reports. [Scope](docs/FEATURES_0.11.0.md) - [review guide and QA](docs/QA_0.11.0.md). Published Latest remains 0.10.1 until the new frozen artifacts are verified.
 
 Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.10.1 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.10.1).
 
@@ -21,7 +23,7 @@ Config Collector 0.9.0 adds explicit-start SSH/Telnet collection, verified host 
 
 Only devices explicitly started resume on launch; Stop clears that intent. X hides to System Tray and continues collection. Restore or double-click its icon; tray Exit stops the app. Relaunch restores the existing data-profile instance. Sleep/local-network gaps are separate from device downtime. Settings and monitoring JSON contain no provider/SNMP secrets. Ctrl+mouse wheel zooms result tables/read-only text, Ctrl+0 resets. Light/Dark/System themes, copyable tables and explicit Updates & Recovery remain.
 
-Diagnostics/old DNS/HTTP test and Network Info/Wi-Fi Manager desktop surfaces were retired in 0.7.0. Compatible legacy settings and older immutable releases remain preserved. Dashboard and other future modules remain pending. [Approved scope](docs/FEATURES_0.8.0.md), [usage and QA limits](docs/QA_0.8.0.md).
+Diagnostics/old DNS/HTTP test and Network Info/Wi-Fi Manager desktop surfaces were retired in 0.7.0. Compatible legacy settings and older immutable releases remain preserved. All current navigation pages now have functional workflows; broader roadmap and real-device acceptance remain separate. [Approved scope](docs/FEATURES_0.8.0.md), [usage and QA limits](docs/QA_0.8.0.md).
 
 ## Update or install
 

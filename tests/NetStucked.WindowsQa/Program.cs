@@ -35,6 +35,7 @@ internal static partial class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        if (args.FirstOrDefault() == "--advisory-metadata-check") return CheckAdvisoryMetadataAsync(Path.GetFullPath(args[1]), args[2]).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--collector-ssh-check") return CheckCollectorSshAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--export-brand") return ExportBrand(Path.GetFullPath(args[1]));
         if (args.FirstOrDefault() == "--mac-read") return ReadMacVendorAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
@@ -45,8 +46,9 @@ internal static partial class Program
         if (args.FirstOrDefault() == "--native-monitor-check") return CheckNativeMonitoringAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         bool collectorOnly = args.FirstOrDefault() == "--collector-ui-check";
         bool terminalOnly = args.FirstOrDefault() == "--terminal-ui-check";
-        string output = Path.GetFullPath(collectorOnly || terminalOnly ? args[1] : args.FirstOrDefault() ?? "artifacts/windows-qa");
-        int soakSeconds = !collectorOnly && !terminalOnly && args.Length > 1 ? int.Parse(args[1]) : 0;
+        bool engineeringOnly = args.FirstOrDefault() == "--engineering-ui-check";
+        string output = Path.GetFullPath(collectorOnly || terminalOnly || engineeringOnly ? args[1] : args.FirstOrDefault() ?? "artifacts/windows-qa");
+        int soakSeconds = !collectorOnly && !terminalOnly && !engineeringOnly && args.Length > 1 ? int.Parse(args[1]) : 0;
         _expectedAvailableVersion = args.Length > 3 ? args[3] : null;
         _expectedCurrentVersion = args.Length > 4 ? args[4] : null;
         if (args.Length > 2 && !terminalOnly)
@@ -67,7 +69,7 @@ internal static partial class Program
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Error;
         _ = application.Dispatcher.InvokeAsync(async () =>
         {
-            try { if (terminalOnly) await RunTerminalOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (collectorOnly) await RunCollectorOnlyAsync(application, output, listener); else await RunAsync(application, output, soakSeconds, listener); }
+            try { if (engineeringOnly) await RunEngineeringOnlyAsync(application, output, listener); else if (terminalOnly) await RunTerminalOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (collectorOnly) await RunCollectorOnlyAsync(application, output, listener); else await RunAsync(application, output, soakSeconds, listener); }
             catch (Exception ex) { _exitCode = 1; Console.Error.WriteLine("FAIL " + ex); }
             finally { application.Shutdown(); }
         });
@@ -172,7 +174,7 @@ internal static partial class Program
         window.UpdateLayout();
         Require(Descendants<DataGridColumnHeader>(restoredGrid).Any(h => Equals(h.Column?.Header, "Lost") && h.IsVisible), "Visible Lost column remains realized after configuring columns and resizing");
         Render(window, output, "LivePing-configured-settled", 1536, 1024, 1);
-        vm.NavigateCommand.Execute("Dashboard"); Require(vm.CurrentPage is PlaceholderViewModel, "Dashboard remains neutral placeholder");
+        vm.NavigateCommand.Execute("Dashboard"); Require(vm.CurrentPage is DashboardViewModel, "Dashboard shows actual operational state");
         await CheckDnsHttpAsync(window, vm, dialogs, output);
         await CheckToolsAsync(window, vm, output);
 

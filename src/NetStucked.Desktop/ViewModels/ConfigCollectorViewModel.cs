@@ -43,6 +43,14 @@ public partial class ConfigCollectorViewModel : ObservableObject, IAsyncDisposab
     [ObservableProperty] private CollectorBatchState _state = CollectorBatchState.Idle;
     [ObservableProperty] private CollectorRowViewModel? _selectedRow;
     public bool CanEdit => !IsRunning;
+    [RelayCommand] private void AnalysisCommands()
+    {
+        if (!CanEdit) return;
+        if (Profile is "Cisco IOS / IOS XE" or "Cisco NX-OS") CollectionCommands = "show running-config\nshow version\nshow inventory\nshow interfaces\nshow ip route\nshow cdp neighbors detail\nshow lldp neighbors detail";
+        else if (Profile == "Cisco ASA") CollectionCommands = "show running-config\nshow version\nshow inventory\nshow interface\nshow route";
+        else { Message = "Offline device-intelligence analysis currently supports Cisco IOS/IOS XE/NX-OS/ASA evidence only."; return; }
+        Message = "Read-only analysis command template selected. Review platform support before explicit Start; no collection has started.";
+    }
     public bool IsTelnet => Protocol == CollectorProtocol.Telnet;
     public string Preview => SelectedRow?.Result.Preview ?? "Select a device to view its bounded capture preview.";
     public string SelectedFiles => SelectedRow is null ? "" : string.Join('\n', new[] { SelectedRow.Result.TxtPath, SelectedRow.Result.JsonPath }.Where(s => s.Length > 0));

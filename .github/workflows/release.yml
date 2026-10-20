@@ -79,7 +79,7 @@ jobs:
           $qa = Join-Path $PWD artifacts/release/qa-runtime
           New-Item -ItemType Directory -Path $qa -Force | Out-Null
           Copy-Item tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/* $qa -Recurse
-          foreach ($file in @('NetStucked.Core.dll','NetStucked.Infrastructure.dll','NetStucked.dll')) { Copy-Item "artifacts/release/publish/$file" (Join-Path $qa $file) -Force }
+          Copy-Item artifacts/release/publish/* $qa -Recurse -Force
           dotnet (Join-Path $qa NetStucked.WindowsQa.dll) artifacts/release/windows-qa 0 artifacts/release/publish
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & ./scripts/SmokePublished.ps1 -PublishDirectory artifacts/release/publish
@@ -100,6 +100,12 @@ jobs:
         run: |
           if ([Version]$env:APP_VERSION -lt [Version]'0.10.0') { exit 0 }
           dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --terminal-ui-check artifacts/release/terminal-qa tests/fixtures/terminal_ssh_server.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify exact integrated engineering menu workflows
+        shell: pwsh
+        run: |
+          if ([Version]$env:APP_VERSION -lt [Version]'0.11.0') { exit 0 }
+          dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --engineering-ui-check artifacts/release/engineering-qa
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Compile Inno Setup installer from the frozen package
         shell: pwsh
