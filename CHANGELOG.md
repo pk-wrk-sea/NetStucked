@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.11.0 - 2026-10-20
+
+- Complete current navigation with an actual-state Dashboard, stable-ID MA Inventory and versioned Excel preview/import/export with before/after audit.
+- Analyze hash-verified Collector captures into versioned Cisco facts; inspect one-hop CDP/LLDP links, freshness, source lines and bounded capture comparisons. No discovery is triggered.
+- Fetch NVD/CISA metadata by explicit CVE ID; record source/configuration-aware engineer review and invalidate it when evidence changes. Plan device changes with explicit engineer approval, before/after observations and Excel/CSV/HTML reports. No device upgrades execute.
+- Keep separate protected atomic engineering records/previous snapshot; retain existing preferences/monitoring/Terminal formats. All new result regions use resizable tables and Ctrl+wheel zoom.
+- See docs/QA_0.11.0.md for actual verification and remaining human/device gates.
+
 ## 0.10.1 - 2026-10-19
 
 - Replace Terminal fingerprint entry with first-use Accept Once / Accept & Save / Cancel, saved-host recognition and explicit changed-key confirmation before authentication.

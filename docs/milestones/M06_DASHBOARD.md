@@ -1,5 +1,7 @@
 # M06 — Operational Dashboard, notifications and UI refinement
 
+**2026-10-20 implementation extension:** The human approved all current menus in the existing theme for one integrated review. The relevant functional workflow is implemented in 0.11.0; see [scope](../FEATURES_0.11.0.md) and [actual QA/open acceptance](../QA_0.11.0.md). Older concept/UI gates below are superseded for this implementation. Broader original milestone criteria are retained; unchecked real-device/human acceptance is not closed by a build or fixture test.
+
 ## 1. Milestone and version
 
 **M06** / 0.10.0 proposed (brief originally 0.7.0). Planning snapshot 2026-10-09; not a version bump or publication instruction. [Milestone index](../MILESTONE_INDEX.md).

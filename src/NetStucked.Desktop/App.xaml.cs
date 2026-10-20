@@ -78,6 +78,9 @@ public partial class App : Application
         services.AddSingleton<ICollectorTransport, CollectorTransport>();
         services.AddSingleton<ICollectorCaptureFactory, CollectorCaptureFactory>();
         services.AddSingleton<CollectorController>(); services.AddSingleton<ConfigCollectorViewModel>();
+        services.AddSingleton<IEngineeringStore, EngineeringStore>(); services.AddSingleton<IEngineeringFiles, EngineeringFiles>();
+        services.AddSingleton<IAdvisoryLookup, AdvisoryLookup>(); services.AddSingleton<EngineeringContext>();
+        services.AddSingleton<InventoryViewModel>(); services.AddSingleton<TopologyViewModel>(); services.AddSingleton<AdvisoryPlannerViewModel>(); services.AddSingleton<DashboardViewModel>();
         services.AddSingleton<DnsResolverViewModel>(); services.AddSingleton<SubnetCalculatorViewModel>();
         services.AddSingleton<MacCheckerViewModel>(); services.AddSingleton<UrlCheckerViewModel>();
         services.AddSingleton<MultiTargetPortService>();
@@ -115,6 +118,7 @@ public partial class App : Application
         window.EnableTray(Environment.GetEnvironmentVariable("NETSTUCKED_QA_DATA_DIRECTORY") is null);
         if (Environment.GetEnvironmentVariable("NETSTUCKED_QA_DATA_DIRECTORY") is null && !System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable()) main.Monitoring.Engine.SetSuspended(true, "Local network unavailable at startup; no device downtime inferred");
         _ = main.Monitoring.ResumeSavedAsync();
+        _ = main.Engineering.InitializeAsync();
         Microsoft.Win32.SystemEvents.PowerModeChanged += PowerChanged;
         System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += NetworkChanged;
         var store = _provider.GetRequiredService<UserSettingsStore>();
