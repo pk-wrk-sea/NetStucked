@@ -21,14 +21,18 @@ public static class InventoryWorkbook
     }
     public static async Task WriteTableAsync(string path, string schema, IReadOnlyList<string> headers, IReadOnlyList<string[]> values, CancellationToken token)
     {
-        if (values.Count > 10000 || headers.Count is < 1 or > 40 || values.Any(row => row.Length != headers.Count || row.Any(s => s.Length > 20000))) throw new ArgumentException("Report table exceeds row/column/text limits.");
+        if (values.Count > 10000 || headers.Count is < 1 or > 40 || values.Any(row => row.Length != headers.Count || row.Any(s => s.Length > 20000)) || values.Sum(row => row.Sum(s => (long)s.Length)) > 4 * 1024 * 1024) throw new ArgumentException("Report table exceeds row/column/text limits. Export a smaller set of records.");
         string temp = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try
         {
             await Task.Run(() =>
             {
                 using var zip = ZipFile.Open(temp, ZipArchiveMode.Create);
-                void Entry(string name, string text) { using var w = new StreamWriter(zip.CreateEntry(name).Open(), new UTF8Encoding(false)); w.Write(text); }
+                void Entry(string name, string text)
+                {
+                    if (Encoding.UTF8.GetByteCount(text) > (schema == "NetStucked Inventory schema 1" ? 8 : 32) * 1024 * 1024) throw new ArgumentException("Workbook part exceeds its bounded import/report limit. Export fewer records; existing destination retained.");
+                    using var w = new StreamWriter(zip.CreateEntry(name).Open(), new UTF8Encoding(false)); w.Write(text);
+                }
                 Entry("[Content_Types].xml", "<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\"><Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/><Default Extension=\"xml\" ContentType=\"application/xml\"/><Override PartName=\"/xl/workbook.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/><Override PartName=\"/xl/worksheets/sheet1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/></Types>");
                 Entry("_rels/.rels", "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\"><Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"xl/workbook.xml\"/></Relationships>");
                 Entry("xl/workbook.xml", "<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"><sheets><sheet name=\"Inventory\" sheetId=\"1\" r:id=\"rId1\"/></sheets></workbook>");

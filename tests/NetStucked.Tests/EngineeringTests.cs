@@ -100,6 +100,13 @@ public sealed class EngineeringTests : IDisposable
         }
         var row = Assert.Single(await InventoryWorkbook.ReadAsync(path, [], default)); Assert.Empty(row.Error); Assert.Equal(a.MaEnd, row.Asset!.MaEnd);
     }
+    [Fact] public async Task OversizedWorkbookExportPreservesExistingDestination()
+    {
+        string path = Path.Combine(_root, "retained.xlsx"); await File.WriteAllTextAsync(path, "original destination");
+        string value = new('x', 20000);
+        await Assert.ThrowsAsync<ArgumentException>(() => InventoryWorkbook.WriteTableAsync(path, "owned report", ["Value"], Enumerable.Repeat(new[] { value }, 300).ToArray(), default));
+        Assert.Equal("original destination", await File.ReadAllTextAsync(path));
+    }
     [Fact] public async Task CollectorJsonHashMustMatchAndTxtIsAlwaysPartial()
     {
         string path = Path.Combine(_root, "owned.json"); string transcript = "--- show version ---\nCisco IOS XE Software, Version 17.9.4a";

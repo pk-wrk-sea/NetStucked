@@ -20,7 +20,7 @@ Existing settings/monitoring/Terminal formats are unchanged. Older app versions 
 ## Evidence so far
 
 - Release build: PASS, no warnings/errors.
-- Unit/integration regression: 461 PASS, zero failed/skipped, `artifacts/all-menus/tests-final-03.log`; includes native Excel date cells, previous metadata revisions and previous valid store snapshot.
+- Unit/integration regression: 462 PASS, zero failed/skipped, `artifacts/all-menus/tests-final-04.log`; includes native Excel date cells, previous metadata revisions and previous valid store snapshot and oversized export preservation.
 - Actual WPF current-menu baseline: PASS in `artifacts/all-menus/windows-regression-02.log`; updated the former placeholder assertions and embedded release history for the actual working version.
 - Actual new-menu WPF workflow: 42 assertions PASS in `artifacts/all-menus/engineering-ui-final.log`, with owned constructed Cisco/advisory fixtures, real persistence/XLSX, explicit import/review/approval and post-change invalidation. 28 renders cover Light/Dark at 1536×1024 and 1100×700, including every new tab. These are WPF renders, not physical-DPI/manual accessibility evidence.
 - Exact old 0.10.1 native binary: start/graceful Exit 0 using an isolated profile containing new engineering data; engineering file SHA-256 is unchanged. `artifacts/all-menus/compatibility-0101.log`. This is binary/data coexistence evidence, not Setup downgrade/rollback acceptance.
@@ -36,3 +36,4 @@ Existing settings/monitoring/Terminal formats are unchanged. Older app versions 
 ## Open acceptance — NOT TESTED
 
 Real Cisco command/parser corpus (IOS/IOS XE/NX-OS/ASA), physical adjacency and platform/feature applicability; engineer validation of actual fixed/compatible targets; personal VirusTotal account and Palo Alto CAPTCHA/session; real SNMP/device capacity; COM/Serial/SFTP, scheduling, cross-tool durable history and central collectors; mixed-monitor/physical DPI, screen reader, High Contrast, long-run behavior and clean Windows installer/recovery. Human review of this integrated revision remains open. These are not silently marked PASS or closed by fixture tests.
+
