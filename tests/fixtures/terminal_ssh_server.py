@@ -7,6 +7,7 @@ import socket
 import sys
 import threading
 import paramiko
+from console_input import ConsoleInput
 from cryptography.hazmat.primitives import serialization
 
 host_key = paramiko.RSAKey.generate(2048)
@@ -20,7 +21,7 @@ listener.settimeout(.2)
 stop = threading.Event()
 lock = threading.Lock()
 connections = []
-audit = {"auth": [], "pty": [], "resize": [], "input": []}
+audit = {"auth": [], "pty": [], "resize": [], "input": [], "blank_commands": 0}
 
 
 class Server(paramiko.ServerInterface):
@@ -72,27 +73,40 @@ def serve(peer):
         if channel is None or not server.shell.wait(5):
             return
         channel.sendall("\x1b[2J\x1b[H\x1b[31mRED\x1b[0m\r\nUnicode ไทย\r\nfixture#".encode())
+        console = ConsoleInput(65536)
+        special_commands = (b"ansi-test", b"osc-test", b"cursor-test", b"large-test")
         while not stop.is_set():
             data = channel.recv(4096)
             if not data:
                 break
             with lock:
                 audit["input"].append(base64.b64encode(data).decode())
-            if data == b"ansi-test\r":
-                channel.sendall(b"\x1b[?1049h\x1b[HAlternate screen\x1b[?1049l\r\nPrimary restored\r\nfixture#")
-            elif data == b"osc-test\r":
-                channel.sendall(b"\x1b]52;c;TkVWRVItQ0xJUEJPQVJE\x07\r\nClipboard blocked\r\n")
-            elif data == b"cursor-test\r":
-                channel.sendall(b"\r\nfirst\rSECOND\x1b[K\r\nfixture#")
-            elif data == b"large-test\r":
-                for i in range(6000):
-                    channel.sendall((f"owned bounded line {i:04d}\r\n").encode())
-                channel.sendall(b"large complete\r\nfixture#")
-            elif data == b"\x03":
+            if data == b"\x03":
+                console.clear_pending()
                 channel.sendall(b"\r\n^C\r\nfixture#")
-            else:
-                channel.sendall(b"\r\nECHO " + data + b"\r\nfixture#")
-    except (OSError, EOFError, paramiko.SSHException):
+                continue
+            for command in console.feed(data):
+                if not command:
+                    with lock:
+                        audit["blank_commands"] += 1
+                elif command == b"ansi-test":
+                    channel.sendall(b"\x1b[?1049h\x1b[HAlternate screen\x1b[?1049l\r\nPrimary restored\r\nfixture#")
+                elif command == b"osc-test":
+                    channel.sendall(b"\x1b]52;c;TkVWRVItQ0xJUEJPQVJE\x07\r\nClipboard blocked\r\n")
+                elif command == b"cursor-test":
+                    channel.sendall(b"\r\nfirst\rSECOND\x1b[K\r\nfixture#")
+                elif command == b"large-test":
+                    for i in range(6000):
+                        channel.sendall((f"owned bounded line {i:04d}\r\n").encode())
+                    channel.sendall(b"large complete\r\nfixture#")
+                else:
+                    channel.sendall(b"\r\nECHO " + command + b"\r\nfixture#")
+            # This emulator fixture echoes generic typing/pastes immediately, while
+            # known synthetic test commands may span arbitrary SSH read boundaries.
+            if console.pending and not any(command.startswith(console.pending) for command in special_commands):
+                channel.sendall(b"\r\nECHO " + bytes(console.pending) + b"\r\nfixture#")
+                console.clear_pending()
+    except (OSError, EOFError, ValueError, paramiko.SSHException):
         pass
     finally:
         transport.close()

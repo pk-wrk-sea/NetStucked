@@ -1,67 +1,14 @@
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 using NetStucked.Core;
-using Tmds.Ssh;
 
 namespace NetStucked.Infrastructure;
 
 public sealed class CollectorTransport : ICollectorTransport
 {
-    public async Task<ICollectorConnection> ConnectAsync(CollectorTarget target, CollectorOptions options, CollectorCredentials credentials, string? hostPin, CancellationToken token)
-    {
-        if (options.Protocol == CollectorProtocol.Telnet) return await TelnetCollectorConnection.ConnectAsync(target, options, credentials, token).ConfigureAwait(false);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(token);
-        timeout.CancelAfter(TimeSpan.FromSeconds(options.ConnectTimeoutSeconds));
-        string? rejectedKey = null; bool passwordSent = false, passwordRejected = false;
-        var settings = new SshClientSettings
-        {
-            HostName = target.Host, Port = target.Port, UserName = credentials.Username,
-            ConnectTimeout = TimeSpan.FromSeconds(options.ConnectTimeoutSeconds),
-            AutoConnect = false, AutoReconnect = false, BatchMode = true,
-            UserKnownHostsFilePaths = [], GlobalKnownHostsFilePaths = [], UpdateKnownHostsFileAfterAuthentication = false,
-            DefaultWindowSize = 256 * 1024, BannerHandler = null,
-            Credentials = [new PasswordCredential((context, _) =>
-            {
-                // The library requests attempt 2 only after an explicit SSH password failure.
-                // Return no password: never send a second attempt for the same profile.
-                if (context.Attempt > 1) { passwordRejected = true; return ValueTask.FromResult<string?>(null); }
-                passwordSent = true; return ValueTask.FromResult<string?>(credentials.Password);
-            })],
-            HostAuthentication = (context, _) =>
-            {
-                string actual = "SHA256:" + context.ConnectionInfo.ServerKey.Key.SHA256FingerPrint;
-                bool trusted = hostPin is not null && CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(actual), Encoding.ASCII.GetBytes(hostPin));
-                if (!trusted) rejectedKey = actual;
-                return ValueTask.FromResult(trusted);
-            }
-        };
-        var client = new SshClient(settings);
-        try
-        {
-            await client.ConnectAsync(timeout.Token).ConfigureAwait(false);
-            var process = await client.ExecuteShellAsync(new ExecuteOptions
-            {
-                AllocateTerminal = true, TerminalType = "vt100", TerminalSize = new(160, 48), WindowSize = 256 * 1024,
-                StandardInputEncoding = new UTF8Encoding(false), StandardOutputEncoding = new UTF8Encoding(false), StandardErrorEncoding = new UTF8Encoding(false)
-            }, timeout.Token).ConfigureAwait(false);
-            return new SshTerminalConnection(client, process);
-        }
-        catch (Exception ex)
-        {
-            client.Dispose();
-            if (rejectedKey is not null) throw new CollectorException(CollectorFailure.HostKey, "SSH host key untrusted/mismatched. Independently verify " + rejectedKey + " before entering a pin.");
-            if (token.IsCancellationRequested) throw new OperationCanceledException(token);
-            if (ex is OperationCanceledException || ex.Message.Contains(" - Timeout - ", StringComparison.Ordinal)) throw new CollectorException(CollectorFailure.Timeout, "SSH connection timed out; credentials were not changed.");
-            // Tmds.Ssh 0.26's reason enum is internal; match its pinned exception category,
-            // never forward raw exception messages or server-controlled banner text to UI/logs.
-            if (ex is SshConnectionException && ex.Message.Contains(" - AuthenticationFailed - ", StringComparison.Ordinal))
-                throw new CollectorException(passwordRejected ? CollectorFailure.AuthenticationRejected : CollectorFailure.UnsupportedAuthentication,
-                    passwordRejected ? "SSH password authentication rejected." : "Server requires unsupported authentication/MFA; no fallback.");
-            if (!passwordSent && (ex is SocketException || ex.InnerException is SocketException)) throw new CollectorException(CollectorFailure.TransientTransport, "SSH socket connection failed before authentication.");
-            throw new CollectorException(CollectorFailure.Transport, "SSH negotiation/session failed; no credential fallback.");
-        }
-    }
+    public Task<ICollectorConnection> ConnectAsync(CollectorTarget target, CollectorOptions options, CollectorCredentials credentials, string? hostPin, CancellationToken token) =>
+        options.Protocol == CollectorProtocol.Telnet ? TelnetCollectorConnection.ConnectAsync(target, options, credentials, token)
+            : CollectorSshNetConnection.ConnectAsync(target, options, credentials, hostPin, token);
 
 }
 

@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.11.2",
+    "Date": "2026-10-21",
+    "Notes": "Fix Config Collector SSH compatibility with strong Cisco AES-CTR and SHA-2 ETM combinations. Preserve verified host keys and memory-only credentials; distinguish SSH setup/authentication/shell failures without exposing secrets. Use CR for SSH console commands while retaining Telnet CRLF, reset the shell setup deadline after authentication, and drain bounded streams/connections on cancellation. Owned protocol fixtures verified; real-device acceptance remains separate."
+  },
+  {
     "Version": "0.11.1",
     "Date": "2026-10-21",
     "Notes": "Five-menu acceptance fixes: preserve unsaved Inventory and CVE editors; reject all duplicate Excel IDs/serials; scope Cisco neighbor parsing to CDP/LLDP commands and review contradictory endpoint identities; clear obsolete configuration differences and explicitly reanalyze legacy captures with verified hashes. Collector distinguishes banner text from waiting interactive prompts. CVE requests bound body reads, retain NVD when optional KEV fails, and refresh expired assessments before approval/export. Real-device and human acceptance remain open."

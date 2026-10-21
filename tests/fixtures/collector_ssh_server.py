@@ -11,6 +11,7 @@ import sys
 import threading
 import time
 import paramiko
+from console_input import ConsoleInput
 
 key = paramiko.RSAKey.generate(2048)
 listener = socket.socket()
@@ -20,15 +21,16 @@ listener.settimeout(0.3)
 stopping = threading.Event()
 sessions = []
 lock = threading.Lock()
-audit = {"auth": [], "commands": [], "domain_literal": True, "no_bom": True}
+audit = {"auth": [], "commands": [], "domain_literal": True, "no_bom": True, "blank_commands": 0}
 
 
 class Server(paramiko.ServerInterface):
     def __init__(self):
         self.shell = threading.Event()
+        self.partial = False
 
     def get_allowed_auths(self, username):
-        return "keyboard-interactive" if username.startswith("mfa-") else "password"
+        return "keyboard-interactive" if username == "mfa-fixture" or self.partial else "password"
 
     def check_auth_password(self, username, password):
         accepted = username in ("DOMAIN\\fixture", "mfa-after-password") and password == "owned-fixture-password"
@@ -37,6 +39,7 @@ class Server(paramiko.ServerInterface):
             if not username.startswith("mfa-"):
                 audit["domain_literal"] &= username == "DOMAIN\\fixture"
         if username == "mfa-after-password" and accepted:
+            self.partial = True
             return paramiko.AUTH_PARTIALLY_SUCCESSFUL
         return paramiko.AUTH_SUCCESSFUL if accepted else paramiko.AUTH_FAILED
 
@@ -65,19 +68,19 @@ def serve(peer):
         for part in (b"fixt", b"ure", b"#"):
             channel.sendall(part)
             time.sleep(0.015)
-        pending = b""
+        console = ConsoleInput()
         while not stopping.is_set():
             chunk = channel.recv(4096)
             if not chunk:
                 break
-            pending += chunk
-            if len(pending) > 2048:
-                break
-            while b"\n" in pending:
-                line, pending = pending.split(b"\n", 1)
+            for line in console.feed(chunk):
+                if not line:
+                    with lock:
+                        audit["blank_commands"] += 1
+                    continue
                 with lock:
                     audit["no_bom"] &= not line.startswith(b"\xef\xbb\xbf")
-                command = line.rstrip(b"\r").decode("utf-8")
+                command = line.decode("utf-8")
                 with lock:
                     audit["commands"].append(command)
                 if command == "show wait":
@@ -92,7 +95,7 @@ def serve(peer):
                     channel.sendall(b"owned fixture output\r\n")
                     channel.send_stderr(b"owned stderr fixture\r\n")
                 channel.sendall(b"fixture#")
-    except (EOFError, OSError, paramiko.SSHException):
+    except (EOFError, OSError, ValueError, paramiko.SSHException):
         pass  # Expected for unknown pins, cancelled clients and rejected logins.
     finally:
         transport.close()

@@ -13,13 +13,14 @@ import sys
 import threading
 import time
 import paramiko
+from console_input import ConsoleInput
 
 key = paramiko.RSAKey.generate(2048)
 stopping = threading.Event()
 lock = threading.Lock()
 sessions = []
 listeners = []
-audit = {"fixture": "owned software fixture; no real Cisco hardware", "auth": [], "commands": []}
+audit = {"fixture": "owned software fixture; no real Cisco hardware", "auth": [], "commands": [], "blank_commands": 0, "negotiated": [], "bare_lf_bytes": 0, "cr_bytes": 0}
 
 
 def output(command, name, peer, local_port, remote_port, address, serial):
@@ -110,28 +111,39 @@ class Server(paramiko.ServerInterface):
 
 def serve(peer_socket, name, peer_name, local_port, remote_port, address, serial):
     transport = paramiko.Transport(peer_socket)
+    if os.environ.get("NETSTUCKED_QA_SSH_CTR") == "1":
+        transport.get_security_options().ciphers = ("aes256-ctr",)
+        transport.get_security_options().digests = ("hmac-sha2-512-etm@openssh.com",)
     with lock:
         sessions.append(transport)
     try:
         transport.add_server_key(key)
         server = Server(name)
         transport.start_server(server=server)
+        with lock:
+            audit["negotiated"].append({"device": name, "cipher": transport.remote_cipher, "mac": transport.remote_mac})
         channel = transport.accept(10)
         if channel is None or not server.shell.wait(10):
             return
         prompt = (name + "#").encode("utf-8")
         channel.sendall(prompt)
-        pending = b""
+        console = ConsoleInput()
         while not stopping.is_set():
             chunk = channel.recv(4096)
             if not chunk:
                 break
-            pending += chunk
-            if len(pending) > 2048:
-                break
-            while b"\n" in pending:
-                line, pending = pending.split(b"\n", 1)
-                command = line.rstrip(b"\r").decode("utf-8")
+            with lock:
+                audit["bare_lf_bytes"] += chunk.count(b"\n")
+                audit["cr_bytes"] += chunk.count(b"\r")
+            if os.environ.get("NETSTUCKED_QA_SSH_CTR") == "1" and b"\n" in chunk:
+                # This mode deliberately requires console CR, exposing the former LF bug.
+                return
+            for line in console.feed(chunk):
+                if not line:
+                    with lock:
+                        audit["blank_commands"] += 1
+                    continue
+                command = line.decode("utf-8")
                 with lock:
                     audit["commands"].append({"device": name, "command": command})
                 data = (command + "\r\n" + output(command, name, peer_name, local_port, remote_port, address, serial).replace("\n", "\r\n")).encode("utf-8")
@@ -140,7 +152,7 @@ def serve(peer_socket, name, peer_name, local_port, remote_port, address, serial
                     channel.sendall(data[offset:offset + 43])
                     time.sleep(0.002)
                 channel.sendall(prompt)
-    except (EOFError, OSError, paramiko.SSHException):
+    except (EOFError, OSError, ValueError, paramiko.SSHException):
         pass
     finally:
         transport.close()

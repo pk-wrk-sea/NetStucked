@@ -1,5 +1,7 @@
 # Config Collector — approved adaptation, 2026-10-19
 
+**2026-10-21 correction:** The infrastructure-provider paragraph below records the original 0.9.0 design. Collector-only SSH is being replaced by the strong AES-CTR/SHA-2 compatible adapter with authenticated, owned loopback socket cancellation and bounded streams in [0.11.2](FEATURES_0.11.2.md). Terminal retains Tmds. The original host-pin, memory-only credential, rejection-only fallback, capture and no-command-replay policy remains; [incident/verification](QA_0.11.2.md).
+
 Authority: the human supplied the collector requirements and requested implementation in the existing NetStucked theme. This supersedes A02's missing-v2-mockup gate for this slice only. The standing GitHub update publication instruction carries forward; the additive module uses 0.9.0. No scheduling, inventory reconciliation, topology, CVE, terminal emulator or device configuration writes.
 
 ## Architecture recorded before implementation
