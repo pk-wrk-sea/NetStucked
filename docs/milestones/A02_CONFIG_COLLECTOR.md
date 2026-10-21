@@ -2,6 +2,8 @@
 
 **2026-10-21 / 0.11.2 incident follow-up:** [Strong-algorithm/console/cancellation correction](../FEATURES_0.11.2.md) and [released-binary reproduction/QA](../QA_0.11.2.md) address the reported existing Collector failure. Required acceptance now includes a CTR/SHA512-ETM-only owned SSH server, strict console CR with unchanged Telnet CRLF, trust-before-auth, rejected-auth-only fallback and cancellation during KEX/auth/shell/output. These scoped checks do not close actual Cisco/AAA/command-corpus or full A02 acceptance.
 
+**Publication:** 0.11.2 is GitHub Latest after 512 tests, 60 SSH matrix assertions, exact WPF/native/CI/public download and old/current updater checks; [immutable evidence](../GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md). The scoped software-fixture checks pass. Actual Cisco/manual/Setup and broader checklist items below stay open.
+
 **2026-10-21 / 0.11.1:** Captured-banner prompt handling and awaited cancellation fixes, actual production SSH/capture verification and Collector-to-engineering integration are tracked in [QA](../QA_0.11.1.md). Owned software fixtures do not close real Cisco/platform/large-network acceptance.
 
 **2026-10-19 superseding adaptation:** the human explicitly requested the attached collector requirements in the current app theme. The bounded SSH/Telnet/memory-only AUTH/prompt-aware capture slice is implemented for 0.9.0; [scope](../FEATURES_0.9.0.md), [architecture/matrix/plan](../CONFIG_COLLECTOR_2026-10-19.md), [actual QA and limits](../QA_0.9.0.md). Older v2, inventory/group/diff/parser and scheduling statements below are historical backlog, not additional authorization or completion claims. Real Cisco acceptance/full A02 DoD stays open.

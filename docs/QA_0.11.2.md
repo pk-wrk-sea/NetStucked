@@ -1,10 +1,10 @@
 # 0.11.2 - Collector incident verification
 
-Date: 2026-10-21, Asia/Bangkok. [Scope and security contract](FEATURES_0.11.2.md). Final source checks pass; exact-package/GitHub publication verification is being prepared. Actual-device resolution is not claimed.
+Date: 2026-10-21, Asia/Bangkok. [Scope and security contract](FEATURES_0.11.2.md). **Published as GitHub Latest** after exact-package/CI/public-download and real old/current updater verification; [immutable publication evidence](GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md). Actual-device resolution is not claimed.
 
 ## Observed incident
 
-The running installed executable is 0.11.1+314c2f3da937232e5f9441c0863e9390016af8e7. Installed Core/Infrastructure/Desktop/Tmds DLL hashes match the frozen 0.11.1 payload. Read-only inspection confirms the reported generic Detail. No Start, credentials or commands were submitted to the working device during development.
+At incident inspection the installed executable was 0.11.1+314c2f3da937232e5f9441c0863e9390016af8e7. Installed Core/Infrastructure/Desktop/Tmds DLL hashes matched the frozen 0.11.1 payload. Read-only inspection confirmed the reported generic Detail. No Start, credentials or commands were submitted to the working device during development.
 
 Do not infer that Collector authentication succeeded from the supplied Cisco event: the two events have distinct tty values, and the successful event's AES256-CTR is absent from the installed provider's supported cipher list. The whole server offer and connection correlation are unknown. The generic Detail alone also covers channel, PTY and shell rejection.
 
@@ -49,9 +49,11 @@ The SSH matrix includes GCM control, channel/PTY/shell denial, early close, chan
 
 One complete 512-test attempt during concurrent build/SSH probe activity failed only the pre-existing ICMP admission timing assertion (511 passed). The subsequent quiet complete run passes all 512. No unrelated pacing code or timing threshold is changed. The earlier SDK-worker crash candidate is retained above; the guarded design's fresh independent wire/banner/policy runs exit cleanly with unchanged source/runtime hashes.
 
-Light/Dark PNGs are actual WPF control renders. Computer Use was stopped by the human with Esc; no successful native screenshot is claimed for this patch. Native executable/monitoring, frozen package and public release/updater checks are recorded separately when performed. Raw TCP-connect/DNS stalls on a real network are NOT TESTED; owned connected-socket KEX cancellation and relay startup/no-dial policies are verified.
+Light/Dark PNGs are actual WPF control renders. Computer Use was stopped by the human with Esc; no successful native screenshot is claimed for this patch. Exact native executable/monitoring, frozen package and public release/updater checks are recorded in the publication report below. Raw TCP-connect/DNS stalls on a real network are NOT TESTED; owned connected-socket KEX cancellation and relay startup/no-dial policies are verified.
 
 ## Publication checks
+
+PASS: all four source/PR/main/exact-installer CI runs, six-asset draft verification, 498 exact payload entries, anonymous public ZIP/Setup downloads, actual 0.11.1 discovery of Install v0.11.2 (8 assertions), current Reinstall/Recovery (9) and old production updater staging/trust/native-helper preparation (11). No Setup was executed. [Exact hashes, source identities and evidence](GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md).
 
 - Exact reported CTR/SHA512-ETM real SSH WPF collection and GCM control; actual protected JSON/TXT capture and command framing.
 - Host mismatch before any authentication, one rejected AUTH1 then bounded AUTH2, unsupported/partial/MFA/password-change no fallback; no credentials/nonce in errors/state/files.

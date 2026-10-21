@@ -1,8 +1,10 @@
-# NetStucked 0.11.0
+# NetStucked 0.11.2
 
-0.11.0 integrated review: actual-state Dashboard, stable-ID MA Inventory and versioned Excel preview/import/audit, offline Cisco evidence/one-hop Topology/config comparison, and engineer-reviewed CVE/device upgrade plans with Excel/CSV/HTML reports. [Scope](docs/FEATURES_0.11.0.md) - [review guide and QA](docs/QA_0.11.0.md). Published as GitHub Latest; [source/assets/CI and updater limits](docs/GITHUB_RELEASE_0.11.0_REPORT_2026-10-20.md). Check for Updates may be denied by GitHub HTTP 403; verified direct downloads are available.
+0.11.2 fixes Config Collector strong AES-CTR/SHA-2 SSH compatibility, console Enter framing, separate shell setup timeouts and bounded cancellation/cleanup. [Scope](docs/FEATURES_0.11.2.md) - [QA](docs/QA_0.11.2.md) - [verified source/assets/CI/public updater](docs/GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md). Real Cisco/AAA acceptance remains separate.
 
-Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.11.0 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.11.0).
+Includes the 0.11.0 integrated workflows: actual-state Dashboard, stable-ID MA Inventory/versioned Excel/audit, offline Cisco evidence/one-hop Topology/config comparison and engineer-reviewed CVE/device change plans. [Integrated scope](docs/FEATURES_0.11.0.md) - [review guide](docs/QA_0.11.0.md).
+
+Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.11.2 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.11.2).
 
 <img src="docs/branding/NetStuckedBanner.png" width="480" alt="NetStucked — Network Engineer's Toolkit" />
 
@@ -27,9 +29,9 @@ Diagnostics/old DNS/HTTP test and Network Info/Wi-Fi Manager desktop surfaces we
 
 ## Update or install
 
-**Updates → Check for Updates → Install v0.10.1** (when GitHub public API access is available). Acknowledge the hash-verified unsigned project installer and follow ordinary Windows UAC/SmartScreen prompts. Checking/installation starts only after an explicit user action.
+**Updates → Check for Updates → Install v0.11.2** (when GitHub public API access is available). Acknowledge the hash-verified unsigned project installer and follow ordinary Windows UAC/SmartScreen prompts. Checking/installation starts only after an explicit user action.
 
-The actual 0.9.0 updater now discovers Install v0.10.1 and public installer/helper preparation passes. Earlier checks were rate-limited; if GitHub limits a future check, manual release downloads remain available.
+The actual 0.11.1 updater discovers Install v0.11.2; public download/hash/trust/staging and native helper preparation pass without executing Setup during development. Earlier rate-limit results remain in the historical reports; manual release downloads are also available.
 
 The [release page](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.10.1) provides a self-contained .NET Windows x64 portable ZIP, setup EXE, SHA-256 files and provenance manifests. Keep the portable directory together. Preferences/logs live under `%LOCALAPPDATA%\NetStucked`; keys/credentials use Windows-protected storage.
 

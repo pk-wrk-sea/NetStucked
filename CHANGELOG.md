@@ -5,7 +5,7 @@
 - Fix Config Collector compatibility with strong Cisco AES-CTR/SHA-2 ETM combinations that the earlier SSH provider could not negotiate. Retain host-key pin checks before authentication, memory-only credentials and authentication-rejection-only fallback.
 - Use SSH console CR command termination, preserve Telnet NVT CRLF, and separate authentication/connection and shell setup deadlines.
 - Bound stream buffers and own connection cancellation/cleanup; report safe stage-specific SSH errors instead of one generic negotiation/session error.
-- See docs/QA_0.11.2.md for the exact released-binary reproduction, owned protocol fixtures and actual-device acceptance limits.
+- Published as GitHub Latest after exact-payload/CI/public-download and actual 0.11.1 updater discovery/staging checks. See docs/QA_0.11.2.md and docs/GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md for evidence and actual-device acceptance limits.
 
 ## 0.11.1 - 2026-10-21
 

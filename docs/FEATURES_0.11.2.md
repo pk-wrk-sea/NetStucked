@@ -17,4 +17,4 @@ Provider references: [Tmds 0.26 supported/default algorithms at its pinned sourc
 
 The combined application output queue is 32 x 4 KiB plus bounded decoder/pending state; this is not a 256 KiB total-process or SSH receive-window claim. SDK packets and its temporary pre-ready duplicate buffer have separate finite bounds. No compression is negotiated. A server accepting none-auth without running the explicit password method is rejected because this adapter has not established its owned Session hooks.
 
-Implementation, owned regression verification and publication are tracked separately in [QA_0.11.2.md](QA_0.11.2.md). Physical Cisco/AAA policy/command support and real-device acceptance remain open until the corrected build is exercised on the intended device.
+Implementation and owned regression verification are tracked in [QA_0.11.2.md](QA_0.11.2.md); [immutable source/assets/CI/public updater evidence](GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md) confirms publication as GitHub Latest. Physical Cisco/AAA policy/command support and real-device acceptance remain open until the corrected build is exercised on the intended device.
