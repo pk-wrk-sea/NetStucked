@@ -56,13 +56,13 @@ public sealed class EngineeringStore(UserSettingsStore settings) : IEngineeringS
             if (File.Exists(path))
             {
                 string backupTemp = temp + ".backup";
-                try { File.Copy(path, backupTemp, false); File.Move(backupTemp, Path.Combine(_directory, "workspace-v1.previous.json"), true); }
+                try { File.Copy(path, backupTemp, false); await AtomicFileReplace.MoveAsync(backupTemp, Path.Combine(_directory, "workspace-v1.previous.json"), token).ConfigureAwait(false); }
                 finally { if (File.Exists(backupTemp)) File.Delete(backupTemp); }
             }
-            File.Move(temp, path, true);
+            await AtomicFileReplace.MoveAsync(temp, path, token).ConfigureAwait(false);
             return saved;
         }
-        finally { if (File.Exists(temp)) File.Delete(temp); _gate.Release(); }
+        finally { try { if (File.Exists(temp)) File.Delete(temp); } finally { _gate.Release(); } }
     }
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     private static void ProtectDirectory(string path)

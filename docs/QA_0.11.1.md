@@ -18,7 +18,7 @@ Local evidence root: artifacts/menu-acceptance-20261021. Inventory parser regres
 | Check | Actual result | Evidence |
 | --- | --- | --- |
 | Final solution Release build | PASS, 0 warnings/errors | final-build.log |
-| Final unit/integration | 487 PASS, 0 failed/skipped | final-unit.log; final-test-results/final-unit.trx |
+| Final unit/integration | 493 PASS, 0 failed/skipped, including 6 added store-contention cases | contention-final-unit-quiet.log; final-test-results/contention-final-unit-quiet.trx |
 | Actual WPF engineering regression | 46 PASS; dirty editor/filter-out/refresh, reanalysis, persistence, Excel, explicit review/approval and invalidation | engineering-regression.log |
 | Real Collector-produced capture consumers | 18 PASS; production parser/store, actual source hashes, Excel/audit/observations, graph/CSV and public CVE reports | real-engineering.log; real-engineering/result.json |
 | Fresh public NVD/CISA consumer call | PASS; actual CVE-2023-20198 metadata; 2 assets remain Needs Review, 0 reviews/plans | real-engineering/actual-public-advisory-displayed.json |
@@ -39,9 +39,15 @@ Native Computer Use images in native-captures:
 
 Additional Light/Dark WPF renders and actual Terminal WebView previews are retained with the corresponding test folders. These are not manufactured mockups. Frozen-package identity and post-commit exact-payload/release verification will be recorded separately.
 
-One initial full test run had an existing ICMP admission timing assertion failure during concurrent build activity (480 pass/1 fail at that point); the focused pacing check and two later complete suites passed, finally 487/487. No unrelated pacing implementation/test thresholds were changed. One real SSH AFTER attempt used a stale QA dependency file and failed before login; it is retained as invalid staging, then repeated successfully with a restored runtime. Public NVD returned HTTP 503 on an intermediate call; the later consumer fresh call passed. No availability or quota guarantee is claimed.
+Two full test runs hit an existing ICMP admission timing assertion during concurrent build/probe activity (480 pass/1 fail initially, 492 pass/1 fail after adding store tests); the focused check and later complete suites passed, finally 493/493 after probe activity ended. No unrelated pacing implementation/test thresholds were changed. One real SSH AFTER attempt used a stale QA dependency file and failed before login; it is retained as invalid staging, then repeated successfully with a restored runtime. Public NVD returned HTTP 503 on an intermediate call; the later consumer fresh call passed. No availability or quota guarantee is claimed.
 
 Collector remains conservative for literal command-error lines inside unusual banners (for example lines beginning `% Invalid`); arbitrary configuration-language parsing and platform command compatibility require real-device corpus acceptance. Such failure does not trigger credential fallback or command replay.
+
+## Frozen-candidate contention finding
+
+Candidate final-1 at source 1535b02a0a1306ac6bc6f19c0f2da3c95165f1bb is preserved locally and will not be published. Its general exact-payload WPF, SSH/Terminal/CVE, native smoke and source/PR CI passed, but exact engineering WPF failed while saving a review with UnauthorizedAccessException. The original owned workspace/previous snapshot remained valid. ACL inspection showed current user/SYSTEM FullControl and no read-only attributes. Direct-store replay reproduced HRESULT 0x80070005 at the final File.Move after 20 successful commits in the OneDrive QA folder; a separate fresh LocalAppData profile completed 500/500. Evidence: store-probe/run-1/direct-store-result.json. The same exact WPF engineering suite passed from a fresh LocalAppData profile (final-1/exact-engineering-local.log), distinguishing the file-contention condition from the workflow assertion.
+
+The corrective candidate uses existing AtomicFileReplace bounded retries for both renames, cancellation and unconditional gate release. Six deterministic current/backup lock tests (transient/permanent/cancel) yielded 4 failures before and all pass after; 39 combined engineering tests pass. Fresh owned replay after the fix completed 500/500 in OneDrive and 500/500 in LocalAppData (store-probe/run-2/direct-store-result.json). The complete corrected suite is 493/493. New frozen-candidate verification is required before publication. No permission bypass or modification of the user's installed process/profile is involved. final-1 bytes remain immutable and are not silently replaced by final-2.
 
 ## Open acceptance
 

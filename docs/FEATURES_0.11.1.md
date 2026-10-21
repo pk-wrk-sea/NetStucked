@@ -9,3 +9,5 @@ Human instruction on 2026-10-21 explicitly requests testing Terminal, Config Col
 - CVE: bound complete HTTP requests including body reads; optional CISA failure keeps successful NVD metadata with KEV Unknown. Preserve active review/plan fields during refresh. Refresh time-sensitive states while the page is visible, on navigation, and before approval/export. No automatic applicability or safe-release claim.
 
 Existing schema-1 engineering data, preferences and secrets policy remain compatible. Parser revisions append to existing evidence history. Historical milestones and real Cisco/physical-DPI/accessibility/Setup acceptance remain separate. Verification and capture provenance are tracked in [QA_0.11.1.md](QA_0.11.1.md).
+
+Frozen-candidate verification also reproduced transient atomic file replacement failure in the owned OneDrive QA profile. Engineering saves now use the existing bounded atomic-replacement retry for both previous-snapshot and current-document renames, with cancellation and unconditional gate release. ACLs, revision checks and atomic data rules remain unchanged. No permission broadening or user-data repair is performed.
