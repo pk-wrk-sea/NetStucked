@@ -8,18 +8,30 @@ namespace NetStucked.Infrastructure;
 public sealed class AdvisoryLookup : IAdvisoryLookup, IDisposable
 {
     private readonly HttpClient _http;
+    private readonly TimeSpan _requestTimeout;
     private readonly SemaphoreSlim _gate = new(1);
     private DateTimeOffset _lastRequest;
     public AdvisoryLookup() : this(new HttpClientHandler { AllowAutoRedirect = false, AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate }) { }
-    public AdvisoryLookup(HttpMessageHandler handler) { _http = new(handler) { Timeout = TimeSpan.FromSeconds(30) }; _http.DefaultRequestHeaders.UserAgent.ParseAdd("NetStucked/0.11 advisory-metadata"); }
+    public AdvisoryLookup(HttpMessageHandler handler, TimeSpan? requestTimeout = null)
+    {
+        _requestTimeout = requestTimeout ?? TimeSpan.FromSeconds(30);
+        if (_requestTimeout <= TimeSpan.Zero || _requestTimeout > TimeSpan.FromSeconds(30)) throw new ArgumentOutOfRangeException(nameof(requestTimeout));
+        _http = new(handler) { Timeout = Timeout.InfiniteTimeSpan }; _http.DefaultRequestHeaders.UserAgent.ParseAdd("NetStucked/0.11 advisory-metadata");
+    }
     private async Task<JsonDocument> GetAsync(string url, int maxBytes, CancellationToken token)
     {
-        using var response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
-        if ((int)response.StatusCode is 429 or 403) throw new IOException("Provider quota/access limit. Retry later; cached metadata was retained.");
-        response.EnsureSuccessStatusCode(); if (response.Content.Headers.ContentLength > maxBytes) throw new IOException("Provider response exceeds limit.");
-        await using var input = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false); using var output = new MemoryStream(); byte[] buffer = new byte[8192]; int count;
-        while ((count = await input.ReadAsync(buffer, token).ConfigureAwait(false)) > 0) { if (output.Length + count > maxBytes) throw new IOException("Provider response exceeds limit."); output.Write(buffer, 0, count); }
-        return JsonDocument.Parse(output.ToArray());
+        // ResponseHeadersRead completes before the body; keep the same deadline through every body read.
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token); deadline.CancelAfter(_requestTimeout);
+        try
+        {
+            using var response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, deadline.Token).ConfigureAwait(false);
+            if ((int)response.StatusCode is 429 or 403) throw new IOException("Provider quota/access limit. Retry later; cached metadata was retained.");
+            response.EnsureSuccessStatusCode(); if (response.Content.Headers.ContentLength > maxBytes) throw new IOException("Provider response exceeds limit.");
+            await using var input = await response.Content.ReadAsStreamAsync(deadline.Token).ConfigureAwait(false); using var output = new MemoryStream(); byte[] buffer = new byte[8192]; int count;
+            while ((count = await input.ReadAsync(buffer, deadline.Token).ConfigureAwait(false)) > 0) { if (output.Length + count > maxBytes) throw new IOException("Provider response exceeds limit."); output.Write(buffer, 0, count); }
+            token.ThrowIfCancellationRequested(); return JsonDocument.Parse(output.ToArray());
+        }
+        catch (OperationCanceledException ex) when (!token.IsCancellationRequested) { throw new IOException("Provider request timed out; cached metadata was retained.", ex); }
     }
     public async Task<Advisory> FetchAsync(string cve, CancellationToken token)
     {

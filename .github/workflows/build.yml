@@ -28,6 +28,10 @@ jobs:
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --terminal-ui-check artifacts/terminal-qa tests/fixtures/terminal_ssh_server.py
       - name: Verify integrated engineering menus with owned offline fixtures
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --engineering-ui-check artifacts/engineering-qa
+      - name: Verify CVE expiry and editor preservation without external providers
+        run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --cve-regression-check artifacts/cve-regression-qa
+      - name: Verify Collector banners through owned SSH
+        run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --collector-banner-ssh-check artifacts/collector-banner-qa tests/fixtures/collector_cisco_lab_server.py
       - run: dotnet publish src/NetStucked.Desktop/NetStucked.Desktop.csproj -c Release -r win-x64 --self-contained true -o artifacts/publish/win-x64
       - name: Verify native monitoring auto-resume and profile instance restoration
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --native-monitor-check artifacts/native-monitor-qa artifacts/publish/win-x64/NetStucked.exe

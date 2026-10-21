@@ -83,23 +83,33 @@ public static class InventoryWorkbook
             return values;
         }
         if (Cells(rows[0])[0] != "NetStucked Inventory schema 1" || !Cells(rows[1]).SequenceEqual(Headers)) throw new IOException("Unsupported schema/headers. Export a fresh template; keep the first two rows.");
-        var result = new List<AssetImportRow>(); var seen = new HashSet<Guid>(); var serials = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var result = new List<AssetImportRow>(); var identities = new Dictionary<int, Guid>(); var serials = new Dictionary<int, string>();
         for (int i = 2; i < rows.Length; i++)
         {
             token.ThrowIfCancellationRequested();
             try
             {
                 var v = Cells(rows[i]); if (v.All(string.IsNullOrWhiteSpace)) continue;
-                Guid id = v[0].Length == 0 ? Guid.NewGuid() : Guid.Parse(v[0]);
-                if (!seen.Add(id)) throw new ArgumentException("Duplicate AssetId in workbook.");
-                DateOnly? Date(string s) => s.Length == 0 ? null : DateOnly.TryParseExact(s, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) ? date : throw new ArgumentException("Dates must be text yyyy-MM-dd (not Excel serial dates).");
+                if (v[5].Length > 0) serials[i + 1] = v[5];
+                Guid id = v[0].Length == 0 ? Guid.NewGuid() : Guid.Parse(v[0]); identities[i + 1] = id;
+                DateOnly? Date(string s) => s.Length == 0 ? null : DateOnly.TryParseExact(s, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) ? date : throw new ArgumentException("Dates must be yyyy-MM-dd text or whole-day Excel date cells.");
                 var asset = new Asset(id, v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], Date(v[10]), Date(v[11]), DateTimeOffset.UtcNow); EngineeringRules.Validate(asset);
-                if (asset.Serial.Length > 0 && (!serials.Add(asset.Serial) || existing.Any(a => a.Id != id && a.Serial.Equals(asset.Serial, StringComparison.OrdinalIgnoreCase)))) throw new ArgumentException("Serial conflicts with another asset; reconcile stable identity first.");
+                if (asset.Serial.Length > 0 && existing.Any(a => a.Id != id && a.Serial.Equals(asset.Serial, StringComparison.OrdinalIgnoreCase))) throw new ArgumentException("Serial conflicts with another asset; reconcile stable identity first.");
                 var old = existing.FirstOrDefault(a => a.Id == id);
                 result.Add(new(i + 1, asset, old is null ? "Add" : "Update human fields (explicit selection)", ""));
             }
             catch (Exception e) when (e is ArgumentException or FormatException or OverflowException or IOException) { result.Add(new(i + 1, null, "Rejected", e.Message)); }
         }
-        return result.ToArray();
+        // Reject every member of an ambiguous identity group, including the first row.
+        // Otherwise Select valid silently applies a first-wins update from a conflicting workbook.
+        var duplicateIds = identities.GroupBy(x => x.Value).Where(g => g.Count() > 1).SelectMany(g => g.Select(x => x.Key)).ToHashSet();
+        var duplicateSerials = serials.GroupBy(x => x.Value, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1).SelectMany(g => g.Select(x => x.Key)).ToHashSet();
+        return result.Select(row =>
+        {
+            string error = row.Error;
+            if (duplicateIds.Contains(row.Row)) error = (error.Length > 0 ? error + " " : "") + "Duplicate AssetId in workbook; all matching rows rejected.";
+            if (duplicateSerials.Contains(row.Row)) error = (error.Length > 0 ? error + " " : "") + "Serial conflicts with another workbook row; all matching rows rejected.";
+            return error.Length > 0 ? row with { Asset = null, Action = "Rejected", Error = error } : row;
+        }).ToArray();
     }, token).ConfigureAwait(false);
 }

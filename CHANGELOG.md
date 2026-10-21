@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.1 - 2026-10-21
+
+- Clear the obsolete maximum-tab warning after Terminal tabs are closed, retaining the live SSH session and unrelated error messages.
+- Preserve unsaved Inventory/CVE edits during filtering and workspace refresh; reject every conflicting duplicate Excel ID/serial row.
+- Scope Cisco neighbor parsing to captured CDP/LLDP commands, prevent incomplete neighbor leakage, and keep contradictory endpoint addresses under review. Clear configuration differences on device changes. Explicitly reanalyze legacy captures with verified original hashes, retaining observation history.
+- Stop treating ordinary running-config banner words as live Collector authentication/confirmation prompts; genuine waiting prompts still stop without replay.
+- Bound CVE response body reads, retain NVD metadata when optional CISA lookup times out, and refresh expired assessments/plans before approval or export.
+- See docs/QA_0.11.1.md for actual program captures, owned SSH integration and remaining acceptance limits.
+
 ## 0.11.0 - 2026-10-20
 
 - Complete current navigation with an actual-state Dashboard, stable-ID MA Inventory and versioned Excel preview/import/export with before/after audit.

@@ -77,6 +77,15 @@ public sealed class EngineeringStore(UserSettingsStore settings) : IEngineeringS
 
 public static class EvidenceFile
 {
+    public static async Task<EvidenceDocument> ReanalyzeAsync(EvidenceDocument original, CancellationToken token)
+    {
+        string text = await ReadVerifiedTextAsync(original, token).ConfigureAwait(false);
+        var revision = await Task.Run(() => CiscoEvidenceParser.Parse(text, original.Source, original.Sha256, original.Host, original.CollectedAt, original.Complete, original.AssetId, token), token).ConfigureAwait(false);
+        // This new immutable record is the audit trail. Raw source, collection time and
+        // prior parser facts remain unchanged; downstream reviews see a new evidence ID.
+        string audit = $"Explicit offline reanalysis of evidence {original.Id} ({original.Parser}) at {DateTimeOffset.UtcNow:O}; original capture and prior facts retained.";
+        return revision with { Warnings = revision.Warnings.Append(audit).ToArray() };
+    }
     public static async Task<string> ReadVerifiedTextAsync(EvidenceDocument evidence, CancellationToken token)
     {
         if (new FileInfo(evidence.Source).Length > 12 * 1024 * 1024) throw new IOException("Evidence file exceeds analysis limit.");

@@ -51,6 +51,15 @@ internal static partial class Program
             await Until(() => !vm.Engineering.IsBusy); Require(vm.Inventory.Assets.Count == 1 && vm.Inventory.Assets[0].Asset.Hostname == "SW1-owned", "Actual editor binding and Save button persist stable asset identity: " + vm.Engineering.Message);
             Guid asset = vm.Inventory.Assets[0].Asset.Id; Require(vm.Engineering.Data.Changes?.Length == 1, "Manual edits create a separate before/after audit record");
             vm.Inventory.SelectedAsset = vm.Inventory.Assets[0];
+            hostname.Text = "SW1-owned-unsaved"; vm.Inventory.Site = "Dirty site ไทย";
+            vm.Inventory.Search = "SW1"; await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+            Require(vm.Inventory.Hostname == "SW1-owned-unsaved" && vm.Inventory.Site == "Dirty site ไทย", "Actual WPF grid refresh preserves unsaved inventory editor");
+            vm.Inventory.Search = "no-matching-owned-asset"; await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+            vm.Inventory.Search = ""; await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+            Require(vm.Inventory.AssetId == asset.ToString() && vm.Inventory.Hostname == "SW1-owned-unsaved", "Filtering asset out and back preserves stable editing identity and dirty fields");
+            await vm.Engineering.CommitAsync(data => data, default); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+            Require(vm.Inventory.Site == "Dirty site ไทย" && vm.Inventory.Hostname == "SW1-owned-unsaved", "Unrelated saved workspace revision does not replace active inventory edits");
+            vm.Inventory.Hostname = "SW1-owned"; vm.Inventory.Site = "Owned fixture";
             files.OpenPath = await WriteOwnedEvidenceAsync(output, "sw1", "SW1-owned", "SW2-owned", "Gi1/0/1", "Gi1/0/2", "17.9.4a");
             await vm.Inventory.ImportEvidenceCommand.ExecuteAsync(null);
             Require(vm.Engineering.Data.Evidence.Length == 1 && vm.Inventory.Assets[0].ObservedVersion == "17.9.4a" && vm.Inventory.Assets[0].Asset.Model == "Manual model", "Collector hash-verified observed facts remain separate from human inventory: " + vm.Engineering.Message);
@@ -108,6 +117,12 @@ internal static partial class Program
             vm.Dashboard.Update(true); Require(vm.Dashboard.Summary.Contains("2 assets") && vm.Dashboard.Incidents.Count == 0, "Dashboard uses actual inventory and no fabricated incidents");
             vm.Dashboard.OpenCommand.Execute("MA Inventory"); Require(vm.CurrentPage == vm.Inventory, "Dashboard drill-down opens cached functional menu");
             var reloaded = await provider.GetRequiredService<IEngineeringStore>().LoadAsync(default); Require(reloaded.Assets.Length == 2 && reloaded.Evidence.Length == 3 && reloaded.Plans.Length == 1, "Real local persistence round trip retains assets, evidence and plans");
+            var legacy = EngineeringRules.Latest(vm.Engineering.Data, asset)! with { Parser = "cisco-text/1" };
+            await vm.Engineering.CommitAsync(data => data with { Evidence = data.Evidence.Select(e => e.Id == legacy.Id ? legacy : e).ToArray() }, default);
+            vm.Topology.SelectedDevice = vm.Topology.Devices.Single(e => e.AssetId == asset);
+            await vm.Topology.ReanalyzeSourceCommand.ExecuteAsync(null);
+            var reparsed = EngineeringRules.Latest(vm.Engineering.Data, asset)!;
+            Require(reparsed.Id != legacy.Id && reparsed.Parser == CiscoEvidenceParser.Version && reparsed.Sha256 == legacy.Sha256 && vm.Engineering.Data.Evidence.Contains(legacy), "Explicit WPF reanalysis appends corrected parser facts while retaining source hash and original observation");
             Require(errors.Messages.Count == 0, "Engineering actual WPF bindings: " + string.Join(" | ", errors.Messages.Take(5)));
             await File.WriteAllTextAsync(Path.Combine(output, "result.txt"), "PASS · owned fixtures only; WPF workflow/theme/geometry renders, not physical DPI or human accessibility acceptance.");
         }

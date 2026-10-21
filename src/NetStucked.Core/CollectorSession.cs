@@ -26,6 +26,10 @@ public sealed class CollectorPromptRecognizer
     public bool Rejected => Regex.IsMatch(_tail, @"(?im)(authentication failed|login incorrect|access denied|^%\s*(bad passwords|access denied)|permission denied)");
     public bool Mfa => Regex.IsMatch(_tail, @"(?i)(verification code|one.time password|\bOTP\b|\bMFA\b|duo push|authenticator code)");
     public bool Confirmation => Regex.IsMatch(_tail, @"(?i)(\[confirm\]|\[yes/no\]|\(yes/no\)|\[y/n\]|press (any key|enter|return)|--more--|---- more ----)");
+    private string ActiveLine => _tail[(_tail.LastIndexOf('\n') + 1)..].Trim();
+    public bool ActiveMfa => Regex.IsMatch(ActiveLine, @"(?i)^(?:(?:OTP(?: verification)?|verification|MFA|authenticator) code|one.time password)\s*:\s*$");
+    public bool ActiveRejected => Regex.IsMatch(ActiveLine, @"(?i)^(?:authentication failed|login incorrect|access denied|permission denied)[.!:]?\s*$");
+    public bool ActiveConfirmation => Regex.IsMatch(ActiveLine, @"(?i)(?:\[confirm\]|\[yes/no\]|\(yes/no\)|\[y/n\]|press (?:any key|enter|return)(?: to [^\r\n]*)?|--more--|---- more ----)\s*$");
     public bool CommandError => Regex.IsMatch(_tail, @"(?im)(^%\s*(invalid|error|unknown|incomplete|ambiguous|authorization)|^error:|^unrecognized command|^invalid input|^permission denied)");
 }
 
@@ -86,20 +90,37 @@ public static class CollectorSession
         public async Task<string> UntilAsync(Func<CollectorPromptRecognizer, string?> match, ICollectorCapture? capture, CancellationToken token, Action? preview = null)
         {
             var recognizer = new CollectorPromptRecognizer(); byte[] buffer = new byte[4096]; char[] chars = new char[4096]; var decoder = Encoding.UTF8.GetDecoder();
+            Task<int>? pendingRead = null;
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(token); timeout.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
             try
             {
                 while (true)
                 {
-                    int count = await connection.ReadAsync(buffer, timeout.Token).ConfigureAwait(false);
+                    int count = await (pendingRead ?? connection.ReadAsync(buffer, timeout.Token).AsTask()).ConfigureAwait(false);
+                    pendingRead = null;
                     if (count == 0) throw new CollectorException(CollectorFailure.Transport, "Device disconnected; commands were not replayed.");
                     int used = decoder.GetChars(buffer, 0, count, chars, 0); string text = new(chars, 0, used);
                     if (capture is not null) { await capture.AppendAsync(text, timeout.Token).ConfigureAwait(false); preview?.Invoke(); }
                     recognizer.Push(text);
-                    if (recognizer.Mfa) throw new CollectorException(CollectorFailure.UnsupportedAuthentication, "MFA/OTP requires an interactive login and is unsupported.");
-                    if (recognizer.Rejected) throw new CollectorException(capture is null ? CollectorFailure.AuthenticationRejected : CollectorFailure.Command, "Device rejected access in this session.");
-                    if (recognizer.Confirmation) throw new CollectorException(CollectorFailure.Confirmation, "Interactive confirmation or pagination detected; collection stopped.");
                     if (capture is not null && recognizer.CommandError) throw new CollectorException(CollectorFailure.Command, "Device reported a command/authorization error; collection stopped.");
+                    CollectorException? interactive = recognizer.ActiveMfa ? new(CollectorFailure.UnsupportedAuthentication, "MFA/OTP requires an interactive login and is unsupported.")
+                        : recognizer.ActiveRejected ? new(capture is null ? CollectorFailure.AuthenticationRejected : CollectorFailure.Command, "Device rejected access in this session.")
+                        : recognizer.ActiveConfirmation ? new(CollectorFailure.Confirmation, "Interactive confirmation or pagination detected; collection stopped.") : null;
+                    if (interactive is not null)
+                    {
+                        // Captured configuration and the authenticated shell greeting may contain
+                        // these exact words in banners. Only an active unterminated prompt which
+                        // waits for input is a control request; allow streaming output to finish.
+                        pendingRead = connection.ReadAsync(buffer, timeout.Token).AsTask();
+                        if (await Task.WhenAny(pendingRead, Task.Delay(150, timeout.Token)).ConfigureAwait(false) != pendingRead)
+                        {
+                            await timeout.CancelAsync().ConfigureAwait(false);
+                            try { await pendingRead.ConfigureAwait(false); } catch (OperationCanceledException) { }
+                            token.ThrowIfCancellationRequested();
+                            throw interactive;
+                        }
+                        continue;
+                    }
                     if (match(recognizer) is { } result) return result;
                 }
             }

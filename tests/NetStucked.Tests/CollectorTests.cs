@@ -72,16 +72,66 @@ public sealed class CollectorTests
     [Theory] [InlineData("\n% Invalid input detected\nfixture#", "command")] [InlineData("\nContinue? [confirm]", "confirmation")] [InlineData("\nOTP verification code:", "MFA")]
     public async Task CommandFailuresPreservePartialAndNeverReplay(string response, string label)
     {
-        Assert.NotEmpty(label);
+        var watch = System.Diagnostics.Stopwatch.StartNew();
         var transport = new FakeTransport { Response = _ => response };
         var result = (await new CollectorController(transport, new FakeCaptureFactory()).RunAsync(Run(new("fallback", "second-password", "")), _ => { }, default)).Single();
         Assert.Equal(CollectorDeviceState.Partial, result.State); Assert.Single(transport.Users); Assert.Single(transport.Connections.Single().Sent);
+        Assert.Contains(label, result.Detail, StringComparison.OrdinalIgnoreCase);
+        Assert.True(transport.Connections.Single().Disposed);
+        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(3), "A waiting live control prompt must fail without waiting for the command timeout.");
     }
     [Fact] public async Task SplitNoNewlinePromptIgnoresHashAndGreaterThanInsideOutput()
     {
         var transport = new FakeTransport { SplitChunks = true, Response = command => command + "\r\nvalue # inside > output\r\nfixture#" };
         var result = (await new CollectorController(transport, new FakeCaptureFactory()).RunAsync(Run(), _ => { }, default)).Single();
         Assert.Equal(CollectorDeviceState.Completed, result.State); Assert.Equal(3, transport.Connections.Single().Sent.Count);
+    }
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public async Task ConfigurationBannerWordsAreDataAndDoNotAbortCollection(bool split)
+    {
+        // These strings are common configured login banners. They are not live
+        // authentication/confirmation prompts in show running-config output.
+        var transport = new FakeTransport
+        {
+            SplitChunks = split,
+            Response = command => command + "\r\nbanner motd ^\r\nMFA / OTP is required for access.\r\nOTP verification code:\r\nAccess denied\r\nAccess denied to unauthorized users.\r\nPress enter to continue [confirm]\r\n^\r\nhostname fixture\r\nfixture#"
+        };
+        var result = (await new CollectorController(transport, new FakeCaptureFactory()).RunAsync(Run(new("fallback", "second-password", "")), _ => { }, default)).Single();
+        Assert.Equal(CollectorDeviceState.Completed, result.State);
+        Assert.Single(transport.Users);
+        Assert.Equal(3, transport.Connections.Single().Sent.Count);
+        Assert.Contains("MFA / OTP is required", result.Preview);
+    }
+    [Theory] [InlineData(false)] [InlineData(true)]
+    public async Task AuthenticatedShellGreetingMayContainBannerWarnings(bool split)
+    {
+        var transport = new FakeTransport { SplitChunks = split, InitialPrompt = "MFA / OTP required for access.\r\nAccess denied to unauthorized users.\r\nOTP verification code:\r\nPress enter to continue [confirm]\r\nfixture#" };
+        var result = (await new CollectorController(transport, new FakeCaptureFactory()).RunAsync(Run(), _ => { }, default)).Single();
+        Assert.Equal(CollectorDeviceState.Completed, result.State);
+        Assert.Single(transport.Users); Assert.Equal(3, transport.Connections.Single().Sent.Count);
+    }
+    [Theory]
+    [InlineData("OTP verification code:", "MFA")]
+    [InlineData("Access denied", "rejected")]
+    [InlineData("Continue? [confirm]", "confirmation")]
+    public async Task WaitingShellControlPromptStopsBeforeCommandsOrCredentialFallback(string prompt, string label)
+    {
+        var transport = new FakeTransport { InitialPrompt = prompt };
+        var result = (await new CollectorController(transport, new FakeCaptureFactory()).RunAsync(Run(new("fallback", "second-password", "")), _ => { }, default)).Single();
+        Assert.Equal(CollectorDeviceState.Failed, result.State); Assert.Contains(label, result.Detail, StringComparison.OrdinalIgnoreCase);
+        Assert.Single(transport.Users); Assert.Empty(transport.Connections.Single().Sent); Assert.True(transport.Connections.Single().Disposed);
+    }
+    [Fact] public async Task CancelDuringControlPromptWaitAwaitsReadCleanupBeforeDisposal()
+    {
+        var transport = new DelayedReadTransport(); using var cancel = new CancellationTokenSource();
+        var running = new CollectorController(transport, new FakeCaptureFactory()).RunAsync(Run(), _ => { }, cancel.Token);
+        await transport.Connection.PendingReadStarted.Task.WaitAsync(TimeSpan.FromSeconds(3));
+        cancel.Cancel();
+        var result = await running.WaitAsync(TimeSpan.FromSeconds(3));
+        Assert.All(result, row => Assert.Equal(CollectorDeviceState.Cancelled, row.State));
+        Assert.True(transport.Connection.Disposed); Assert.False(transport.Connection.DisposedWhileReading);
+        Assert.Equal(0, transport.Connection.ActiveReads); Assert.Equal(1, transport.Connection.Writes);
     }
     [Fact] public async Task CancelCommandAndQueuedWorkDrainsAllConnections()
     {
@@ -300,5 +350,37 @@ public sealed class CollectorTests
             try { await Task.Delay(Timeout.Infinite, token); throw new InvalidOperationException(); }
             finally { Interlocked.Decrement(ref Active); }
         }
+    }
+    private sealed class DelayedReadTransport : ICollectorTransport
+    {
+        public DelayedReadConnection Connection { get; } = new();
+        public Task<ICollectorConnection> ConnectAsync(CollectorTarget target, CollectorOptions options, CollectorCredentials credentials, string? pin, CancellationToken token) => Task.FromResult<ICollectorConnection>(Connection);
+    }
+    private sealed class DelayedReadConnection : ICollectorConnection
+    {
+        private int _read;
+        public int ActiveReads { get; private set; }
+        public int Writes { get; private set; }
+        public bool Disposed { get; private set; }
+        public bool DisposedWhileReading { get; private set; }
+        public TaskCompletionSource PendingReadStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken token)
+        {
+            if (++_read <= 2)
+            {
+                byte[] text = Encoding.UTF8.GetBytes(_read == 1 ? "fixture#" : "Continue? [confirm]");
+                text.CopyTo(buffer); return text.Length;
+            }
+            ActiveReads++; PendingReadStarted.SetResult();
+            try
+            {
+                try { await Task.Delay(Timeout.Infinite, token); }
+                catch (OperationCanceledException) { await Task.Delay(250); throw; }
+                return 0;
+            }
+            finally { ActiveReads--; }
+        }
+        public ValueTask WriteAsync(ReadOnlyMemory<byte> bytes, CancellationToken token) { Writes++; return ValueTask.CompletedTask; }
+        public ValueTask DisposeAsync() { DisposedWhileReading = ActiveReads > 0; Disposed = true; return ValueTask.CompletedTask; }
     }
 }

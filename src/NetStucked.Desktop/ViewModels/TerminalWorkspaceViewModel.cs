@@ -53,6 +53,8 @@ public partial class TerminalTabViewModel : ObservableObject
 
 public partial class TerminalWorkspaceViewModel : ObservableObject, IAsyncDisposable
 {
+    private const string DefaultMessage = "Up to 5 independent sessions · credentials stay in memory · no automatic connections";
+    private const string TabLimitMessage = "Maximum 5 terminal tabs. Close one before adding another.";
     private readonly ITerminalTransport _transport;
     private readonly ITerminalProfileStore _store;
     private readonly IDesktopDialogs _dialogs;
@@ -69,7 +71,7 @@ public partial class TerminalWorkspaceViewModel : ObservableObject, IAsyncDispos
     public IReadOnlyList<TerminalAuthentication> Authentications { get; } = Enum.GetValues<TerminalAuthentication>();
     [ObservableProperty] private TerminalTabViewModel _selectedTab;
     [ObservableProperty] private TerminalProfile? _selectedProfile;
-    [ObservableProperty] private string _message = "Up to 5 independent sessions · credentials stay in memory · no automatic connections";
+    [ObservableProperty] private string _message = DefaultMessage;
     partial void OnSelectedProfileChanged(TerminalProfile? value) { if (value is not null && SelectedTab.CanEdit) SelectedTab.Load(value); }
     partial void OnSelectedTabChanged(TerminalTabViewModel value) => SelectedProfile = null;
     public TerminalWorkspaceViewModel(ITerminalTransport transport, ITerminalProfileStore store, IDesktopDialogs dialogs, ITerminalKnownHostStore knownHosts)
@@ -86,7 +88,8 @@ public partial class TerminalWorkspaceViewModel : ObservableObject, IAsyncDispos
         try { foreach (var p in await _store.LoadAsync(CancellationToken.None)) Profiles.Add(p); }
         catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException) { Message = "Saved profiles could not be read; no connections were started."; }
     }
-    [RelayCommand] private void AddTab() { if (_disposed || _stopping) return; if (Tabs.Count >= 5) { Message = "Maximum 5 terminal tabs. Close one before adding another."; return; } var tab = CreateTab(); Tabs.Add(tab); SelectedTab = tab; }
+    [RelayCommand] private void AddTab() { if (_disposed || _stopping) return; if (Tabs.Count >= 5) { Message = TabLimitMessage; return; } var tab = CreateTab(); Tabs.Add(tab); SelectedTab = tab; ClearTabLimitMessage(); }
+    private void ClearTabLimitMessage() { if (Message == TabLimitMessage && Tabs.Count < 5) Message = DefaultMessage; }
     [RelayCommand] private async Task CloseTabAsync()
     {
         var tab = SelectedTab;
@@ -94,6 +97,7 @@ public partial class TerminalWorkspaceViewModel : ObservableObject, IAsyncDispos
         tab.Closing = true; await StopTabAsync(tab); await tab.Connecting; await tab.Session.DisposeAsync(); tab.Rendering.Dispose();
         if (Renderer is not null) await Renderer.RemoveAsync(tab.Id);
         if (Tabs.Count == 1) Tabs.Add(CreateTab()); SelectedTab = Tabs.First(t => t != tab); Tabs.Remove(tab);
+        ClearTabLimitMessage();
     }
     public Task ConnectAsync(string password, string passphrase)
     {

@@ -80,7 +80,9 @@ public static partial class EngineeringRules
         }
     }
     private static void Unique(IEnumerable<Guid> ids) { var x = ids.ToArray(); if (x.Contains(Guid.Empty) || x.Distinct().Count() != x.Length) throw new ArgumentException("Invalid/duplicate stable ID."); }
-    public static EvidenceDocument? Latest(EngineeringData data, Guid asset) => data.Evidence.Where(e => e.AssetId == asset).OrderByDescending(e => e.CollectedAt).FirstOrDefault();
+    // Appended parser revisions retain the original collection time. Prefer the last
+    // append on a tie so reviews remain bound to their original, superseded evidence ID.
+    public static EvidenceDocument? Latest(EngineeringData data, Guid asset) => data.Evidence.Where(e => e.AssetId == asset).OrderBy(e => e.CollectedAt).LastOrDefault();
     public static string Assessment(AdvisoryReview? review, EvidenceDocument? evidence, Advisory? advisory, DateTimeOffset now)
     {
         if (evidence is null || advisory is null) return "Insufficient Data";
