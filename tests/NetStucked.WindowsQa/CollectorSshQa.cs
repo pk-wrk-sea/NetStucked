@@ -30,7 +30,7 @@ internal static partial class Program
             Require(mismatch.State == CollectorDeviceState.Failed && mismatch.Detail.Contains("host key"), "Real SSH changed pin fails before credentials");
             var first = (await controller.RunAsync(Plan("owned-fixture-password", pin), _ => { }, deadline.Token)).Single();
             Require(first.State == CollectorDeviceState.Completed && first.AuthSlot == 1, "Real pinned SSH collects using AUTH1");
-            Require(first.Bytes > 8 * 1024 * 1024 && first.Preview.Length < 8400, "Real SSH output exceeds 8 MiB with configured 256 KiB flow-control window and bounded preview");
+            Require(first.Bytes > 8 * 1024 * 1024 && first.Preview.Length < 8400, "Real SSH output exceeds 8 MiB through bounded consumer streams with bounded preview");
             string text = await File.ReadAllTextAsync(first.TxtPath, deadline.Token);
             Require(text.Contains("ไทย") && !text.Contains("owned-fixture-password") && text.Contains("[REDACTED]"), "Actual SSH UTF-8 output preserved and echoed password redacted");
             Require(text.Split("fixture line # value > ไทย").Length - 1 == 8192 && text.Contains("owned stderr fixture"), "All 8192 large-output lines and extended stderr arrive in the capture without loss");
@@ -49,8 +49,8 @@ internal static partial class Program
             string audit = await server.StandardOutput.ReadLineAsync(deadline.Token) ?? "{}";
             using var stats = JsonDocument.Parse(audit);
             await File.WriteAllTextAsync(Path.Combine(output, "ssh-fixture-audit.json"), audit, new UTF8Encoding(false), deadline.Token);
-            Require(stats.RootElement.GetProperty("domain_literal").GetBoolean() && stats.RootElement.GetProperty("no_bom").GetBoolean(), "Server receives literal DOMAIN backslash and BOM-free command bytes");
-            Require(stats.RootElement.GetProperty("auth").GetArrayLength() == 6, "Server sees six bounded attempts across success, fallback, two MFA cases and cancel; host-key failures send no passwords");
+            Require(stats.RootElement.GetProperty("domain_literal").GetBoolean() && stats.RootElement.GetProperty("no_bom").GetBoolean() && stats.RootElement.GetProperty("blank_commands").GetInt32() == 0, "Server receives literal DOMAIN backslash and BOM-free CR-terminated commands without blank extra commands");
+            Require(stats.RootElement.GetProperty("auth").GetArrayLength() == 5, "Server sees five bounded password attempts across success, fallback, partial MFA and cancel; KI-only and host-key failures send no passwords");
             await File.WriteAllTextAsync(Path.Combine(output, "ssh-fixture-audit.json"), audit, new UTF8Encoding(false), deadline.Token);
             await File.WriteAllTextAsync(Path.Combine(output, "result.txt"), "PASS: owned loopback SSH integration. No Cisco/working network tested.", deadline.Token);
             return 0;

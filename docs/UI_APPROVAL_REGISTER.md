@@ -1,5 +1,7 @@
 # UI approval register
 
+**2026-10-21 / 0.11.2 incident follow-up:** The reported Collector failure authorizes correcting its existing explicit-start SSH workflow in the same theme. [Scope](FEATURES_0.11.2.md), [verification](QA_0.11.2.md). No new menu, discovery, trust bypass, algorithm weakening or automatic retry is authorized; real-device/human acceptance stays open.
+
 **2026-10-21 / five-menu actual-program follow-up:** The human explicitly authorizes necessary fixes and result captures for Terminal, Config Collector, Topology Explorer, MA Inventory and CVE. [0.11.1 scope](FEATURES_0.11.1.md) and [verification](QA_0.11.1.md). This authorizes existing-theme fixes, including explicit legacy-source reanalysis; it does not imply human acceptance of the captured UI or real Cisco workflows.
 
 **Publication:** Corrected 0.11.1 was verified and published; [source/assets/CI/public updater evidence](GITHUB_RELEASE_0.11.1_REPORT_2026-10-21.md). Native screenshots are available for the requested integrated review; human acceptance remains open.

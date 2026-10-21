@@ -101,6 +101,18 @@ jobs:
           if ([Version]$env:APP_VERSION -lt [Version]'0.10.0') { exit 0 }
           dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --terminal-ui-check artifacts/release/terminal-qa tests/fixtures/terminal_ssh_server.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify exact Collector Cisco-compatible SSH and console framing
+        shell: pwsh
+        run: |
+          if ([Version]$env:APP_VERSION -lt [Version]'0.11.2') { exit 0 }
+          python -m unittest discover -s tests/fixtures -p test_console_input.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --collector-cisco-ssh-check artifacts/release/collector-cisco-ssh-qa tests/fixtures/collector_ssh_compat_server.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:NETSTUCKED_QA_SSH_CTR = '1'
+          dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --collector-real-ui-check artifacts/release/collector-real-ctr-qa tests/fixtures/collector_cisco_lab_server.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Remove-Item Env:NETSTUCKED_QA_SSH_CTR
       - name: Verify exact integrated engineering menu workflows
         shell: pwsh
         run: |
@@ -139,5 +151,7 @@ jobs:
             artifacts/release/test-results
             artifacts/release/windows-qa
             artifacts/release/native-monitor-qa
+            artifacts/release/collector-cisco-ssh-qa
+            artifacts/release/collector-real-ctr-qa
             artifacts/release/installer-build.json
             artifacts/installer

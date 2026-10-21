@@ -35,6 +35,7 @@ internal static partial class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        if (args.FirstOrDefault() == "--collector-cisco-ssh-check") return CheckCollectorCiscoSshAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--cve-regression-check") return CheckCveRegressionAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--collector-banner-ssh-check") return CheckCollectorBannerSshAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--advisory-metadata-check") return CheckAdvisoryMetadataAsync(Path.GetFullPath(args[1]), args[2]).GetAwaiter().GetResult();

@@ -101,7 +101,7 @@ internal static partial class Program
             await CheckHostKeyDialogsAsync(app,window,provider,workspace,dialogs,pin,output);
             await CheckInteractiveHostTrustAsync(store,profile,deadline.Token);
             await server.StandardInput.WriteLineAsync("stats");await server.StandardInput.FlushAsync(deadline.Token);string audit=await server.StandardOutput.ReadLineAsync(deadline.Token)??"{}";await File.WriteAllTextAsync(Path.Combine(output,"terminal-fixture-audit.json"),audit);
-            using var stats=JsonDocument.Parse(audit);Require(stats.RootElement.GetProperty("auth").GetArrayLength()==8,"Rejected unknown/changed/cancelled host keys send no credentials; exactly eight explicit successful or rejected login attempts");
+            using var stats=JsonDocument.Parse(audit);Require(stats.RootElement.GetProperty("auth").GetArrayLength()==8&&stats.RootElement.GetProperty("blank_commands").GetInt32()==0,"Rejected unknown/changed/cancelled host keys send no credentials; exactly eight explicit login attempts and no blank extra commands");
             Require(stats.RootElement.GetProperty("pty").EnumerateArray().All(p=>p.GetProperty("term").GetString()=="xterm-256color")&&stats.RootElement.GetProperty("resize").GetArrayLength()>0,"Real SSH requests xterm PTY and sends window resize events");
             Require(errors.Messages.Count==0,"Terminal has no WPF binding errors");
             await workspace.CloseTabCommand.ExecuteAsync(null);await Task.Delay(100);Require(workspace.Tabs.Count==1&&workspace.SelectedTab!=tab,"Closing last disconnected tab leaves a usable fresh connection tab");

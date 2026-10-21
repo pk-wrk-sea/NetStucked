@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.2 - 2026-10-21
+
+- Fix Config Collector compatibility with strong Cisco AES-CTR/SHA-2 ETM combinations that the earlier SSH provider could not negotiate. Retain host-key pin checks before authentication, memory-only credentials and authentication-rejection-only fallback.
+- Use SSH console CR command termination, preserve Telnet NVT CRLF, and separate authentication/connection and shell setup deadlines.
+- Bound stream buffers and own connection cancellation/cleanup; report safe stage-specific SSH errors instead of one generic negotiation/session error.
+- See docs/QA_0.11.2.md for the exact released-binary reproduction, owned protocol fixtures and actual-device acceptance limits.
+
 ## 0.11.1 - 2026-10-21
 
 - Clear the obsolete maximum-tab warning after Terminal tabs are closed, retaining the live SSH session and unrelated error messages.

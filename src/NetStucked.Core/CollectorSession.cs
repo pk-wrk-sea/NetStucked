@@ -38,7 +38,8 @@ public static class CollectorSession
     public static async Task<string> RunAsync(ICollectorConnection connection, CollectorRun run, CollectorCredentials credentials,
         ICollectorCapture capture, List<CollectorCommandEvidence> commands, Action<CollectorDeviceState> state, CancellationToken token)
     {
-        var reader = new Reader(connection, run.Options.CommandTimeoutSeconds);
+        // SSH writes directly to the remote terminal. Telnet's NVT adapter expands LF to CRLF.
+        var reader = new Reader(connection, run.Options.CommandTimeoutSeconds, run.Options.Protocol == CollectorProtocol.Ssh ? "\r" : "\n");
         string prompt = await reader.UntilAsync(p => p.InitialPrompt(), null, token).ConfigureAwait(false);
         state(CollectorDeviceState.Preparing);
         if (prompt.EndsWith('>') && credentials.EnableSecret.Length > 0)
@@ -79,12 +80,12 @@ public static class CollectorSession
         return prompt;
     }
 
-    private sealed class Reader(ICollectorConnection connection, int timeoutSeconds)
+    private sealed class Reader(ICollectorConnection connection, int timeoutSeconds, string lineEnding)
     {
         public async Task SendAsync(string text, CancellationToken token)
         {
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(token); timeout.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
-            try { await connection.WriteAsync(Encoding.UTF8.GetBytes(text + "\n"), timeout.Token).ConfigureAwait(false); }
+            try { await connection.WriteAsync(Encoding.UTF8.GetBytes(text + lineEnding), timeout.Token).ConfigureAwait(false); }
             catch (OperationCanceledException) when (!token.IsCancellationRequested) { throw new CollectorException(CollectorFailure.Timeout, "Terminal write timed out; command was not replayed."); }
         }
         public async Task<string> UntilAsync(Func<CollectorPromptRecognizer, string?> match, ICollectorCapture? capture, CancellationToken token, Action? preview = null)

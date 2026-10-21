@@ -41,7 +41,7 @@ internal static partial class Program
             string auditText = await server.StandardOutput.ReadLineAsync(deadline.Token) ?? "{}";
             await File.WriteAllTextAsync(Path.Combine(output, "owned-ssh-audit.json"), auditText, deadline.Token);
             using var audit = JsonDocument.Parse(auditText);
-            Require(audit.RootElement.GetProperty("auth").GetArrayLength() == 2 && audit.RootElement.GetProperty("commands").GetArrayLength() == 6, "Banner regression performs one login and three read-only commands per device without credential fallback/replay");
+            Require(audit.RootElement.GetProperty("auth").GetArrayLength() == 2 && audit.RootElement.GetProperty("commands").GetArrayLength() == 6 && audit.RootElement.GetProperty("blank_commands").GetInt32() == 0, "Banner regression performs one login and three read-only CR-terminated commands per device without blank commands, credential fallback or replay");
             await File.WriteAllTextAsync(Path.Combine(output, "result.txt"), "PASS: real owned SSH fragmented configuration banner regression; no working network tested.", deadline.Token);
             return 0;
         }
@@ -120,6 +120,8 @@ internal static partial class Program
                     Render(window, output, "Collector-real-ssh-" + theme.ToLowerInvariant(), 1536, 1024, 1);
                 }
                 vm.Appearance.SelectedTheme = "Dark";
+                window.ShowActivated = true; window.Activate();
+                await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
                 Console.WriteLine("VISIBLE OWNED COLLECTOR WINDOW: completed two real loopback SSH collections; native screenshot interval 60 seconds.");
                 await Task.Delay(TimeSpan.FromSeconds(60), deadline.Token);
                 Require(errors.Messages.Count == 0, "Real Collector has no WPF binding errors: " + string.Join("; ", errors.Messages));
@@ -127,7 +129,12 @@ internal static partial class Program
                 string auditText = await server.StandardOutput.ReadLineAsync(deadline.Token) ?? "{}";
                 await File.WriteAllTextAsync(Path.Combine(output, "owned-ssh-audit.json"), auditText, deadline.Token);
                 using var audit = JsonDocument.Parse(auditText);
-                Require(audit.RootElement.GetProperty("auth").GetArrayLength() == 2 && audit.RootElement.GetProperty("commands").GetArrayLength() == 16, "Owned server confirms exactly two authenticated sessions and sixteen read-only command sends");
+                Require(audit.RootElement.GetProperty("auth").GetArrayLength() == 2 && audit.RootElement.GetProperty("commands").GetArrayLength() == 16 && audit.RootElement.GetProperty("blank_commands").GetInt32() == 0, "Owned server confirms exactly two authenticated sessions and sixteen read-only command sends without blanks");
+                if (Environment.GetEnvironmentVariable("NETSTUCKED_QA_SSH_CTR") == "1")
+                {
+                    Require(audit.RootElement.GetProperty("negotiated").GetArrayLength() == 2 && audit.RootElement.GetProperty("negotiated").EnumerateArray().All(n => n.GetProperty("cipher").GetString() == "aes256-ctr" && n.GetProperty("mac").GetString() == "hmac-sha2-512-etm@openssh.com"), "Actual WPF collections negotiate the incident's AES256-CTR / SHA512-ETM pair");
+                    Require(audit.RootElement.GetProperty("bare_lf_bytes").GetInt32() == 0 && audit.RootElement.GetProperty("cr_bytes").GetInt32() == 16, "Actual WPF sends exactly one console CR per command and no LF or replay");
+                }
                 await File.WriteAllTextAsync(Path.Combine(output, "result.txt"), "PASS: actual WPF Collector + production pinned SSH transport + protected capture factory. Two owned loopback software fixtures; no real Cisco/working network tested.", deadline.Token);
             }
             finally { await vm.ShutdownAsync(); }

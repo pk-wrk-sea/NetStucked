@@ -323,7 +323,7 @@ public sealed class CollectorTests
         }
         public ValueTask WriteAsync(ReadOnlyMemory<byte> bytes, CancellationToken token)
         {
-            Assert.False(bytes.Span.StartsWith(new byte[] { 0xEF, 0xBB, 0xBF })); string command = Encoding.UTF8.GetString(bytes.Span).TrimEnd('\n'); Sent.Add(command);
+            Assert.False(bytes.Span.StartsWith(new byte[] { 0xEF, 0xBB, 0xBF })); string command = Encoding.UTF8.GetString(bytes.Span).TrimEnd('\r', '\n'); Sent.Add(command);
             string? response = _response is null ? command + "\r\nfixture-data\r\nfixture#" : _response(command);
             if (response is not null) Push(response); return ValueTask.CompletedTask;
         }
