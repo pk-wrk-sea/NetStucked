@@ -55,30 +55,52 @@ public partial class InventoryViewModel : EngineeringPageViewModel
     [ObservableProperty] private string _previewSummary = "No import preview. Dates accept yyyy-MM-dd text or whole-day Excel date cells.";
     private Guid _editingId = Guid.NewGuid();
     private long _previewRevision = -1;
+    private Asset? _editingBaseline;
+    private bool _refreshingAssets;
     public string AssetId => _editingId.ToString();
     public string EvidenceDetails => SelectedAsset is { } a ? string.Join('\n', Workspace.Data.Evidence.Where(e => e.AssetId == a.Asset.Id).OrderByDescending(e => e.CollectedAt).Select(e => $"{e.CollectedAt:u} · {e.Family} · {e.Parser} · {e.Source}\nSHA-256 {e.Sha256}\n{string.Join("; ", e.Warnings)}")) : "Select an asset to inspect observation provenance.";
     public InventoryViewModel(EngineeringContext w, IEngineeringFiles f, IDesktopDialogs d) : base(w, f, d) { }
     partial void OnSearchChanged(string value) => Refresh();
     partial void OnSelectedAssetChanged(AssetRow? value)
     {
-        if (value is not null) { var a = value.Asset; _editingId = a.Id; Hostname = a.Hostname; Address = a.Address; Vendor = a.Vendor; Model = a.Model; Serial = a.Serial; Site = a.Site; Location = a.Location; Role = a.Role; Contract = a.Contract; MaStart = a.MaStart?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? ""; MaEnd = a.MaEnd?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? ""; }
+        if (!_refreshingAssets && value is not null) LoadEditor(value.Asset);
         OnPropertyChanged(nameof(AssetId)); OnPropertyChanged(nameof(EvidenceDetails));
+    }
+    private static string DateText(DateOnly? value) => value?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "";
+    private bool HasEditorChanges => _editingBaseline is not { } a || Hostname != a.Hostname || Address != a.Address || Vendor != a.Vendor || Model != a.Model || Serial != a.Serial || Site != a.Site || Location != a.Location || Role != a.Role || Contract != a.Contract || MaStart != DateText(a.MaStart) || MaEnd != DateText(a.MaEnd);
+    private void LoadEditor(Asset a)
+    {
+        _editingId = a.Id; _editingBaseline = a; Hostname = a.Hostname; Address = a.Address; Vendor = a.Vendor; Model = a.Model; Serial = a.Serial; Site = a.Site; Location = a.Location; Role = a.Role; Contract = a.Contract; MaStart = DateText(a.MaStart); MaEnd = DateText(a.MaEnd); OnPropertyChanged(nameof(AssetId));
     }
     protected override void Refresh()
     {
-        var selected = SelectedAsset?.Asset.Id;
-        Replace(Assets, Workspace.Data.Assets.Where(a => string.Join(' ', a.Hostname, a.Address, a.Serial, a.Site, a.Model, a.Contract, a.Role, a.MaStatus).Contains(Search, StringComparison.OrdinalIgnoreCase)).Select(a =>
-        { var e = EngineeringRules.Latest(Workspace.Data, a.Id); string Field(string name) => e?.Facts.FirstOrDefault(f => f.Field == name)?.Value ?? "Unknown"; return new AssetRow(a, Field("Version"), Field("Model"), Field("Serial"), e?.CollectedAt); }));
-        if (selected is not null) SelectedAsset = Assets.FirstOrDefault(a => a.Asset.Id == selected);
+        var selected = SelectedAsset?.Asset.Id ?? _editingBaseline?.Id;
+        bool dirty = HasEditorChanges;
+        // DataGrid clears its two-way selection while the collection resets. Do not let
+        // its temporary null/reselection reload persisted fields over an unsaved editor.
+        _refreshingAssets = true;
+        try
+        {
+            Replace(Assets, Workspace.Data.Assets.Where(a => string.Join(' ', a.Hostname, a.Address, a.Serial, a.Site, a.Model, a.Contract, a.Role, a.MaStatus).Contains(Search, StringComparison.OrdinalIgnoreCase)).Select(a =>
+            { var e = EngineeringRules.Latest(Workspace.Data, a.Id); string Field(string name) => e?.Facts.FirstOrDefault(f => f.Field == name)?.Value ?? "Unknown"; return new AssetRow(a, Field("Version"), Field("Model"), Field("Serial"), e?.CollectedAt); }));
+            SelectedAsset = selected is null ? null : Assets.FirstOrDefault(a => a.Asset.Id == selected);
+        }
+        finally { _refreshingAssets = false; }
+        if (_editingBaseline is not null)
+        {
+            var committed = Workspace.Data.Assets.FirstOrDefault(a => a.Id == _editingId);
+            if (committed is null) NewAsset();
+            else if (!dirty) LoadEditor(committed);
+        }
         OnPropertyChanged(nameof(EvidenceDetails));
     }
-    [RelayCommand] private void NewAsset() { SelectedAsset = null; _editingId = Guid.NewGuid(); Hostname = Address = Model = Serial = Site = Location = Role = Contract = MaStart = MaEnd = ""; Vendor = "Cisco"; OnPropertyChanged(nameof(AssetId)); }
+    [RelayCommand] private void NewAsset() { SelectedAsset = null; _editingBaseline = null; _editingId = Guid.NewGuid(); Hostname = Address = Model = Serial = Site = Location = Role = Contract = MaStart = MaEnd = ""; Vendor = "Cisco"; OnPropertyChanged(nameof(AssetId)); }
     private static DateOnly? Date(string text) => text.Length == 0 ? null : DateOnly.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var x) ? x : throw new ArgumentException("Use MA date yyyy-MM-dd, or leave empty.");
     [RelayCommand] private Task SaveAsset() => Run(async token =>
     {
         var a = new Asset(_editingId, Hostname.Trim(), Address.Trim(), Vendor.Trim(), Model.Trim(), Serial.Trim(), Site.Trim(), Location.Trim(), Role.Trim(), Contract.Trim(), Date(MaStart), Date(MaEnd), DateTimeOffset.UtcNow); EngineeringRules.Validate(a);
         if (a.Serial.Length > 0 && Workspace.Data.Assets.Any(x => x.Id != a.Id && x.Serial.Equals(a.Serial, StringComparison.OrdinalIgnoreCase))) throw new ArgumentException("Serial belongs to another asset. Review identity before saving.");
-        await Workspace.CommitAsync(d => d with { Assets = d.Assets.Where(x => x.Id != a.Id).Append(a).ToArray() }, token); SelectedAsset = Assets.FirstOrDefault(x => x.Asset.Id == a.Id);
+        await Workspace.CommitAsync(d => d with { Assets = d.Assets.Where(x => x.Id != a.Id).Append(a).ToArray() }, token); LoadEditor(a); SelectedAsset = Assets.FirstOrDefault(x => x.Asset.Id == a.Id);
     });
     [RelayCommand] private Task DeleteAsset() => Run(async token =>
     {
@@ -102,7 +124,9 @@ public partial class InventoryViewModel : EngineeringPageViewModel
         var apply = Preview.Where(r => r.Selected && r.Data.Asset is not null && r.Data.Error.Length == 0).Select(r => r.Data.Asset!).ToArray();
         if (apply.Length == 0) throw new ArgumentException("Select valid preview rows first.");
         if (!Dialogs.Confirm("Apply inventory import", $"Apply {apply.Length} selected asset rows? Updates replace human fields shown in the preview; observed facts are preserved.")) return;
-        await Workspace.CommitAsync(d => d with { Assets = d.Assets.Where(a => !apply.Any(x => x.Id == a.Id)).Concat(apply).ToArray() }, token); Preview.Clear(); _previewRevision = -1; PreviewSummary = $"Applied {apply.Length} rows atomically.";
+        await Workspace.CommitAsync(d => d with { Assets = d.Assets.Where(a => !apply.Any(x => x.Id == a.Id)).Concat(apply).ToArray() }, token);
+        if (apply.FirstOrDefault(a => a.Id == _editingId) is { } imported) LoadEditor(imported);
+        Preview.Clear(); _previewRevision = -1; PreviewSummary = $"Applied {apply.Length} rows atomically.";
     });
     [RelayCommand] private Task ImportEvidence() => Run(async token =>
     {
@@ -122,26 +146,44 @@ public partial class InventoryViewModel : EngineeringPageViewModel
 
 public partial class TopologyViewModel : EngineeringPageViewModel
 {
+    private const string DiffPrompt = "Select a device and compare its previous capture. Original source files must remain available and match their saved hashes.";
     public ObservableCollection<EvidenceDocument> Devices { get; } = [];
     public ObservableCollection<TopologyLink> Links { get; } = [];
     public ObservableCollection<DeviceFact> Facts { get; } = [];
     [ObservableProperty] private EvidenceDocument? _selectedDevice;
     [ObservableProperty] private TopologyLink? _selectedLink;
-    [ObservableProperty] private string _configurationDiff = "Select a device and compare its previous capture. Original source files must remain available and match their saved hashes.";
+    [ObservableProperty] private string _configurationDiff = DiffPrompt;
     public string Summary => SelectedDevice is { } e ? $"{e.Host} · {e.Family} · {e.CollectedAt:u}\n{e.Source}\nSHA-256 {e.Sha256}\n{string.Join("\n", e.Warnings)}" : "Import captured evidence through MA Inventory, then select a device. No discovery or collection runs from this page.";
     public string LinkDetails => SelectedLink is { } l ? $"{l.Device} [{l.LocalInterface}] ↔ {l.Neighbor} [{l.RemoteInterface}]\n{l.Classification} · {l.Freshness}\n{l.Detail}\nSource {l.Source}, line {l.Line}\nSHA-256 {l.Sha256}" : "Select a neighbor/link to inspect its supporting evidence.";
     public TopologyViewModel(EngineeringContext w, IEngineeringFiles f, IDesktopDialogs d) : base(w, f, d) { }
-    protected override void Refresh() { var id = SelectedDevice?.Id; Replace(Devices, Workspace.Data.Evidence.GroupBy(e => e.AssetId?.ToString() ?? e.Host).Select(g => g.OrderByDescending(e => e.CollectedAt).First())); SelectedDevice = Devices.FirstOrDefault(e => e.Id == id) ?? Devices.FirstOrDefault(); }
+    private static bool SameDevice(EvidenceDocument a, EvidenceDocument b) => a.AssetId is { } asset ? b.AssetId == asset : b.AssetId is null && a.Host.Equals(b.Host, StringComparison.OrdinalIgnoreCase);
+    protected override void Refresh()
+    {
+        var selected = SelectedDevice;
+        Replace(Devices, Workspace.Data.Evidence.GroupBy(e => e.AssetId is { } asset ? "asset:" + asset : "host:" + e.Host, StringComparer.OrdinalIgnoreCase).Select(g => g.OrderBy(e => e.CollectedAt).Last()));
+        SelectedDevice = Devices.FirstOrDefault(e => e.Id == selected?.Id) ?? (selected is null ? null : Devices.FirstOrDefault(e => SameDevice(selected, e))) ?? Devices.FirstOrDefault();
+    }
     partial void OnSelectedDeviceChanged(EvidenceDocument? value)
-    { Replace(Links, value is null ? [] : TopologyProjection.Build(value, Devices, DateTimeOffset.UtcNow)); Replace(Facts, value?.Facts ?? []); SelectedLink = Links.FirstOrDefault(); OnPropertyChanged(nameof(Summary)); }
+    { ConfigurationDiff = DiffPrompt; Replace(Links, value is null ? [] : TopologyProjection.Build(value, Devices, DateTimeOffset.UtcNow)); Replace(Facts, value?.Facts ?? []); SelectedLink = Links.FirstOrDefault(); OnPropertyChanged(nameof(Summary)); }
     partial void OnSelectedLinkChanged(TopologyLink? value) => OnPropertyChanged(nameof(LinkDetails));
     [RelayCommand] private void Analyze() { OnSelectedDeviceChanged(SelectedDevice); Workspace.Message = "Analyzed existing captured evidence only. No network requests."; }
-    [RelayCommand] private Task ComparePrevious() => Run(async token =>
+    [RelayCommand] private Task ReanalyzeSource() => Run(async token =>
     {
         var current = SelectedDevice ?? throw new ArgumentException("Select a captured device first.");
-        var previous = Workspace.Data.Evidence.Where(e => e.AssetId == current.AssetId && e.Id != current.Id && e.CollectedAt < current.CollectedAt).OrderByDescending(e => e.CollectedAt).FirstOrDefault() ?? throw new ArgumentException("No earlier capture for this asset. Attach another capture through MA Inventory.");
+        if (current.Parser == CiscoEvidenceParser.Version) { Workspace.Message = "Selected capture already uses " + CiscoEvidenceParser.Version + ". No revision added."; return; }
+        if (!Dialogs.Confirm("Reanalyze captured source", $"Verify the saved source hash and reanalyze {current.Host} with {CiscoEvidenceParser.Version}?\nA new evidence revision will be appended. Original capture time, source and prior facts are retained. Existing CVE reviews/plans must be reviewed against the new evidence ID. No device connection or inventory field update runs.")) return;
+        var revision = await EvidenceFile.ReanalyzeAsync(current, token);
+        await Workspace.CommitAsync(d => d with { Evidence = d.Evidence.Append(revision).ToArray() }, token);
+        Workspace.Message = $"Appended {revision.Parser} evidence revision for {current.Host}; original source and prior facts retained. Review topology and CVE assessments against the new evidence ID.";
+    });
+    [RelayCommand] private Task ComparePrevious() => Run(async token =>
+    {
+        ConfigurationDiff = DiffPrompt;
+        var current = SelectedDevice ?? throw new ArgumentException("Select a captured device first.");
+        var previous = Workspace.Data.Evidence.Where(e => (current.AssetId is { } asset ? e.AssetId == asset : e.AssetId is null && e.Host.Equals(current.Host, StringComparison.OrdinalIgnoreCase)) && e.Id != current.Id && e.CollectedAt < current.CollectedAt).OrderByDescending(e => e.CollectedAt).FirstOrDefault() ?? throw new ArgumentException("No earlier capture for this asset/device. Attach another capture through MA Inventory.");
         string before = await EvidenceFile.ReadVerifiedTextAsync(previous, token), after = await EvidenceFile.ReadVerifiedTextAsync(current, token);
         string diff = await Task.Run(() => CaptureDiff.Compare(before, after, token), token);
+        if (SelectedDevice?.Id != current.Id) return;
         ConfigurationDiff = $"Before {previous.CollectedAt:u} · {previous.Source}\nSHA-256 {previous.Sha256}\nAfter {current.CollectedAt:u} · {current.Source}\nSHA-256 {current.Sha256}\n\n{diff}";
     });
     [RelayCommand] private Task Export() => Run(async token => { string? p = Files.Save("csv", "NetStucked-one-hop-topology.csv"); if (p is null) return; await ReportAsync(p, CsvExporter.Rows(["Device", "Neighbor", "Address", "Local interface", "Remote interface", "Protocol", "Class", "Freshness", "Collected UTC", "Source", "SHA256", "Line", "Detail"], Links.Select(l => new object?[] { l.Device, l.Neighbor, l.Address, l.LocalInterface, l.RemoteInterface, l.Protocol, l.Classification, l.Freshness, l.CollectedAt, l.Source, l.Sha256, l.Line, l.Detail })), token); });

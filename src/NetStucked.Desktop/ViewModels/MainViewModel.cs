@@ -47,7 +47,7 @@ public partial class MainViewModel : ObservableObject
         Ping.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Ping.IsActive)) OnPropertyChanged(nameof(IsPingActive)); };
         TraceWorkspace.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(TraceWorkspace.IsActive)) OnPropertyChanged(nameof(IsTraceActive)); };
         Port.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Port.IsActive)) OnPropertyChanged(nameof(IsPortActive)); };
-        _activity = new DispatcherTimer(TimeSpan.FromMilliseconds(150), DispatcherPriority.Background, (_, _) => { Ping.UpdateState(); TraceWorkspace.UpdateStates(); Port.UpdateState(); if (SelectedPage == "Dashboard") Dashboard.Update(); }, Dispatcher.CurrentDispatcher);
+        _activity = new DispatcherTimer(TimeSpan.FromMilliseconds(150), DispatcherPriority.Background, (_, _) => { Ping.UpdateState(); TraceWorkspace.UpdateStates(); Port.UpdateState(); if (SelectedPage == "Dashboard") Dashboard.Update(); if (SelectedPage == "CVE & Upgrade Planner") Planner.RefreshTimeSensitiveState(); }, Dispatcher.CurrentDispatcher);
         _activity.Start();
     }
     [RelayCommand]
@@ -82,7 +82,7 @@ public partial class MainViewModel : ObservableObject
         if (page == "Dashboard") { Dashboard.Update(true); PageSubtitle = "Actual local sessions, monitoring incidents and engineering records"; }
         if (page == "MA Inventory") PageSubtitle = "Stable asset identity, maintenance contracts, versioned Excel and reviewed observations";
         if (page == "Topology Explorer") PageSubtitle = "One-hop neighbors and source-traceable facts from captured evidence";
-        if (page == "CVE & Upgrade Planner") PageSubtitle = "Advisory metadata, explicit applicability review and engineer-approved device change plans";
+        if (page == "CVE & Upgrade Planner") { Planner.RefreshTimeSensitiveState(force: true); PageSubtitle = "Advisory metadata, explicit applicability review and engineer-approved device change plans"; }
         Port.SetPresentationActive(ReferenceEquals(CurrentPage, Port));
     }
     public async Task ShutdownAsync() { _activity.Stop(); await Task.WhenAll(Ping.DisposeAsync().AsTask(), TraceWorkspace.DisposeAsync().AsTask(), Port.DisposeAsync().AsTask(), Updates.DisposeAsync().AsTask(), Dns.DisposeAsync().AsTask(), Mac.DisposeAsync().AsTask(), Url.DisposeAsync().AsTask(), Monitoring.DisposeAsync().AsTask(), Collector.DisposeAsync().AsTask(), Terminal.DisposeAsync().AsTask(), Engineering.DisposeAsync().AsTask()); await Ping.Store.SaveAsync(); }

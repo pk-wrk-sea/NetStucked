@@ -1,5 +1,7 @@
 # A06 — Cisco CVE/advisory assessment and metadata sync
 
+**2026-10-21 / 0.11.1:** Full-response deadline, optional KEV timeout retention, dirty-editor preservation and current approval/export expiry checks are tracked in [QA](../QA_0.11.1.md). Actual public metadata never establishes device applicability; engineer-reviewed real product/config/fixed-release acceptance remains open.
+
 **2026-10-20 implementation extension:** The human approved all current menus in the existing theme for one integrated review. The relevant functional workflow is implemented in 0.11.0; see [scope](../FEATURES_0.11.0.md) and [actual QA/open acceptance](../QA_0.11.0.md). Older concept/UI gates below are superseded for this implementation. Broader original milestone criteria are retained; unchecked real-device/human acceptance is not closed by a build or fixture test.
 
 Current-menu delivery acceptance (2026-10-20):

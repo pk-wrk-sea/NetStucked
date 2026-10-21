@@ -56,13 +56,13 @@ public sealed class EngineeringStore(UserSettingsStore settings) : IEngineeringS
             if (File.Exists(path))
             {
                 string backupTemp = temp + ".backup";
-                try { File.Copy(path, backupTemp, false); File.Move(backupTemp, Path.Combine(_directory, "workspace-v1.previous.json"), true); }
+                try { File.Copy(path, backupTemp, false); await AtomicFileReplace.MoveAsync(backupTemp, Path.Combine(_directory, "workspace-v1.previous.json"), token).ConfigureAwait(false); }
                 finally { if (File.Exists(backupTemp)) File.Delete(backupTemp); }
             }
-            File.Move(temp, path, true);
+            await AtomicFileReplace.MoveAsync(temp, path, token).ConfigureAwait(false);
             return saved;
         }
-        finally { if (File.Exists(temp)) File.Delete(temp); _gate.Release(); }
+        finally { try { if (File.Exists(temp)) File.Delete(temp); } finally { _gate.Release(); } }
     }
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     private static void ProtectDirectory(string path)
@@ -77,6 +77,15 @@ public sealed class EngineeringStore(UserSettingsStore settings) : IEngineeringS
 
 public static class EvidenceFile
 {
+    public static async Task<EvidenceDocument> ReanalyzeAsync(EvidenceDocument original, CancellationToken token)
+    {
+        string text = await ReadVerifiedTextAsync(original, token).ConfigureAwait(false);
+        var revision = await Task.Run(() => CiscoEvidenceParser.Parse(text, original.Source, original.Sha256, original.Host, original.CollectedAt, original.Complete, original.AssetId, token), token).ConfigureAwait(false);
+        // This new immutable record is the audit trail. Raw source, collection time and
+        // prior parser facts remain unchanged; downstream reviews see a new evidence ID.
+        string audit = $"Explicit offline reanalysis of evidence {original.Id} ({original.Parser}) at {DateTimeOffset.UtcNow:O}; original capture and prior facts retained.";
+        return revision with { Warnings = revision.Warnings.Append(audit).ToArray() };
+    }
     public static async Task<string> ReadVerifiedTextAsync(EvidenceDocument evidence, CancellationToken token)
     {
         if (new FileInfo(evidence.Source).Length > 12 * 1024 * 1024) throw new IOException("Evidence file exceeds analysis limit.");

@@ -35,6 +35,8 @@ internal static partial class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        if (args.FirstOrDefault() == "--cve-regression-check") return CheckCveRegressionAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
+        if (args.FirstOrDefault() == "--collector-banner-ssh-check") return CheckCollectorBannerSshAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--advisory-metadata-check") return CheckAdvisoryMetadataAsync(Path.GetFullPath(args[1]), args[2]).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--collector-ssh-check") return CheckCollectorSshAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--export-brand") return ExportBrand(Path.GetFullPath(args[1]));
@@ -46,12 +48,14 @@ internal static partial class Program
         if (args.FirstOrDefault() == "--native-monitor-check") return CheckNativeMonitoringAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         bool collectorOnly = args.FirstOrDefault() == "--collector-ui-check";
         bool terminalOnly = args.FirstOrDefault() == "--terminal-ui-check";
+        bool realCollectorOnly = args.FirstOrDefault() == "--collector-real-ui-check";
+        bool realEngineeringOnly = args.FirstOrDefault() == "--engineering-real-ui-check";
         bool engineeringOnly = args.FirstOrDefault() == "--engineering-ui-check";
-        string output = Path.GetFullPath(collectorOnly || terminalOnly || engineeringOnly ? args[1] : args.FirstOrDefault() ?? "artifacts/windows-qa");
-        int soakSeconds = !collectorOnly && !terminalOnly && !engineeringOnly && args.Length > 1 ? int.Parse(args[1]) : 0;
+        string output = Path.GetFullPath(collectorOnly || terminalOnly || realCollectorOnly || realEngineeringOnly || engineeringOnly ? args[1] : args.FirstOrDefault() ?? "artifacts/windows-qa");
+        int soakSeconds = !collectorOnly && !terminalOnly && !realCollectorOnly && !realEngineeringOnly && !engineeringOnly && args.Length > 1 ? int.Parse(args[1]) : 0;
         _expectedAvailableVersion = args.Length > 3 ? args[3] : null;
         _expectedCurrentVersion = args.Length > 4 ? args[4] : null;
-        if (args.Length > 2 && !terminalOnly)
+        if (args.Length > 2 && !terminalOnly && !realCollectorOnly && !realEngineeringOnly)
         {
             string published = Path.GetFullPath(args[2]);
             foreach (string file in new[] { "NetStucked.Core.dll", "NetStucked.Infrastructure.dll", "NetStucked.dll" })
@@ -69,7 +73,7 @@ internal static partial class Program
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Error;
         _ = application.Dispatcher.InvokeAsync(async () =>
         {
-            try { if (engineeringOnly) await RunEngineeringOnlyAsync(application, output, listener); else if (terminalOnly) await RunTerminalOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (collectorOnly) await RunCollectorOnlyAsync(application, output, listener); else await RunAsync(application, output, soakSeconds, listener); }
+            try { if (realEngineeringOnly) await RunRealEngineeringOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (realCollectorOnly) await RunRealCollectorOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (engineeringOnly) await RunEngineeringOnlyAsync(application, output, listener); else if (terminalOnly) await RunTerminalOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (collectorOnly) await RunCollectorOnlyAsync(application, output, listener); else await RunAsync(application, output, soakSeconds, listener); }
             catch (Exception ex) { _exitCode = 1; Console.Error.WriteLine("FAIL " + ex); }
             finally { application.Shutdown(); }
         });

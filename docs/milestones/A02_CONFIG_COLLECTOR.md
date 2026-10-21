@@ -1,5 +1,7 @@
 # A02 — Cisco Config Collector
 
+**2026-10-21 / 0.11.1:** Captured-banner prompt handling and awaited cancellation fixes, actual production SSH/capture verification and Collector-to-engineering integration are tracked in [QA](../QA_0.11.1.md). Owned software fixtures do not close real Cisco/platform/large-network acceptance.
+
 **2026-10-19 superseding adaptation:** the human explicitly requested the attached collector requirements in the current app theme. The bounded SSH/Telnet/memory-only AUTH/prompt-aware capture slice is implemented for 0.9.0; [scope](../FEATURES_0.9.0.md), [architecture/matrix/plan](../CONFIG_COLLECTOR_2026-10-19.md), [actual QA and limits](../QA_0.9.0.md). Older v2, inventory/group/diff/parser and scheduling statements below are historical backlog, not additional authorization or completion claims. Real Cisco acceptance/full A02 DoD stays open.
 
 ## 1. Milestone and version
