@@ -1,5 +1,7 @@
 # 0.11.1 - Five-menu functional acceptance fixes
 
+Published as GitHub Latest after corrected frozen-payload, CI and actual public-download/updater verification; [publication evidence](GITHUB_RELEASE_0.11.1_REPORT_2026-10-21.md). Human/real-device and broader milestone acceptance remains open.
+
 Human instruction on 2026-10-21 explicitly requests testing Terminal, Config Collector, Topology Explorer, MA Inventory and CVE from the real program, correcting necessary defects and capturing results. Existing-theme implementation and standing distributable publication authorization remain in force. No working-network discovery/probes or device upgrades are added.
 
 - Terminal: verify the actual bundled xterm/WebView and SSH/Telnet trust/session workflow with owned fixtures; clear obsolete maximum-tab warnings after tab closure; preserve credential and host-trust policy.
