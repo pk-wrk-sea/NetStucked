@@ -11,7 +11,9 @@
     <EmbeddedResource Include="Resources/Icons/*.svg" LogicalName="NetStucked.Icons.%(Filename)%(Extension)" />
     <None Update="Resources/Icons/LICENSE" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Resources/ThirdParty/*.txt" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="Resources/Terminal/*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Remove="Resources/Terminal/**" />
+    <Compile Remove="ViewModels/TerminalWorkspaceViewModel.cs;Views/TerminalView.xaml.cs" />
+    <Page Remove="Views/TerminalView.xaml" />
     <EmbeddedResource Include="Resources/ReleaseHistory.json" LogicalName="NetStucked.ReleaseHistory.json" />
     <ProjectReference Include="../NetStucked.Core/NetStucked.Core.csproj" />
     <ProjectReference Include="../NetStucked.Infrastructure/NetStucked.Infrastructure.csproj" />
@@ -25,5 +27,13 @@
     <MakeDir Directories="$(BaseIntermediateOutputPath)" />
     <PropertyGroup><_AppManifest>$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)/app.manifest').Replace('__ASSEMBLY_VERSION__', '$(AssemblyVersion)'))</_AppManifest></PropertyGroup>
     <WriteLinesToFile File="$(ApplicationManifest)" Lines="$(_AppManifest)" Overwrite="true" WriteOnlyWhenDifferent="true" Encoding="UTF-8" />
+  </Target>
+  <Target Name="PrepareCollectorRuntime" BeforeTargets="AssignTargetPaths">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/../../scripts/Prepare-CollectorRuntime.ps1&quot;" />
+    <ItemGroup>
+      <_CollectorRuntime Include="$(MSBuildProjectDirectory)/../../artifacts/collector-runtime/payload/**/*" />
+      <Content Include="@(_CollectorRuntime)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"><Link>CollectorRuntime/%(_CollectorRuntime.RecursiveDir)%(_CollectorRuntime.Filename)%(_CollectorRuntime.Extension)</Link></Content>
+      <Content Include="$(MSBuildProjectDirectory)/../../src/NetStucked.Infrastructure/CollectorWorker/collector_worker.py" Link="CollectorRuntime/collector_worker.py" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
   </Target>
 </Project>

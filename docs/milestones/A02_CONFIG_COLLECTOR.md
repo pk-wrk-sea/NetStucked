@@ -1,5 +1,7 @@
 # A02 — Cisco Config Collector
 
+**2026-10-22 superseding human scope:** [0.12.0](../FEATURES_0.12.0.md) moves Collector to bundled Netmiko, adds the supplied nullable component Inventory layout and retires the Terminal desktop feature. [Scoped QA](../QA_0.12.0.md); broad historical acceptance is not closed by software fixtures.
+
 **2026-10-21 / 0.11.2 incident follow-up:** [Strong-algorithm/console/cancellation correction](../FEATURES_0.11.2.md) and [released-binary reproduction/QA](../QA_0.11.2.md) address the reported existing Collector failure. Required acceptance now includes a CTR/SHA512-ETM-only owned SSH server, strict console CR with unchanged Telnet CRLF, trust-before-auth, rejected-auth-only fallback and cancellation during KEX/auth/shell/output. These scoped checks do not close actual Cisco/AAA/command-corpus or full A02 acceptance.
 
 **Publication:** 0.11.2 is GitHub Latest after 512 tests, 60 SSH matrix assertions, exact WPF/native/CI/public download and old/current updater checks; [immutable evidence](../GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md). The scoped software-fixture checks pass. Actual Cisco/manual/Setup and broader checklist items below stay open.

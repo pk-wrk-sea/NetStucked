@@ -66,14 +66,16 @@ public sealed class CollectorCapture : ICollectorCapture
     private readonly string _base;
     private readonly CollectorOptions _options;
     private readonly CollectorRedactor _redactor;
+    private readonly string[] _secrets;
     private readonly FileStream _stream;
     private bool _closed;
+    private string? _reservation;
     private string _preview = "";
     private long _bytes;
     public string Preview => _preview;
     public CollectorCapture(string path, CollectorOptions options, IEnumerable<string> secrets)
     {
-        _base = path; _options = options; _redactor = new(secrets);
+        _base = path; _options = options; _secrets = secrets.Where(s => s.Length > 0).ToArray(); _redactor = new(_secrets);
         _stream = new FileStream(path + ".capture.tmp", FileMode.CreateNew, FileAccess.Write, FileShare.None, 8192, FileOptions.Asynchronous | FileOptions.SequentialScan);
     }
     public Task AppendAsync(string text, CancellationToken token) => WriteAsync(_redactor.Push(text), token);
@@ -92,10 +94,33 @@ public sealed class CollectorCapture : ICollectorCapture
         catch (CollectorException ex) when (ex.Failure == CollectorFailure.OutputLimit) { result = result with { State = CollectorDeviceState.Partial, Detail = "Capture byte limit reached; final redaction tail omitted." }; }
         await _stream.FlushAsync(token).ConfigureAwait(false); await _stream.DisposeAsync().ConfigureAwait(false); _closed = true;
         string source = _base + ".capture.tmp";
+        string Safe(string value)
+        {
+            foreach (string secret in _secrets) value = value.Replace(secret, "redacted", StringComparison.Ordinal);
+            value = string.Concat(value.Select(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_' or '.' ? c : '_')).Trim('.', '_');
+            return value.Length == 0 ? "unknown" : value[..Math.Min(80, value.Length)];
+        }
+        string address = Safe(result.CollectedAddress.Length > 0 ? result.CollectedAddress : result.Target.Host);
+        string name = Safe(result.DeviceHostname.Length > 0 ? result.DeviceHostname : "hostname-unknown");
+        string finalBase = Path.Combine(Path.GetDirectoryName(_base)!, address + " " + name + (result.Target.Port == 22 ? "" : " port-" + result.Target.Port));
+        // A run directory isolates history; aliases resolving to the same address must not overwrite each other.
+        string desiredBase = finalBase;
+        for (int suffix = 0; ; suffix++)
+        {
+            finalBase = desiredBase + (suffix == 0 ? "" : " " + suffix);
+            string reservation = finalBase + ".reserved";
+            try
+            {
+                using var held = new FileStream(reservation, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+                if (File.Exists(finalBase + ".txt") || File.Exists(finalBase + ".json")) { held.Dispose(); File.Delete(reservation); continue; }
+                _reservation = reservation; break;
+            }
+            catch (IOException) when (File.Exists(reservation)) { }
+        }
         string sha;
         await using (var input = File.OpenRead(source)) sha = Convert.ToHexString(await SHA256.HashDataAsync(input, token).ConfigureAwait(false)).ToLowerInvariant();
-        if (_options.WriteTxt) { File.Move(source, _base + ".txt"); source = _base + ".txt"; }
-        result = result with { TxtPath = _options.WriteTxt ? source : "", Bytes = _bytes, Sha256 = sha, Preview = (_bytes > 8192 ? "[Preview is truncated; full retained output is in capture files.]\n" : "") + _preview };
+        if (_options.WriteTxt) { File.Move(source, finalBase + ".txt"); source = finalBase + ".txt"; }
+        result = result with { TxtPath = _options.WriteTxt ? source : "", JsonPath = _options.WriteJson ? finalBase + ".json" : "", Bytes = _bytes, Sha256 = sha, Preview = (_bytes > 8192 ? "[Preview is truncated; full retained output is in capture files.]\n" : "") + _preview };
         if (_options.WriteJson)
         {
             try
@@ -104,7 +129,7 @@ public sealed class CollectorCapture : ICollectorCapture
             await using (var output = new FileStream(tempJson, FileMode.CreateNew, FileAccess.Write, FileShare.None, 8192, FileOptions.Asynchronous))
             {
                 using var writer = new Utf8JsonWriter(output);
-                writer.WriteStartObject(); writer.WriteNumber("schema", 1); writer.WriteString("protocol", _options.Protocol.ToString()); writer.WriteString("deviceProfile", _options.DeviceProfile);
+                writer.WriteStartObject(); writer.WriteNumber("schema", 1); writer.WriteString("protocol", _options.Protocol.ToString()); writer.WriteString("deviceProfile", result.Target.DeviceProfile.Length > 0 ? result.Target.DeviceProfile : _options.DeviceProfile);
                 writer.WriteString("transformation", "UTF-8 terminal transcript; entered credentials redacted; not secret-free configuration");
                 writer.WritePropertyName("result"); JsonSerializer.Serialize(writer, result with { Preview = "" }, new JsonSerializerOptions { Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } });
                 writer.WritePropertyName("commands"); JsonSerializer.Serialize(writer, commands);
@@ -120,10 +145,10 @@ public sealed class CollectorCapture : ICollectorCapture
                 if (carry.Length > 0) writer.WriteStringValue(carry);
                 writer.WriteEndArray(); writer.WriteEndObject(); await writer.FlushAsync(token).ConfigureAwait(false);
             }
-            File.Move(tempJson, _base + ".json"); result = result with { JsonPath = _base + ".json" };
+            File.Move(tempJson, finalBase + ".json");
             }
             catch (Exception ex) when (_options.WriteTxt && ex is IOException or UnauthorizedAccessException or OperationCanceledException)
-            { result = result with { State = CollectorDeviceState.Partial, Detail = "TXT capture retained; JSON finalization failed. Check output storage." }; }
+            { result = result with { State = CollectorDeviceState.Partial, JsonPath = "", Detail = "TXT capture retained; JSON finalization failed. Check output storage." }; }
         }
         if (!_options.WriteTxt) File.Delete(source);
         return result;
@@ -134,5 +159,6 @@ public sealed class CollectorCapture : ICollectorCapture
         // Failed temporary captures are removed; already finalized evidence is never deleted.
         foreach (string path in new[] { _base + ".capture.tmp", _base + ".json.tmp" })
                 try { if (File.Exists(path)) File.Delete(path); } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        if (_reservation is { } reservation) try { File.Delete(reservation); } catch (IOException) { }
     }
 }

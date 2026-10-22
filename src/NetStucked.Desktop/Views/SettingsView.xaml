@@ -3,8 +3,9 @@
     <StackPanel>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,24"><Image Source="{x:Static s:BrandAssets.Mark}" Width="60" Height="44" Margin="0,0,12,0"/><StackPanel VerticalAlignment="Center"><TextBlock FontSize="22" FontWeight="Bold"><Run Text="Net" Foreground="{DynamicResource AccentBrush}"/><Run Text="Stucked"/></TextBlock><TextBlock Text="NETWORK ENGINEER’S TOOLKIT" Style="{StaticResource Muted}" FontSize="10"/></StackPanel></StackPanel>
       <TextBlock Text="Appearance" Style="{StaticResource Heading}" Margin="0,0,0,12"/>
-      <Label Content="Theme" Target="{Binding ElementName=ThemeChoice}" Padding="0,0,0,6"/>
-      <ComboBox x:Name="ThemeChoice" ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme}" Width="220" HorizontalAlignment="Left" AutomationProperties.Name="Application theme"/>
+      <StackPanel Orientation="Horizontal"><TextBlock Text="Dark mode" VerticalAlignment="Center" Margin="0,0,14,0"/>
+      <ToggleButton IsChecked="{Binding IsDarkMode, Mode=TwoWay}" Style="{StaticResource DarkModeSwitch}" AutomationProperties.Name="Dark mode"/></StackPanel>
+      <CheckBox Content="Follow Windows theme" IsChecked="{Binding FollowSystem}" Margin="0,12,0,0"/>
       <TextBlock Text="Light, Dark, or follow Windows. Changes apply immediately." Style="{StaticResource Muted}" Margin="0,10,0,0" TextWrapping="Wrap"/>
     </StackPanel>
   </Border>

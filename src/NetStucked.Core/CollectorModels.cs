@@ -18,7 +18,7 @@ public sealed class CollectorCredentials(string username, string password, strin
     [System.Text.Json.Serialization.JsonIgnore] public string EnableSecret { get; } = enableSecret;
     public override string ToString() => "[memory-only collector credentials]";
 }
-public sealed record CollectorTarget(int Line, string Host, int Port, string Description, int? AuthSlot)
+public sealed record CollectorTarget(int Line, string Host, int Port, string Description, int? AuthSlot, string DeviceProfile = "")
 { public string Endpoint => Host.Contains(':') ? $"[{Host}]:{Port}" : $"{Host}:{Port}"; }
 public sealed record CollectorOptions(CollectorProtocol Protocol, string DeviceProfile, string OutputFolder,
     int Concurrency = 2, int ConnectTimeoutSeconds = 15, int CommandTimeoutSeconds = 30,
@@ -45,6 +45,7 @@ public sealed class CollectorRun
         Options = options; Targets = targets.ToImmutableArray(); BasicCommands = basic.ToImmutableArray(); CollectionCommands = collection.ToImmutableArray();
         HostPins = pins.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase); Auth1 = auth1; Auth2 = auth2;
         if (Targets.Length is < 1 or > 256) throw new ArgumentException("Enter 1–256 devices.");
+        if (Targets.Any(t => t.DeviceProfile.Length > 0 && !CollectorCommands.IsSupported(t.DeviceProfile))) throw new ArgumentException("Unsupported per-device profile.");
         ValidateCredentials(auth1); if (auth2 is not null) ValidateCredentials(auth2);
         if (Targets.Any(t => t.AuthSlot == 2) && auth2 is null) throw new ArgumentException("An auth=2 device needs AUTH2.");
         CollectorCommands.Validate(options.DeviceProfile, BasicCommands, CollectionCommands);
@@ -59,7 +60,13 @@ public sealed class CollectorRun
 public sealed record CollectorCommandEvidence(string Command, DateTimeOffset Started, DateTimeOffset Finished, bool Completed);
 public sealed record CollectorResult(Guid RunId, CollectorTarget Target, CollectorDeviceState State, string Detail,
     int? AuthSlot = null, string Preview = "", string TxtPath = "", string JsonPath = "", long Bytes = 0, string Sha256 = "",
-    DateTimeOffset? Started = null, DateTimeOffset? Finished = null, string DevicePrompt = "");
+    DateTimeOffset? Started = null, DateTimeOffset? Finished = null, string DevicePrompt = "", string DeviceHostname = "", string CollectedAddress = "");
+public sealed record CollectorSessionIdentity(string Prompt, string Hostname, string Address);
+public interface ICollectorSessionRunner
+{
+    Task<CollectorSessionIdentity> RunAsync(CollectorRun run, CollectorTarget target, CollectorCredentials credentials,
+        ICollectorCapture capture, List<CollectorCommandEvidence> commands, Action<CollectorDeviceState> state, CancellationToken token);
+}
 public interface ICollectorConnection : IAsyncDisposable
 {
     ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken token);
@@ -106,7 +113,7 @@ public static class CollectorInputParser
             if (port is < 1 or > 65535 || host.Length is < 1 or > 253 || host.Contains('%') || host.Any(char.IsControl)
                 || (Uri.CheckHostName(host) == UriHostNameType.Unknown)) throw new ArgumentException($"Line {line}: invalid host or port.");
             host = IPAddress.TryParse(host, out var ip) ? ip.ToString() : host.TrimEnd('.').ToLowerInvariant();
-            int? auth = null; var description = new List<string>();
+            int? auth = null; string profile = ""; var description = new List<string>();
             foreach (string part in tokens.Skip(1))
             {
                 if (part.StartsWith("auth=", StringComparison.OrdinalIgnoreCase))
@@ -114,9 +121,14 @@ public static class CollectorInputParser
                     if (auth is not null || part.ToLowerInvariant() is not ("auth=1" or "auth=2")) throw new ArgumentException($"Line {line}: use one auth=1 or auth=2.");
                     auth = part[^1] - '0';
                 }
+                else if (part.StartsWith("profile=", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (profile.Length > 0) throw new ArgumentException($"Line {line}: use one profile override.");
+                    profile = part[8..].ToLowerInvariant() switch { "ios" => "Cisco IOS", "ios-xe" => "Cisco IOS-XE", "ios-xr" => "Cisco IOS XR", "nxos" => "Cisco NX-OS", "huawei" => "Huawei VRP (Switch/Router)", _ => throw new ArgumentException($"Line {line}: profile must be ios, ios-xe, ios-xr, nxos or huawei.") };
+                }
                 else description.Add(part);
             }
-            var target = new CollectorTarget(line, host, port, string.Join(' ', description), auth);
+            var target = new CollectorTarget(line, host, port, string.Join(' ', description), auth, profile);
             if (seen.Add(target.Endpoint)) result.Add(target);
             if (result.Count > 256) throw new ArgumentException("Maximum 256 unique devices.");
         }
@@ -140,13 +152,15 @@ public static class CollectorInputParser
 
 public static class CollectorCommands
 {
-    public static IReadOnlyList<string> Profiles { get; } = ["Cisco IOS / IOS XE", "Cisco NX-OS", "Cisco ASA", "Huawei VRP", "Aruba / ProCurve"];
-    public static string Basic(string profile) => profile switch { "Cisco ASA" => "terminal pager 0", "Huawei VRP" => "screen-length 0 temporary", "Aruba / ProCurve" => "no page", _ => "terminal length 0" };
-    public static string Collection(string profile) => profile == "Huawei VRP" ? "display current-configuration\ndisplay version" : "show running-config\nshow version";
+    public static IReadOnlyList<string> Profiles { get; } = ["Cisco IOS", "Cisco IOS-XE", "Cisco IOS XR", "Cisco NX-OS", "Huawei VRP (Switch/Router)"];
+    public static bool IsSupported(string profile) => Profiles.Contains(profile) || profile is "Cisco IOS / IOS XE" or "Cisco ASA" or "Huawei VRP" or "Aruba / ProCurve";
+    public static string NetmikoType(string profile) => profile switch { "Cisco IOS XR" => "cisco_xr", "Cisco NX-OS" => "cisco_nxos", "Cisco IOS-XE" => "cisco_xe", "Huawei VRP" or "Huawei VRP (Switch/Router)" => "huawei", "Cisco ASA" => "cisco_asa", "Aruba / ProCurve" => "hp_procurve", _ => "cisco_ios" };
+    public static string Basic(string profile) => profile switch { "Cisco ASA" => "terminal pager 0", "Huawei VRP" or "Huawei VRP (Switch/Router)" => "screen-length 0 temporary", "Aruba / ProCurve" => "no page", _ => "terminal length 0" };
+    public static string Collection(string profile) => profile.StartsWith("Huawei VRP", StringComparison.Ordinal) ? "display current-configuration\ndisplay version" : "show running-config\nshow version";
     public static string[] Lines(string text) => text.Split('\n').Select(s => s.Trim()).Where(s => s.Length > 0).ToArray();
     public static void Validate(string profile, IEnumerable<string> basic, IEnumerable<string> collection)
     {
-        if (!Profiles.Contains(profile)) throw new ArgumentException("Select a supported device profile.");
+        if (!IsSupported(profile)) throw new ArgumentException("Select a supported device profile.");
         var b = basic.ToArray(); var c = collection.ToArray();
         if (b.Length > 4 || c.Length is < 1 or > 32) throw new ArgumentException("Use up to 4 basic and 1–32 collection commands.");
         if (b.Any(s => s != Basic(profile))) throw new ArgumentException("Basic commands must match the selected profile's pagination command.");

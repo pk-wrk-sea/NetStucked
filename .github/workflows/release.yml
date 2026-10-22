@@ -95,11 +95,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --collector-ssh-check artifacts/release/collector-ssh-qa tests/fixtures/collector_ssh_server.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Verify exact terminal emulator with owned SSH fixture
+      - name: Verify exact Netmiko and Collector/Inventory workflows
         shell: pwsh
         run: |
-          if ([Version]$env:APP_VERSION -lt [Version]'0.10.0') { exit 0 }
-          dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --terminal-ui-check artifacts/release/terminal-qa tests/fixtures/terminal_ssh_server.py
+          if ([Version]$env:APP_VERSION -lt [Version]'0.12.0') { exit 0 }
+          dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --netmiko-check artifacts/release/netmiko-qa tests/fixtures/netmiko_devices.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --collector-revision-ui-check artifacts/release/collector-revision-qa tests/fixtures/netmiko_devices.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify exact Collector Cisco-compatible SSH and console framing
         shell: pwsh
@@ -153,5 +155,7 @@ jobs:
             artifacts/release/native-monitor-qa
             artifacts/release/collector-cisco-ssh-qa
             artifacts/release/collector-real-ctr-qa
+            artifacts/release/netmiko-qa
+            artifacts/release/collector-revision-qa
             artifacts/release/installer-build.json
             artifacts/installer

@@ -1,5 +1,7 @@
 # A03 — MA Inventory and versioned Excel import/export
 
+**2026-10-22 superseding human scope:** [0.12.0](../FEATURES_0.12.0.md) moves Collector to bundled Netmiko, adds the supplied nullable component Inventory layout and retires the Terminal desktop feature. [Scoped QA](../QA_0.12.0.md); broad historical acceptance is not closed by software fixtures.
+
 **2026-10-21 / 0.11.1:** Actual WPF/native dirty-editor regression, all-row duplicate rejection and real Collector-produced evidence/Excel workflow are tracked in [QA](../QA_0.11.1.md). Stable identity, separate human/observed fields and original audit history remain intact; broader inventory criteria remain open.
 
 **2026-10-20 implementation extension:** The human approved all current menus in the existing theme for one integrated review. The relevant functional workflow is implemented in 0.11.0; see [scope](../FEATURES_0.11.0.md) and [actual QA/open acceptance](../QA_0.11.0.md). Older concept/UI gates below are superseded for this implementation. Broader original milestone criteria are retained; unchecked real-device/human acceptance is not closed by a build or fixture test.

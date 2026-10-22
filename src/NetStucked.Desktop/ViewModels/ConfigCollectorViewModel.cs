@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NetStucked.Core;
 using NetStucked.Desktop.Services;
+using NetStucked.Infrastructure;
 
 namespace NetStucked.Desktop.ViewModels;
 
@@ -13,6 +14,8 @@ public partial class ConfigCollectorViewModel : ObservableObject, IAsyncDisposab
 {
     private readonly CollectorController _controller;
     private readonly IDesktopDialogs _dialogs;
+    private readonly UserSettingsStore? _settings;
+    private readonly ITerminalKnownHostStore? _knownHosts;
     private readonly ConcurrentDictionary<string, CollectorResult> _pending = new(StringComparer.OrdinalIgnoreCase);
     private readonly DispatcherTimer _presenter;
     private CancellationTokenSource? _cancel;
@@ -21,10 +24,13 @@ public partial class ConfigCollectorViewModel : ObservableObject, IAsyncDisposab
     private bool _disposed;
     public ObservableCollection<CollectorRowViewModel> Results { get; } = [];
     public IReadOnlyList<string> Profiles => CollectorCommands.Profiles;
+    public ObservableCollection<TerminalKnownHost> KnownHosts { get; } = [];
+    public string HostKeysMessage => "Saved keys are checked before login. Passwords are never stored.";
+    [ObservableProperty] private TerminalKnownHost? _selectedKnownHost;
     public IReadOnlyList<CollectorProtocol> Protocols { get; } = Enum.GetValues<CollectorProtocol>();
     [ObservableProperty] private string _targetText = "";
     [ObservableProperty] private CollectorProtocol _protocol;
-    [ObservableProperty] private string _profile = "Cisco IOS / IOS XE";
+    [ObservableProperty] private string _profile = "Cisco IOS-XE";
     [ObservableProperty] private string _basicCommands = "terminal length 0";
     [ObservableProperty] private string _collectionCommands = "show running-config\nshow version";
     [ObservableProperty] private string _hostPins = "";
@@ -39,14 +45,14 @@ public partial class ConfigCollectorViewModel : ObservableObject, IAsyncDisposab
     [ObservableProperty] private string _username2 = "";
     [ObservableProperty] private bool _useAuth2;
     [ObservableProperty] private bool _isRunning;
-    [ObservableProperty] private string _message = "Paste authorized devices, enter AUTH1 and verified SSH host pins, then Start.";
+    [ObservableProperty] private string _message = "Paste authorized devices, choose a profile and enter AUTH1, then Start. New SSH keys require confirmation before login.";
     [ObservableProperty] private CollectorBatchState _state = CollectorBatchState.Idle;
     [ObservableProperty] private CollectorRowViewModel? _selectedRow;
     public bool CanEdit => !IsRunning;
     [RelayCommand] private void AnalysisCommands()
     {
         if (!CanEdit) return;
-        if (Profile is "Cisco IOS / IOS XE" or "Cisco NX-OS") CollectionCommands = "show running-config\nshow version\nshow inventory\nshow interfaces\nshow ip route\nshow cdp neighbors detail\nshow lldp neighbors detail";
+        if (Profile is "Cisco IOS / IOS XE" or "Cisco IOS" or "Cisco IOS-XE" or "Cisco NX-OS") CollectionCommands = "show running-config\nshow version\nshow inventory\nshow interfaces\nshow ip route\nshow cdp neighbors detail\nshow lldp neighbors detail";
         else if (Profile == "Cisco ASA") CollectionCommands = "show running-config\nshow version\nshow inventory\nshow interface\nshow route";
         else { Message = "Offline device-intelligence analysis currently supports Cisco IOS/IOS XE/NX-OS/ASA evidence only."; return; }
         Message = "Read-only analysis command template selected. Review platform support before explicit Start; no collection has started.";
@@ -58,11 +64,34 @@ public partial class ConfigCollectorViewModel : ObservableObject, IAsyncDisposab
     partial void OnProfileChanged(string value) { BasicCommands = CollectorCommands.Basic(value); CollectionCommands = CollectorCommands.Collection(value); }
     partial void OnSelectedRowChanged(CollectorRowViewModel? value) { OnPropertyChanged(nameof(Preview)); OnPropertyChanged(nameof(SelectedFiles)); }
     partial void OnIsRunningChanged(bool value) => OnPropertyChanged(nameof(CanEdit));
-    public ConfigCollectorViewModel(CollectorController controller, IDesktopDialogs dialogs)
+    public ConfigCollectorViewModel(CollectorController controller, IDesktopDialogs dialogs, UserSettingsStore? settings = null, ITerminalKnownHostStore? knownHosts = null)
     {
-        _controller = controller; _dialogs = dialogs;
+        _controller = controller; _dialogs = dialogs; _settings = settings; _knownHosts = knownHosts;
+        Username1 = settings?.Preferences.CollectorUsername1 ?? ""; Username2 = settings?.Preferences.CollectorUsername2 ?? "";
         _presenter = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, (_, _) => Drain(), Dispatcher.CurrentDispatcher);
         _presenter.Start();
+    }
+    [RelayCommand] private async Task SaveUsernamesAsync()
+    {
+        if (_settings is null) return;
+        if (new[] { Username1, Username2 }.Any(s => s.Length > 256 || s.Any(char.IsControl))) { Message = "Enter usernames without control characters (maximum 256 characters)."; return; }
+        _settings.Preferences.CollectorUsername1 = Username1; _settings.Preferences.CollectorUsername2 = Username2;
+        try { await _settings.SaveAsync(); Message = "Usernames saved. Passwords and enable secrets are never saved."; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Message = "Usernames could not be saved; check settings access."; }
+    }
+    [RelayCommand] private async Task ForgetUsernamesAsync() { Username1 = Username2 = ""; await SaveUsernamesAsync(); }
+    [RelayCommand] private async Task RefreshHostKeysAsync()
+    {
+        if (_knownHosts is null) return;
+        try { var rows = await _knownHosts.LoadAsync(default); KnownHosts.Clear(); foreach (var row in rows) KnownHosts.Add(row); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Message = "Saved SSH keys could not be loaded; existing data retained."; }
+    }
+    [RelayCommand] private async Task RemoveHostKeyAsync()
+    {
+        if (_knownHosts is null || SelectedKnownHost is not { } key || IsRunning) return;
+        if (!_dialogs.Confirm("Forget SSH host key", "Forget " + key.Endpoint + "? Its next connection will require confirmation before login.")) return;
+        try { await _knownHosts.RemoveAsync(key, default); await RefreshHostKeysAsync(); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Message = "Saved SSH key could not be removed."; }
     }
     public async Task StartAsync(string password1, string enable1, string password2, string enable2)
     {
@@ -145,9 +174,11 @@ public partial class CollectorRowViewModel(CollectorResult result) : ObservableO
     public CollectorResult Result { get; private set; } = result;
     public string Endpoint => Result.Target.Endpoint;
     public string Description => Result.Target.Description;
+    public string Hostname => Result.DeviceHostname.Length == 0 ? "—" : Result.DeviceHostname;
+    public string FileName => Path.GetFileName(Result.TxtPath.Length > 0 ? Result.TxtPath : Result.JsonPath);
     public string State => Result.State.ToString();
     public string Auth => Result.AuthSlot is { } slot ? "AUTH" + slot : "—";
     public string Detail => Result.Detail;
     public long Bytes => Result.Bytes;
-    public void Update(CollectorResult result) { Result = result; OnPropertyChanged(nameof(State)); OnPropertyChanged(nameof(Auth)); OnPropertyChanged(nameof(Detail)); OnPropertyChanged(nameof(Bytes)); }
+    public void Update(CollectorResult result) { Result = result; OnPropertyChanged(nameof(State)); OnPropertyChanged(nameof(Auth)); OnPropertyChanged(nameof(Detail)); OnPropertyChanged(nameof(Bytes)); OnPropertyChanged(nameof(Hostname)); OnPropertyChanged(nameof(FileName)); }
 }

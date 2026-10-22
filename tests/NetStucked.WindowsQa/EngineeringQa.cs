@@ -40,7 +40,7 @@ internal static partial class Program
         {
             var window = provider.GetRequiredService<MainWindow>(); app.MainWindow = window; window.DataContext = vm; window.ShowActivated = false; window.ShowInTaskbar = false; window.Opacity = 0; window.Show();
             await vm.Engineering.InitializeAsync(); Require(vm.Engineering.Loaded && vm.Engineering.Data.Assets.Length == 0, "Engineering workspace begins empty without fabricated assets");
-            vm.NavigateCommand.Execute("MA Inventory"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+            vm.NavigateCommand.Execute("Inventory"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
             var root = (DependencyObject)window.Content;
             var hostname = Descendants<TextBox>(root).Single(t => AutomationProperties.GetName(t) == "Asset hostname"); hostname.Text = "SW1-owned";
             vm.Inventory.Address = "192.0.2.1"; vm.Inventory.Model = "Manual model"; vm.Inventory.Site = "Owned fixture";
@@ -98,7 +98,7 @@ internal static partial class Program
             foreach (string theme in new[] { "Light", "Dark" })
             {
                 vm.Appearance.SelectedTheme = theme;
-                foreach (string page in new[] { "Dashboard", "MA Inventory", "Topology Explorer", "CVE & Upgrade Planner" })
+                foreach (string page in new[] { "Dashboard", "Inventory", "Topology Explorer", "CVE & Upgrade Planner" })
                 {
                     vm.NavigateCommand.Execute(page); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
                     Require(vm.CurrentPage is not PlaceholderViewModel, theme + " actual functional navigation: " + page);
@@ -115,7 +115,7 @@ internal static partial class Program
                 }
             }
             vm.Dashboard.Update(true); Require(vm.Dashboard.Summary.Contains("2 assets") && vm.Dashboard.Incidents.Count == 0, "Dashboard uses actual inventory and no fabricated incidents");
-            vm.Dashboard.OpenCommand.Execute("MA Inventory"); Require(vm.CurrentPage == vm.Inventory, "Dashboard drill-down opens cached functional menu");
+            vm.Dashboard.OpenCommand.Execute("Inventory"); Require(vm.CurrentPage == vm.Inventory, "Dashboard drill-down opens cached functional menu");
             var reloaded = await provider.GetRequiredService<IEngineeringStore>().LoadAsync(default); Require(reloaded.Assets.Length == 2 && reloaded.Evidence.Length == 3 && reloaded.Plans.Length == 1, "Real local persistence round trip retains assets, evidence and plans");
             var legacy = EngineeringRules.Latest(vm.Engineering.Data, asset)! with { Parser = "cisco-text/1" };
             await vm.Engineering.CommitAsync(data => data with { Evidence = data.Evidence.Select(e => e.Id == legacy.Id ? legacy : e).ToArray() }, default);

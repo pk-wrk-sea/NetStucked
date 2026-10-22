@@ -6,6 +6,18 @@ public sealed record Asset(Guid Id, string Hostname, string Address, string Vend
     string Site, string Location, string Role, string Contract, DateOnly? MaStart, DateOnly? MaEnd,
     DateTimeOffset ModifiedAt)
 {
+    public string Number { get; init; } = "";
+    public string Company { get; init; } = "";
+    public string Province { get; init; } = "";
+    public string Building { get; init; } = "";
+    public string Floor { get; init; } = "";
+    public string Room { get; init; } = "";
+    public string Rack { get; init; } = "";
+    public string MaType { get; init; } = "";
+    public string SlaType { get; init; } = "";
+    public string Remark { get; init; } = "";
+    public string Remark2 { get; init; } = "";
+    public DateOnly? Ldos { get; init; }
     public string MaStatus => MaEnd is null ? "Unknown" : MaEnd < DateOnly.FromDateTime(DateTime.UtcNow) ? "Expired" : MaEnd <= DateOnly.FromDateTime(DateTime.UtcNow).AddDays(90) ? "Expiring ≤90d" : "Active";
 }
 public sealed record DeviceFact(string Field, string Value, string Command, int Line, string Confidence);
@@ -40,8 +52,9 @@ public static partial class EngineeringRules
 {
     public static void Validate(Asset a)
     {
-        if (a.Id == Guid.Empty || string.IsNullOrWhiteSpace(a.Hostname) && string.IsNullOrWhiteSpace(a.Address)) throw new ArgumentException("Asset needs a stable ID and hostname or address.");
-        foreach (string s in new[] { a.Hostname, a.Address, a.Vendor, a.Model, a.Serial, a.Site, a.Location, a.Role, a.Contract }) Text(s, 256);
+        if (a.Id == Guid.Empty) throw new ArgumentException("Asset needs a stable ID.");
+        foreach (string s in new[] { a.Hostname, a.Address, a.Vendor, a.Model, a.Serial, a.Site, a.Location, a.Role, a.Contract, a.Number, a.Company, a.Province, a.Building, a.Floor, a.Room, a.Rack, a.MaType, a.SlaType }) Text(s, 256);
+        Text(a.Remark, 2000); Text(a.Remark2, 2000);
         if (a.Address.Length > 0 && Uri.CheckHostName(a.Address) == UriHostNameType.Unknown) throw new ArgumentException("Invalid management IP/hostname.");
         if (a.MaStart > a.MaEnd) throw new ArgumentException("MA start must not be after MA end.");
     }

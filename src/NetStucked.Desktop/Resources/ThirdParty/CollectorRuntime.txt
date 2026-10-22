@@ -1,0 +1,13 @@
+NetStucked Collector runtime
+
+Python 3.13.17: Python Software Foundation license; bundled CollectorRuntime/LICENSE.txt.
+Netmiko 4.8.0: MIT license, Kirk Byers; bundled netmiko-4.8.0.dist-info/licenses/LICENSE.
+Paramiko 4.0.0: LGPL-2.1; bundled paramiko-4.0.0.dist-info/licenses/LICENSE.
+Additional libraries retain their original .dist-info metadata and license files under CollectorRuntime/Lib/site-packages.
+
+Exact distributions, official download URLs and SHA-256 are recorded in scripts/collector-runtime.lock.json in the project source. The Python ZIP SHA-256 comes from the official python.org Windows release manifest; wheel hashes match official PyPI release metadata. Runtime provisioning verifies all archive hashes and the Python Software Foundation Authenticode publisher before use. No pip/package download is performed on an end user's machine.
+
+Source: https://github.com/pk-wrk-sea/NetStucked
+Python: https://www.python.org/downloads/release/python-31317/
+Netmiko: https://github.com/ktbyers/netmiko
+Paramiko: https://github.com/paramiko/paramiko

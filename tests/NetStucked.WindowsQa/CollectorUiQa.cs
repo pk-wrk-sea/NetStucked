@@ -19,7 +19,7 @@ internal static partial class Program
     private static async Task RunCollectorOnlyAsync(Application app, string output, BindingErrors errors)
     {
         var store = new UserSettingsStore(Path.Combine(output, "isolated-user-data"));
-        await using var provider = App.ConfigureServices(store, new QaDialogs(), services => services.AddSingleton<ICollectorTransport, QaCollectorTransport>());
+        await using var provider = App.ConfigureServices(store, new QaDialogs(), services => services.AddSingleton<ICollectorTransport, QaCollectorTransport>().AddSingleton<CollectorController>(p => new(p.GetRequiredService<ICollectorTransport>(), p.GetRequiredService<ICollectorCaptureFactory>())));
         provider.GetRequiredService<ThemeService>(); var vm = provider.GetRequiredService<MainViewModel>();
         try
         {

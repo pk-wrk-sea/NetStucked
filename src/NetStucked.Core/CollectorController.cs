@@ -1,6 +1,6 @@
 namespace NetStucked.Core;
 
-public sealed class CollectorController(ICollectorTransport transport, ICollectorCaptureFactory captures)
+public sealed class CollectorController(ICollectorTransport transport, ICollectorCaptureFactory captures, ICollectorSessionRunner? sessionRunner = null)
 {
     public async Task<IReadOnlyList<CollectorResult>> RunAsync(CollectorRun run, Action<CollectorResult> progress, CancellationToken token)
     {
@@ -31,12 +31,18 @@ public sealed class CollectorController(ICollectorTransport transport, ICollecto
             capture = await captures.CreateAsync(run, target, token).ConfigureAwait(false);
             int[] slots = target.AuthSlot is { } selected ? [selected] : run.Auth2 is not null ? [1, 2] : [1];
             ICollectorConnection? connected = null;
+            CollectorSessionIdentity? identity = null;
             foreach (int candidate in slots)
             {
                 slot = candidate; var credentials = candidate == 1 ? run.Auth1 : run.Auth2!;
                 try
                 {
                     // A transient CONNECT failure can retry once with the SAME credentials, before commands only.
+                    if (sessionRunner is not null)
+                    {
+                        identity = await sessionRunner.RunAsync(run, target, credentials, capture, commands, State, token).ConfigureAwait(false);
+                        break;
+                    }
                     for (int retry = 0; ; retry++)
                     {
                         State(CollectorDeviceState.Connecting);
@@ -51,16 +57,22 @@ public sealed class CollectorController(ICollectorTransport transport, ICollecto
                     }
                     break;
                 }
-                catch (CollectorException ex) when (ex.Failure == CollectorFailure.AuthenticationRejected && target.AuthSlot is null && candidate == 1 && run.Auth2 is not null) { }
+                catch (CollectorException ex) when (!token.IsCancellationRequested && ex.Failure == CollectorFailure.AuthenticationRejected && commands.Count == 0 && target.AuthSlot is null && candidate == 1 && run.Auth2 is not null) { }
             }
-            if (connected is null) throw new CollectorException(CollectorFailure.AuthenticationRejected, "Authentication rejected.");
-            string prompt;
-            await using (connected.ConfigureAwait(false))
-                prompt = await CollectorSession.RunAsync(connected, run, slot == 1 ? run.Auth1 : run.Auth2!, capture, commands, State, token).ConfigureAwait(false);
+            if (identity is null)
+            {
+                if (connected is null) throw new CollectorException(CollectorFailure.AuthenticationRejected, "Authentication rejected.");
+                await using (connected.ConfigureAwait(false))
+                {
+                    string prompt = await CollectorSession.RunAsync(connected, run, slot == 1 ? run.Auth1 : run.Auth2!, capture, commands, State, token).ConfigureAwait(false);
+                    identity = new(prompt, "", target.Host);
+                }
+            }
             State(CollectorDeviceState.Saving);
-            result = new(run.Id, target, CollectorDeviceState.Completed, "Collection completed.", slot, Started: start, DevicePrompt: prompt);
+            result = new(run.Id, target, CollectorDeviceState.Completed, "Collection completed.", slot, Started: start, DevicePrompt: identity.Prompt, DeviceHostname: identity.Hostname, CollectedAddress: identity.Address);
         }
         catch (OperationCanceledException) { result = new(run.Id, target, CollectorDeviceState.Cancelled, "Cancelled; completed output retained where available.", slot, Started: start); }
+        catch (Exception) when (token.IsCancellationRequested) { result = new(run.Id, target, CollectorDeviceState.Cancelled, "Cancelled; completed output retained where available.", slot, Started: start); }
         catch (CollectorException ex) { result = new(run.Id, target, commands.Count > 0 ? CollectorDeviceState.Partial : CollectorDeviceState.Failed, ex.Message, slot, Started: start); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         { result = new(run.Id, target, commands.Count > 0 ? CollectorDeviceState.Partial : CollectorDeviceState.Failed, "Output/transport I/O failed; check folder permissions, disk space and connectivity.", slot, Started: start); }

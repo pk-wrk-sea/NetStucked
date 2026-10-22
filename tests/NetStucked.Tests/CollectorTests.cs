@@ -12,6 +12,19 @@ namespace NetStucked.Tests;
 
 public sealed class CollectorTests
 {
+    [Theory] [InlineData(CollectorFailure.Transport)] [InlineData(CollectorFailure.AuthenticationRejected)]
+    public async Task CancellationWinsOverWorkerExitFailureWithoutAuthFallback(CollectorFailure failure)
+    {
+        using var cancel = new CancellationTokenSource(); var runner = new CancelledWorkerRunner(cancel, failure);
+        var result = (await new CollectorController(new FakeTransport(), new FakeCaptureFactory(), runner).RunAsync(Run(new("second", "second-password", "")), _ => { }, cancel.Token)).Single();
+        Assert.Equal(CollectorDeviceState.Cancelled, result.State); Assert.Equal(1, runner.Calls); Assert.Equal(1, result.AuthSlot);
+    }
+    private sealed class CancelledWorkerRunner(CancellationTokenSource cancel, CollectorFailure failure) : ICollectorSessionRunner
+    {
+        public int Calls;
+        public Task<CollectorSessionIdentity> RunAsync(CollectorRun run, CollectorTarget target, CollectorCredentials credentials, ICollectorCapture capture, List<CollectorCommandEvidence> commands, Action<CollectorDeviceState> state, CancellationToken token)
+        { Calls++; cancel.Cancel(); throw new CollectorException(failure, "Owned worker exits with an SSH error concurrently with cancellation."); }
+    }
     private static CollectorRun Run(CollectorCredentials? second = null, int? slot = null, int count = 1) => new(
         new(CollectorProtocol.Ssh, "Cisco IOS / IOS XE", Path.GetTempPath()),
         Enumerable.Range(1, count).Select(i => new CollectorTarget(i, "device" + i + ".test", 22, "owned fixture", slot)),
@@ -275,7 +288,7 @@ public sealed class CollectorTests
         string folder = Path.Combine(Path.GetTempPath(), "NetStucked-owned-save-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
         try
         {
-            string path = Path.Combine(folder, "owned"); Directory.CreateDirectory(path + ".json");
+            string path = Path.Combine(folder, "owned"); Directory.CreateDirectory(Path.Combine(folder, "owned.test hostname-unknown.json"));
             CollectorResult result;
             await using (var capture = new CollectorCapture(path, Run().Options, []))
             {

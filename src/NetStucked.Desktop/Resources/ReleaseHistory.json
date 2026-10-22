@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.12.0",
+    "Date": "2026-10-22",
+    "Notes": "Bundled Netmiko parallel Collector: Cisco IOS/IOS-XE/IOS XR/NX-OS and Huawei VRP. Interactive SSH host trust, saved usernames only, password reveal and observed address/hostname capture names. Inventory component Excel template, optional fields and reviewed import/edit/export. Dark-mode switches; Terminal feature removed."
+  },
+  {
     "Version": "0.11.2",
     "Date": "2026-10-21",
     "Notes": "Fix Config Collector SSH compatibility with strong Cisco AES-CTR and SHA-2 ETM combinations. Preserve verified host keys and memory-only credentials; distinguish SSH setup/authentication/shell failures without exposing secrets. Use CR for SSH console commands while retaining Telnet CRLF, reset the shell setup deadline after authentication, and drain bounded streams/connections on cancellation. Owned protocol fixtures verified; real-device acceptance remains separate."

@@ -95,7 +95,7 @@ public sealed class EngineeringTests : IDisposable
         {
             var entry = zip.GetEntry("xl/worksheets/sheet1.xml")!; System.Xml.Linq.XDocument xml; using (var stream = entry.Open()) xml = System.Xml.Linq.XDocument.Load(stream);
             System.Xml.Linq.XNamespace ns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
-            var cell = xml.Descendants(ns + "c").Single(c => (string?)c.Attribute("r") == "L3"); cell.SetAttributeValue("t", "n"); cell.RemoveNodes(); cell.Add(new System.Xml.Linq.XElement(ns + "v", new DateTime(2027, 2, 28).ToOADate().ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            var cell = xml.Descendants(ns + "c").Single(c => (string?)c.Attribute("r") == "X3"); cell.SetAttributeValue("t", "n"); cell.RemoveNodes(); cell.Add(new System.Xml.Linq.XElement(ns + "v", new DateTime(2027, 2, 28).ToOADate().ToString(System.Globalization.CultureInfo.InvariantCulture)));
             entry.Delete(); using var writer = new StreamWriter(zip.CreateEntry("xl/worksheets/sheet1.xml").Open()); writer.Write(xml);
         }
         var row = Assert.Single(await InventoryWorkbook.ReadAsync(path, [], default)); Assert.Empty(row.Error); Assert.Equal(a.MaEnd, row.Asset!.MaEnd);

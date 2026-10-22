@@ -74,8 +74,8 @@ public partial class App : Application
         services.AddSingleton<ITerminalKnownHostStore, TerminalKnownHostStore>();
         services.AddSingleton<ITerminalHostKeyPrompt, TerminalHostKeyPrompt>();
         services.AddSingleton<ITerminalHostTrust, TerminalHostTrust>();
-        services.AddSingleton<ITerminalTransport, TerminalTransport>(); services.AddSingleton<ITerminalProfileStore, TerminalProfileStore>(); services.AddSingleton<TerminalWorkspaceViewModel>();
         services.AddSingleton<ICollectorTransport, CollectorTransport>();
+        services.AddSingleton<ICollectorSessionRunner, NetmikoCollectorSession>();
         services.AddSingleton<ICollectorCaptureFactory, CollectorCaptureFactory>();
         services.AddSingleton<CollectorController>(); services.AddSingleton<ConfigCollectorViewModel>();
         services.AddSingleton<IEngineeringStore, EngineeringStore>(); services.AddSingleton<IEngineeringFiles, EngineeringFiles>();
