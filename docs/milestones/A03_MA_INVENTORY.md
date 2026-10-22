@@ -1,5 +1,7 @@
 # A03 — MA Inventory and versioned Excel import/export
 
+**0.12.2 delivery follow-up:** retain all Inventory corrections; fix future helper staging after the real 0.12.0 update attempt exposed its existing file-count bound. [Scope](../FEATURES_0.12.2.md), [QA/old-client manual upgrade](../QA_0.12.2.md). Broader physical/manual DoD remains open.
+
 **2026-10-22 human lag report / 0.12.1:** [scope](../FEATURES_0.12.1.md), [QA](../QA_0.12.1.md). Scaled owned WPF import/search/scroll, stable-ID edits/roundtrip and unchanged audit checks pass. Human physical interaction and broader historical DoD remain open.
 
 **0.12.0 publication:** the named Collector/Inventory revision is implemented and published, and Terminal is retired. [Verification and remaining acceptance](../GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md). Broader historical DoD is not closed by owned software fixtures.

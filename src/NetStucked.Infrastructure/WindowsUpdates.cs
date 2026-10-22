@@ -92,7 +92,16 @@ public sealed class WindowsApplicationUpdateService(UserSettingsStore store) : I
             {
                 token.ThrowIfCancellationRequested(); UpdateFiles.NoLinks(entry);
                 if (++entries > 4096) throw new IOException("Application helper contains too many entries.");
-                if (Directory.Exists(entry)) folders.Enqueue(entry); else safeFiles.Add(entry);
+                if (Directory.Exists(entry))
+                {
+                    // --apply-update branches before desktop service initialization.
+                    // Its private .NET runtime is required; the Collector's Python
+                    // runtime is not. Check the root for links before excluding it,
+                    // and retain the existing bounds for every copied helper entry.
+                    if (UpdateFiles.SamePath(folder, source) && Path.GetFileName(entry).Equals("CollectorRuntime", StringComparison.OrdinalIgnoreCase)) continue;
+                    folders.Enqueue(entry);
+                }
+                else safeFiles.Add(entry);
             }
         var files = safeFiles.ToArray();
         if (files.Length > 1000 || files.Sum(f => new FileInfo(f).Length) > 1024L * 1024 * 1024) throw new IOException("Application helper payload exceeds the copy limit.");

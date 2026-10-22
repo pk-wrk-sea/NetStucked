@@ -1,5 +1,7 @@
 # Implementation status — 2026-10-09
 
+**2026-10-22 / 0.12.2 helper correction:** the real old-client public staging check exposed the bundled Python file count exceeding the existing helper bound. The new helper excludes only the unnecessary root Collector runtime while retaining .NET, trust/path/size bounds and cancellation. [Scope](FEATURES_0.12.2.md), [QA and one-time manual upgrade limitation](QA_0.12.2.md). All 0.12.1 Inventory fixes and immutable published assets are retained.
+
 **2026-10-22 / 0.12.1 Inventory correction:** imported-list lag is reproduced and corrected in the existing UI. Real 708-row store validates read-only; isolated 708/2,708-row WPF measurements and 523 unit/46 engineering assertions pass. [Scope](FEATURES_0.12.1.md), [QA/remaining acceptance](QA_0.12.1.md). Publication follows exact-package checks; the production process/data and released assets are retained.
 
 **2026-10-22 / 0.12.0 published as GitHub Latest:** bundled Netmiko Collector, interactive host trust, bounded mixed-profile parallel jobs, nullable component Inventory XLSX, Dark switches and Terminal retirement. 520 unit tests, exact WPF/worker/native checks, four CI runs, public downloads and real 0.11.2 updater discovery/staging pass. [Scope](FEATURES_0.12.0.md), [immutable publication evidence](GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md), [QA/open acceptance](QA_0.12.0.md). Physical vendor/AAA, human DPI/accessibility and Setup acceptance remain open.

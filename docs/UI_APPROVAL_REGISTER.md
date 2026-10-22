@@ -1,5 +1,7 @@
 # UI approval register
 
+**2026-10-22 compatibility follow-up:** [0.12.2](FEATURES_0.12.2.md) corrects restart-helper packaging discovered during the authorized real update check. No UI/layout or canonical reference change; 0.12.1 Inventory scope is retained. [QA](QA_0.12.2.md).
+
 **2026-10-22 human defect follow-up:** correct Inventory responsiveness after import within the approved layout. [0.12.1 scope](FEATURES_0.12.1.md), [QA](QA_0.12.1.md). Passive cells defer selectable editors until interaction; retained theme/columns/copy/zoom and dirty-editor contracts remain. No new page or canonical reference replacement is authorized.
 
 **2026-10-22 / 0.12.0 published as GitHub Latest:** bundled Netmiko Collector, interactive host trust, bounded mixed-profile parallel jobs, nullable component Inventory XLSX, Dark switches and Terminal retirement. 520 unit tests, exact WPF/worker/native checks, four CI runs, public downloads and real 0.11.2 updater discovery/staging pass. [Scope](FEATURES_0.12.0.md), [immutable publication evidence](GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md), [QA/open acceptance](QA_0.12.0.md). Physical vendor/AAA, human DPI/accessibility and Setup acceptance remain open.

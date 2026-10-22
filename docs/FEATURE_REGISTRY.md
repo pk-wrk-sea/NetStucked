@@ -1,5 +1,7 @@
 # Feature and navigation registry
 
+**2026-10-22 / 0.12.2:** preserve Inventory performance fixes and exclude only the unnecessary Python bundle from the bounded restart helper. [Scope](FEATURES_0.12.2.md), [QA/manual-upgrade limitation](QA_0.12.2.md).
+
 **2026-10-22 / Inventory correction:** [0.12.1](FEATURES_0.12.1.md) implements measured import/search/scroll improvements, no-op audit preservation and the Brand binding fix. [Verification/open acceptance](QA_0.12.1.md). Existing schema and published assets remain intact.
 
 **2026-10-21 / 0.11.2 published:** Existing F06/A02 strong AES-CTR/SHA-2 SSH, console CR and drained cancellation pass 512 tests, 60 real SSH matrix assertions and exact WPF/native/CI/public updater checks; [scope](FEATURES_0.11.2.md), [QA](QA_0.11.2.md), [publication](GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md). Broader historical Collector requirements and actual-device/manual/Setup acceptance remain open.

@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.12.2",
+    "Date": "2026-10-22",
+    "Notes": "Retain the Inventory performance/audit/Brand corrections. Fix future update staging by excluding Collector's unnecessary Python bundle from the bounded restart helper, preserving its .NET runtime and existing trust/path/cancellation limits. Already installed 0.12.0/0.12.1 clients need a one-time manual Setup upgrade to obtain this correction. No automatic installation or device operation."
+  },
+  {
     "Version": "0.12.1",
     "Date": "2026-10-22",
     "Notes": "Fix Inventory lag after import: lightweight passive cells retain selectable text on interaction, batched snapshots and indexed/cached searches reduce UI work. Coalesce live typing, retain unsaved edits, correct Brand editing, and avoid false audit changes when reimporting an unchanged workbook. Existing stable IDs, optional fields and audit history are preserved. Scaled owned WPF checks pass; physical user acceptance remains separate."
