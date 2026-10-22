@@ -48,14 +48,16 @@ internal static partial class Program
         if (args.FirstOrDefault() == "--public-update-check") return CheckPublicUpdateAsync(Path.GetFullPath(args[1]), args[2], args[3]).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--palo-site-check") return CheckPaloSite(Path.GetFullPath(args[1]));
         if (args.FirstOrDefault() == "--native-monitor-check") return CheckNativeMonitoringAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
+        if (args.FirstOrDefault() == "--inventory-audit") return AuditInventoryAsync(args[1]).GetAwaiter().GetResult();
+        bool inventoryPerformance = args.FirstOrDefault() == "--inventory-performance-check";
         bool revisionOnly = args.FirstOrDefault() == "--collector-revision-ui-check";
         bool collectorOnly = args.FirstOrDefault() == "--collector-ui-check";
         bool terminalOnly = false; // Terminal retired by the 2026-10-22 human request.
         bool realCollectorOnly = args.FirstOrDefault() == "--collector-real-ui-check";
         bool realEngineeringOnly = args.FirstOrDefault() == "--engineering-real-ui-check";
         bool engineeringOnly = args.FirstOrDefault() == "--engineering-ui-check";
-        string output = Path.GetFullPath(revisionOnly || collectorOnly || terminalOnly || realCollectorOnly || realEngineeringOnly || engineeringOnly ? args[1] : args.FirstOrDefault() ?? "artifacts/windows-qa");
-        int soakSeconds = !revisionOnly && !collectorOnly && !terminalOnly && !realCollectorOnly && !realEngineeringOnly && !engineeringOnly && args.Length > 1 ? int.Parse(args[1]) : 0;
+        string output = Path.GetFullPath(inventoryPerformance || revisionOnly || collectorOnly || terminalOnly || realCollectorOnly || realEngineeringOnly || engineeringOnly ? args[1] : args.FirstOrDefault() ?? "artifacts/windows-qa");
+        int soakSeconds = !inventoryPerformance && !revisionOnly && !collectorOnly && !terminalOnly && !realCollectorOnly && !realEngineeringOnly && !engineeringOnly && args.Length > 1 ? int.Parse(args[1]) : 0;
         _expectedAvailableVersion = args.Length > 3 ? args[3] : null;
         _expectedCurrentVersion = args.Length > 4 ? args[4] : null;
         if (args.Length > 2 && !revisionOnly && !terminalOnly && !realCollectorOnly && !realEngineeringOnly)
@@ -76,7 +78,7 @@ internal static partial class Program
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Error;
         _ = application.Dispatcher.InvokeAsync(async () =>
         {
-            try { if (revisionOnly) await RunCollectorRevisionUiAsync(application, output, Path.GetFullPath(args[2]), listener); else if (realEngineeringOnly) await RunRealEngineeringOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (realCollectorOnly) await RunRealCollectorOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (engineeringOnly) await RunEngineeringOnlyAsync(application, output, listener); else if (collectorOnly) await RunCollectorOnlyAsync(application, output, listener); else await RunAsync(application, output, soakSeconds, listener); }
+            try { if (inventoryPerformance) await RunInventoryPerformanceAsync(application, output, listener); else if (revisionOnly) await RunCollectorRevisionUiAsync(application, output, Path.GetFullPath(args[2]), listener); else if (realEngineeringOnly) await RunRealEngineeringOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (realCollectorOnly) await RunRealCollectorOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (engineeringOnly) await RunEngineeringOnlyAsync(application, output, listener); else if (collectorOnly) await RunCollectorOnlyAsync(application, output, listener); else await RunAsync(application, output, soakSeconds, listener); }
             catch (Exception ex) { _exitCode = 1; Console.Error.WriteLine("FAIL " + ex); }
             finally { application.Shutdown(); }
         });

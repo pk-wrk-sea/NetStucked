@@ -34,6 +34,8 @@ jobs:
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --collector-revision-ui-check artifacts/collector-revision-qa tests/fixtures/netmiko_devices.py
       - name: Verify integrated engineering menus with owned offline fixtures
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --engineering-ui-check artifacts/engineering-qa
+      - name: Verify scaled Inventory import, search, selectable cells and audit stability
+        run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --inventory-performance-check artifacts/inventory-performance-qa
       - name: Verify CVE expiry and editor preservation without external providers
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --cve-regression-check artifacts/cve-regression-qa
       - name: Verify Collector banners through owned SSH

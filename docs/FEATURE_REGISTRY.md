@@ -1,5 +1,7 @@
 # Feature and navigation registry
 
+**2026-10-22 / Inventory correction:** [0.12.1](FEATURES_0.12.1.md) implements measured import/search/scroll improvements, no-op audit preservation and the Brand binding fix. [Verification/open acceptance](QA_0.12.1.md). Existing schema and published assets remain intact.
+
 **2026-10-21 / 0.11.2 published:** Existing F06/A02 strong AES-CTR/SHA-2 SSH, console CR and drained cancellation pass 512 tests, 60 real SSH matrix assertions and exact WPF/native/CI/public updater checks; [scope](FEATURES_0.11.2.md), [QA](QA_0.11.2.md), [publication](GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md). Broader historical Collector requirements and actual-device/manual/Setup acceptance remain open.
 
 **2026-10-20 / 0.11.0 published as GitHub Latest:** All current menus have functional existing-theme workflows, including actual Dashboard, stable-ID MA Inventory/Excel/audit, offline Cisco evidence/one-hop Topology and engineer-reviewed CVE/device change plans. [Scope](FEATURES_0.11.0.md), [review guide](QA_0.11.0.md), [immutable source/assets/CI and updater evidence](GITHUB_RELEASE_0.11.0_REPORT_2026-10-20.md). 462 tests, exact WPF/60s, engineering, SSH and native checks pass; both public direct downloads match frozen hashes. The first 0.11.0 updater catalog check passed; older/subsequent requests and installer staging were blocked by GitHub HTTP 403, not fixed by this version. Human/real-device/physical-DPI/accessibility/Setup gates remain open; broader historical milestone criteria and commercial On Hold status are retained.

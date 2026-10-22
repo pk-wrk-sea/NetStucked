@@ -118,6 +118,8 @@ public static class InventoryWorkbook
                 return DateOnly.FromDateTime(date1904 ? new DateTime(1904, 1, 1).AddDays(serial) : DateTime.FromOADate(serial));
             throw new ArgumentException("Invalid Excel date or date text. Use yyyy-MM-dd, dd-MMM-yyyy, day/month/year or whole-day Excel date cells; empty is allowed.");
         }
+        var existingById = existing.ToDictionary(a => a.Id);
+        var existingBySerial = existing.Where(a => a.Serial.Length > 0).ToLookup(a => a.Serial, StringComparer.OrdinalIgnoreCase);
         var result = new List<AssetImportRow>(); var identities = new Dictionary<int, Guid>(); var serials = new Dictionary<int, string>();
         for (int i = headerRow + 1; i < rows.Length; i++)
         {
@@ -130,15 +132,18 @@ public static class InventoryWorkbook
                 string Field(string name) => columns.TryGetValue(Key(name), out int col) ? v[col].Trim() : previous.GetValueOrDefault(Key(name), "");
                 if (Field("SerialNumber").Length > 0) serials[i + 1] = Field("SerialNumber");
                 bool matchSerial = Field("AssetId").Length == 0 && Field("SerialNumber").Length > 0;
-                var serialMatches = matchSerial ? existing.Where(a => a.Serial.Equals(Field("SerialNumber"), StringComparison.OrdinalIgnoreCase)).ToArray() : [];
+                var serialMatches = matchSerial ? existingBySerial[Field("SerialNumber")].ToArray() : [];
                 if (serialMatches.Length > 1) throw new ArgumentException("Serial matches multiple existing assets; retain the exported AssetId to identify the row.");
                 Guid id = Field("AssetId").Length == 0 ? serialMatches.FirstOrDefault()?.Id ?? Guid.NewGuid() : Guid.Parse(Field("AssetId")); identities[i + 1] = id;
-                var old = existing.FirstOrDefault(a => a.Id == id);
+                existingById.TryGetValue(id, out var old);
                 if (old is not null) previous = Headers.Zip(Values(old)).ToDictionary(pair => Key(pair.First), pair => pair.Second);
                 var asset = new Asset(id, Field("Hostname"), Field("IP Address"), Field("Brand"), Field("Partnumber"), Field("SerialNumber"), Field("Site"), Field("Location"), Field("Device Type"), Field("Contract"), Date(Field("MaStart")), Date(Field("MaEnd")), DateTimeOffset.UtcNow)
                 { Number = Field("No"), Company = Field("Company"), Province = Field("Province"), Building = Field("Building"), Floor = Field("Floor"), Room = Field("Room"), Rack = Field("Rack"), MaType = Field("MA Type"), SlaType = Field("SLA Type"), Remark = Field("Remark"), Remark2 = Field("Remark2"), Ldos = Date(Field("LDoS")) };
                 EngineeringRules.Validate(asset);
-                if (asset.Serial.Length > 0 && existing.Any(a => a.Id != id && a.Serial.Equals(asset.Serial, StringComparison.OrdinalIgnoreCase))) throw new ArgumentException("Serial conflicts with another asset; reconcile stable identity first.");
+                if (asset.Serial.Length > 0 && existingBySerial[asset.Serial].Any(a => a.Id != id)) throw new ArgumentException("Serial conflicts with another asset; reconcile stable identity first.");
+                // An unchanged roundtrip is not a human edit: retain its timestamp and
+                // avoid filling the bounded audit with false before/after changes.
+                if (old is not null && asset with { ModifiedAt = old.ModifiedAt } == old) asset = old;
                 result.Add(new(i + 1, asset, old is null ? "Add" : serialMatches.Length == 1 ? "Update by unique Serial (review)" : "Update human fields (explicit selection)", ""));
             }
             catch (Exception e) when (e is ArgumentException or FormatException or OverflowException or IOException) { result.Add(new(i + 1, null, "Rejected", e.Message)); }
