@@ -5,6 +5,7 @@ using Xunit;
 
 namespace NetStucked.Tests;
 
+[Collection("Exclusive timing and bulk fixtures")]
 public class TraceServiceTests
 {
     [Theory]

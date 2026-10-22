@@ -4,6 +4,7 @@ using Xunit;
 
 namespace NetStucked.Tests;
 
+[Collection("Exclusive timing and bulk fixtures")]
 public sealed class InventoryPerformanceRegressionTests : IDisposable
 {
     private readonly string _root = Path.Combine(Path.GetTempPath(), "NetStucked-inventory-regression-" + Guid.NewGuid().ToString("N"));

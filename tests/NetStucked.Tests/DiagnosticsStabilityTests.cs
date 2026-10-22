@@ -9,6 +9,7 @@ using Xunit;
 
 namespace NetStucked.Tests;
 
+[Collection("Exclusive timing and bulk fixtures")]
 public sealed class DiagnosticsStabilityTests
 {
     [Fact]
