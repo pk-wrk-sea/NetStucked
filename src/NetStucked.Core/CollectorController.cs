@@ -57,7 +57,7 @@ public sealed class CollectorController(ICollectorTransport transport, ICollecto
                     }
                     break;
                 }
-                catch (CollectorException ex) when (ex.Failure == CollectorFailure.AuthenticationRejected && commands.Count == 0 && target.AuthSlot is null && candidate == 1 && run.Auth2 is not null) { }
+                catch (CollectorException ex) when (!token.IsCancellationRequested && ex.Failure == CollectorFailure.AuthenticationRejected && commands.Count == 0 && target.AuthSlot is null && candidate == 1 && run.Auth2 is not null) { }
             }
             if (identity is null)
             {
@@ -72,6 +72,7 @@ public sealed class CollectorController(ICollectorTransport transport, ICollecto
             result = new(run.Id, target, CollectorDeviceState.Completed, "Collection completed.", slot, Started: start, DevicePrompt: identity.Prompt, DeviceHostname: identity.Hostname, CollectedAddress: identity.Address);
         }
         catch (OperationCanceledException) { result = new(run.Id, target, CollectorDeviceState.Cancelled, "Cancelled; completed output retained where available.", slot, Started: start); }
+        catch (Exception) when (token.IsCancellationRequested) { result = new(run.Id, target, CollectorDeviceState.Cancelled, "Cancelled; completed output retained where available.", slot, Started: start); }
         catch (CollectorException ex) { result = new(run.Id, target, commands.Count > 0 ? CollectorDeviceState.Partial : CollectorDeviceState.Failed, ex.Message, slot, Started: start); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         { result = new(run.Id, target, commands.Count > 0 ? CollectorDeviceState.Partial : CollectorDeviceState.Failed, "Output/transport I/O failed; check folder permissions, disk space and connectivity.", slot, Started: start); }

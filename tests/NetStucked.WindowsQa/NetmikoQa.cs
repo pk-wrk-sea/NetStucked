@@ -74,7 +74,7 @@ internal static partial class Program
             {
                 using var cancel = new CancellationTokenSource(TimeSpan.FromSeconds(3)); var watch = Stopwatch.StartNew();
                 var result = (await controller.RunAsync(Plan(mode), _ => { }, cancel.Token)).Single();
-                Require(result.State == CollectorDeviceState.Cancelled && watch.Elapsed < TimeSpan.FromSeconds(6), "Worker cancellation drains during " + mode);
+                Require(result.State == CollectorDeviceState.Cancelled && watch.Elapsed < TimeSpan.FromSeconds(6), $"Worker cancellation drains during {mode}: {result.State}, {watch.ElapsedMilliseconds} ms, {result.Detail}");
             }
             string input = string.Join('\n', new[] { ("ios", "ios"), ("xe", "ios-xe"), ("xr", "ios-xr"), ("nxos", "nxos"), ("huawei", "huawei") }.Select(p => $"127.0.0.1:{ports[p.Item1]} profile={p.Item2}"));
             var batch = new CollectorRun(new(CollectorProtocol.Ssh, "Cisco IOS-XE", output, 3, 5, 5), CollectorInputParser.Parse(input, 22), [], ["show running-config"], new Dictionary<string, string>(), new("fixture", "fixture-password", ""), null);

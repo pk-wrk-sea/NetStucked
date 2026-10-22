@@ -11,6 +11,7 @@ public sealed class NetmikoCollectorSession(ITerminalHostTrust trust) : ICollect
     public async Task<CollectorSessionIdentity> RunAsync(CollectorRun run, CollectorTarget target, CollectorCredentials credentials,
         ICollectorCapture capture, List<CollectorCommandEvidence> commands, Action<CollectorDeviceState> state, CancellationToken token)
     {
+        token.ThrowIfCancellationRequested();
         string runtime = Path.Combine(AppContext.BaseDirectory, "CollectorRuntime");
         string python = Path.Combine(runtime, "python.exe"), worker = Path.Combine(runtime, "collector_worker.py");
         if (!File.Exists(python) || !File.Exists(worker)) throw new CollectorException(CollectorFailure.Transport, "Bundled Netmiko runtime is missing. Reinstall or recover the complete application package.");
@@ -86,7 +87,7 @@ public sealed class NetmikoCollectorSession(ITerminalHostTrust trust) : ICollect
             if (!complete || process.ExitCode != 0) throw new CollectorException(CollectorFailure.Transport, "Netmiko worker stopped before collection completed; commands were not replayed.");
             return identity;
         }
-        catch (Exception ex) when (deadline.IsCancellationRequested && ex is IOException or OperationCanceledException or InvalidOperationException)
+        catch (Exception ex) when (deadline.IsCancellationRequested && ex is IOException or OperationCanceledException or InvalidOperationException or CollectorException or JsonException)
         {
             token.ThrowIfCancellationRequested();
             throw new CollectorException(CollectorFailure.Timeout, "Netmiko worker exceeded the bounded run deadline; stopped without credential fallback.");

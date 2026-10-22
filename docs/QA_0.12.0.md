@@ -15,6 +15,8 @@ Development evidence: `artifacts/collector-inventory-20261022/`, including faile
 
 ## Required final package checks
 
+The first source/PR CI pair failed the cancellation status assertion after about three seconds. Audit found a worker-exit race: after cancellation kills the process, EOF or a structured transport failure can arrive instead of an OperationCanceledException. Cancellation now wins over concurrent worker errors and forbids AUTH2, while successful completed results are retained. Two deterministic controller regressions cover transport-error and password-rejection races. The initial immutable `final-1` package and failed CI logs remain preserved; corrected final artifacts use a fresh directory. No cancellation threshold was relaxed.
+
 - [ ] Final solution build/unit and exact published WPF/Netmiko/Inventory/native checks.
 - [ ] Portable/installer file manifests, signatures/status, pinned runtime and license audit.
 - [ ] Source/PR/main/exact-package CI, public downloads and old/current updater checks if published.
