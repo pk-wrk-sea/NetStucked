@@ -210,7 +210,7 @@ public sealed class WifiTests
         {
             var store = new UserSettingsStore(dir); store.Preferences.WifiProfiles["test"] = new("Lab"); store.Preferences.WifiTestProfiles.Add(new() { Name = "Company", TcpHost = "127.0.0.1" });
             await store.SaveAsync(); var loaded = new UserSettingsStore(dir); Assert.Null(loaded.LoadError); Assert.Single(loaded.Preferences.WifiTestProfiles); Assert.Equal(1, loaded.Preferences.SchemaVersion);
-            string json = await File.ReadAllTextAsync(Path.Combine(dir, "settings.json")); Assert.DoesNotContain("Password", json); Assert.DoesNotContain("Xml", json); Assert.DoesNotContain("Username", json);
+            string json = await File.ReadAllTextAsync(Path.Combine(dir, "settings.json")); Assert.DoesNotContain("Password", json); Assert.DoesNotContain("Xml", json); Assert.DoesNotContain("Username", System.Text.Json.JsonSerializer.Serialize(loaded.Preferences.WifiProfiles));
         }
         finally { Directory.Delete(dir, true); }
     }

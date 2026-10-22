@@ -28,8 +28,10 @@ jobs:
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --collector-ssh-check artifacts/collector-ssh-qa tests/fixtures/collector_ssh_server.py
       - name: Verify Collector Cisco-compatible SSH and drained cancellation
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --collector-cisco-ssh-check artifacts/collector-cisco-ssh-qa tests/fixtures/collector_ssh_compat_server.py
-      - name: Verify actual terminal emulator with owned SSH fixture
-        run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --terminal-ui-check artifacts/terminal-qa tests/fixtures/terminal_ssh_server.py
+      - name: Verify bundled Netmiko, five owned drivers, trust, cancellation and parallel jobs
+        run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --netmiko-check artifacts/netmiko-qa tests/fixtures/netmiko_devices.py
+      - name: Verify actual Collector and Inventory WPF workflows
+        run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --collector-revision-ui-check artifacts/collector-revision-qa tests/fixtures/netmiko_devices.py
       - name: Verify integrated engineering menus with owned offline fixtures
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --engineering-ui-check artifacts/engineering-qa
       - name: Verify CVE expiry and editor preservation without external providers

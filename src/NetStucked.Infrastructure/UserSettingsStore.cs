@@ -21,6 +21,8 @@ public sealed class UserPreferences
     public string PortTargetText { get; set; } = "";
     public List<PingTemplate> PortTemplates { get; set; } = [];
     public string Theme { get; set; } = "Light";
+    public string CollectorUsername1 { get; set; } = "";
+    public string CollectorUsername2 { get; set; } = "";
     public bool SidebarExpanded { get; set; } = true;
     public Dictionary<string, string> HopDescriptions { get; set; } = new();
     public bool WanDescriptions { get; set; } = true;
@@ -80,6 +82,7 @@ public sealed class UserSettingsStore
             if (loaded.WifiTestRuns is null || loaded.WifiTestRuns.Count > 100 || loaded.WifiTestRuns.Any(r => r is null || r.Adapter is null || r.Adapter.Length > 512 || r.Ssid is null || r.Ssid.Length > 512 || r.Profile is null || r.Profile.Length > 512 || r.TestProfile is null || r.TestProfile.Length > 80 || r.Status is null || r.Results is null || r.Results.Count > 4 ||
                 r.Results.Any(t => t is null || t.Service is null || t.Service.Length > 80 || t.Status is not ("PASS" or "FAIL" or "SKIPPED") || t.Message is null || t.Message.Length > 2048 || t.Target is null || t.Target.Length > 2048 || t.LatencyMs is { } ms && (!double.IsFinite(ms) || ms < 0))))
                 throw new InvalidDataException("Invalid saved Wi-Fi test results.");
+            if (loaded.CollectorUsername1 is null || loaded.CollectorUsername2 is null || new[] { loaded.CollectorUsername1, loaded.CollectorUsername2 }.Any(s => s.Length > 256 || s.Any(char.IsControl))) throw new InvalidDataException("Invalid saved Collector usernames.");
             Preferences = loaded;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or ArgumentException or InvalidDataException)

@@ -36,7 +36,7 @@ internal static partial class Program
         {
             var window = provider.GetRequiredService<MainWindow>(); app.MainWindow = window; window.DataContext = vm; window.ShowInTaskbar = true; window.ShowActivated = false; window.Show();
             await vm.Engineering.InitializeAsync(); Require(vm.Engineering.Loaded && vm.Engineering.Data.Assets.Length == 0, "Real consumer profile starts empty and isolated");
-            vm.NavigateCommand.Execute("MA Inventory"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+            vm.NavigateCommand.Execute("Inventory"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
             var root = (DependencyObject)window.Content;
             void Invoke(ICommand command)
             {
@@ -97,7 +97,7 @@ internal static partial class Program
             foreach (string theme in new[] { "Light", "Dark" })
             {
                 vm.Appearance.SelectedTheme = theme;
-                foreach (string page in new[] { "MA Inventory", "Topology Explorer", "CVE & Upgrade Planner" })
+                foreach (string page in new[] { "Inventory", "Topology Explorer", "CVE & Upgrade Planner" })
                 {
                     vm.NavigateCommand.Execute(page); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
                     Render(window, output, page.Replace(" ", "").Replace("&", "") + "-real-capture-" + theme.ToLowerInvariant(), 1536, 1024, 1);

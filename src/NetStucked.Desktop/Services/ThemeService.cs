@@ -11,6 +11,7 @@ public sealed class ThemeService : IDisposable
 {
     private readonly UserSettingsStore _store;
     public static string CurrentTheme { get; private set; } = "Light";
+    public event Action? Changed;
     public ThemeService(UserSettingsStore store)
     {
         _store = store;
@@ -40,6 +41,7 @@ public sealed class ThemeService : IDisposable
             else app.Resources[name] = new SolidColorBrush(color);
         }
         foreach (Window window in app.Windows) ApplyWindow(window);
+        Changed?.Invoke();
     }
     public static void ApplyWindow(Window window)
     {

@@ -32,6 +32,8 @@ PrivilegesRequired=admin
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"; Flags: unchecked
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+[InstallDelete]
+Type: filesandordirs; Name: "{app}\Resources\Terminal"
 [Icons]
 Name: "{group}\NetStucked"; Filename: "{app}\NetStucked.exe"; IconFilename: "{app}\NetStucked.exe"; AppUserModelID: "NetStucked.Desktop"
 Name: "{autodesktop}\NetStucked"; Filename: "{app}\NetStucked.exe"; IconFilename: "{app}\NetStucked.exe"; AppUserModelID: "NetStucked.Desktop"; Tasks: desktopicon

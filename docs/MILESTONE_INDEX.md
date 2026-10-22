@@ -1,5 +1,7 @@
 # Milestone index — 2026-10-09
 
+**2026-10-22 / 0.12.0 approved revision in progress:** bundled Netmiko Collector, interactive trust, bounded parallel vendor profiles, optional component Inventory XLSX, Dark switches and Terminal retirement. [Scope](FEATURES_0.12.0.md), [QA and remaining gates](QA_0.12.0.md). Development checks do not establish publication or physical vendor acceptance.
+
 **2026-10-21 / 0.11.2 published as GitHub Latest:** [Scope](FEATURES_0.11.2.md), [owned incident/QA](QA_0.11.2.md) and [immutable publication/public updater evidence](GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md) record 512 tests, 60 real SSH matrix assertions, exact WPF/native/CI and actual old/current updater checks. This correction does not close broader A02 or actual Cisco/manual/Setup acceptance.
 
 **2026-10-21 / 0.11.1 published as GitHub Latest:** Five-menu actual-program fixes, captured results, 493 tests, corrected exact-payload/CI/public-download and old/current updater verification are recorded in [scope](FEATURES_0.11.1.md), [QA](QA_0.11.1.md) and [publication evidence](GITHUB_RELEASE_0.11.1_REPORT_2026-10-21.md). Broader A01/A02/A03/A05/A06 criteria and real-device/physical-DPI/accessibility/Setup acceptance remain open.

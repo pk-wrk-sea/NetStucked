@@ -76,7 +76,7 @@ internal static partial class Program
                 (Name: t.GetProperty("name").GetString()!, Host: t.GetProperty("host").GetString()!, Port: t.GetProperty("port").GetInt32())).ToArray();
             Require(targets.Length == 2 && targets.All(t => t.Host == "127.0.0.1"), "Real Collector QA admits only its two owned loopback software fixtures");
             var store = new UserSettingsStore(Path.Combine(output, "isolated-user-data"));
-            await using var provider = App.ConfigureServices(store, new QaDialogs());
+            await using var provider = App.ConfigureServices(store, new QaDialogs(), services => services.AddSingleton<CollectorController>(p => new(p.GetRequiredService<ICollectorTransport>(), p.GetRequiredService<ICollectorCaptureFactory>())));
             Require(provider.GetRequiredService<ICollectorTransport>().GetType() == typeof(CollectorTransport) && provider.GetRequiredService<ICollectorCaptureFactory>().GetType() == typeof(CollectorCaptureFactory), "Real Collector WPF uses production SSH transport and protected capture factory");
             provider.GetRequiredService<ThemeService>();
             var vm = provider.GetRequiredService<MainViewModel>();

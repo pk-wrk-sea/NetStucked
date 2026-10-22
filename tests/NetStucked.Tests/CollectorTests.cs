@@ -275,7 +275,7 @@ public sealed class CollectorTests
         string folder = Path.Combine(Path.GetTempPath(), "NetStucked-owned-save-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
         try
         {
-            string path = Path.Combine(folder, "owned"); Directory.CreateDirectory(path + ".json");
+            string path = Path.Combine(folder, "owned"); Directory.CreateDirectory(Path.Combine(folder, "owned.test hostname-unknown.json"));
             CollectorResult result;
             await using (var capture = new CollectorCapture(path, Run().Options, []))
             {

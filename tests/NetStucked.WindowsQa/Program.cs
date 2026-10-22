@@ -35,6 +35,7 @@ internal static partial class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        if (args.FirstOrDefault() == "--netmiko-check") return CheckNetmikoAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--collector-cisco-ssh-check") return CheckCollectorCiscoSshAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--cve-regression-check") return CheckCveRegressionAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--collector-banner-ssh-check") return CheckCollectorBannerSshAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
@@ -47,16 +48,17 @@ internal static partial class Program
         if (args.FirstOrDefault() == "--public-update-check") return CheckPublicUpdateAsync(Path.GetFullPath(args[1]), args[2], args[3]).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--palo-site-check") return CheckPaloSite(Path.GetFullPath(args[1]));
         if (args.FirstOrDefault() == "--native-monitor-check") return CheckNativeMonitoringAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
+        bool revisionOnly = args.FirstOrDefault() == "--collector-revision-ui-check";
         bool collectorOnly = args.FirstOrDefault() == "--collector-ui-check";
-        bool terminalOnly = args.FirstOrDefault() == "--terminal-ui-check";
+        bool terminalOnly = false; // Terminal retired by the 2026-10-22 human request.
         bool realCollectorOnly = args.FirstOrDefault() == "--collector-real-ui-check";
         bool realEngineeringOnly = args.FirstOrDefault() == "--engineering-real-ui-check";
         bool engineeringOnly = args.FirstOrDefault() == "--engineering-ui-check";
-        string output = Path.GetFullPath(collectorOnly || terminalOnly || realCollectorOnly || realEngineeringOnly || engineeringOnly ? args[1] : args.FirstOrDefault() ?? "artifacts/windows-qa");
-        int soakSeconds = !collectorOnly && !terminalOnly && !realCollectorOnly && !realEngineeringOnly && !engineeringOnly && args.Length > 1 ? int.Parse(args[1]) : 0;
+        string output = Path.GetFullPath(revisionOnly || collectorOnly || terminalOnly || realCollectorOnly || realEngineeringOnly || engineeringOnly ? args[1] : args.FirstOrDefault() ?? "artifacts/windows-qa");
+        int soakSeconds = !revisionOnly && !collectorOnly && !terminalOnly && !realCollectorOnly && !realEngineeringOnly && !engineeringOnly && args.Length > 1 ? int.Parse(args[1]) : 0;
         _expectedAvailableVersion = args.Length > 3 ? args[3] : null;
         _expectedCurrentVersion = args.Length > 4 ? args[4] : null;
-        if (args.Length > 2 && !terminalOnly && !realCollectorOnly && !realEngineeringOnly)
+        if (args.Length > 2 && !revisionOnly && !terminalOnly && !realCollectorOnly && !realEngineeringOnly)
         {
             string published = Path.GetFullPath(args[2]);
             foreach (string file in new[] { "NetStucked.Core.dll", "NetStucked.Infrastructure.dll", "NetStucked.dll" })
@@ -74,7 +76,7 @@ internal static partial class Program
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Error;
         _ = application.Dispatcher.InvokeAsync(async () =>
         {
-            try { if (realEngineeringOnly) await RunRealEngineeringOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (realCollectorOnly) await RunRealCollectorOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (engineeringOnly) await RunEngineeringOnlyAsync(application, output, listener); else if (terminalOnly) await RunTerminalOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (collectorOnly) await RunCollectorOnlyAsync(application, output, listener); else await RunAsync(application, output, soakSeconds, listener); }
+            try { if (revisionOnly) await RunCollectorRevisionUiAsync(application, output, Path.GetFullPath(args[2]), listener); else if (realEngineeringOnly) await RunRealEngineeringOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (realCollectorOnly) await RunRealCollectorOnlyAsync(application, output, Path.GetFullPath(args[2]), listener); else if (engineeringOnly) await RunEngineeringOnlyAsync(application, output, listener); else if (collectorOnly) await RunCollectorOnlyAsync(application, output, listener); else await RunAsync(application, output, soakSeconds, listener); }
             catch (Exception ex) { _exitCode = 1; Console.Error.WriteLine("FAIL " + ex); }
             finally { application.Shutdown(); }
         });
@@ -93,7 +95,7 @@ internal static partial class Program
         var dialogs = new QaDialogs();
         var measured = new MeasuredRealProbe();
         var measuredTcp = new MeasuredRealTcp();
-        await using var provider = App.ConfigureServices(store, dialogs, services => { services.AddSingleton<IIcmpProbe>(measured); services.AddSingleton<ITcpProbe>(measuredTcp); services.AddSingleton<IMacVendorLookup, QaMacLookup>(); services.AddSingleton<ISecretVault, QaSecretVault>(); services.AddSingleton<ISnmpClient, QaSnmpClient>(); services.AddSingleton<IMonitorProbe, QaMonitorProbe>(); services.AddSingleton<ICollectorTransport, QaCollectorTransport>(); });
+        await using var provider = App.ConfigureServices(store, dialogs, services => { services.AddSingleton<IIcmpProbe>(measured); services.AddSingleton<ITcpProbe>(measuredTcp); services.AddSingleton<IMacVendorLookup, QaMacLookup>(); services.AddSingleton<ISecretVault, QaSecretVault>(); services.AddSingleton<ISnmpClient, QaSnmpClient>(); services.AddSingleton<IMonitorProbe, QaMonitorProbe>(); services.AddSingleton<ICollectorTransport, QaCollectorTransport>().AddSingleton<CollectorController>(p => new(p.GetRequiredService<ICollectorTransport>(), p.GetRequiredService<ICollectorCaptureFactory>())); });
         provider.GetRequiredService<ThemeService>();
         var vm = provider.GetRequiredService<MainViewModel>();
         try

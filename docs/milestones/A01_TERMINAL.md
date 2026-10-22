@@ -1,5 +1,7 @@
 # A01 — SSH Terminal / Remote Access
 
+**2026-10-22 superseding human scope:** [0.12.0](../FEATURES_0.12.0.md) moves Collector to bundled Netmiko, adds the supplied nullable component Inventory layout and retires the Terminal desktop feature. [Scoped QA](../QA_0.12.0.md); broad historical acceptance is not closed by software fixtures.
+
 **2026-10-21 acceptance follow-up:** Actual xterm/WebView, owned SSH and native result captures are tracked in [0.11.1 QA](../QA_0.11.1.md). Real Cisco, Serial/SFTP and human/physical-DPI/accessibility acceptance remain open.
 
 **0.10.1 follow-up:** Human approval replaces Terminal manual fingerprint entry with interactive host-key acceptance, saved-key recognition and explicit changed-key review. See [scope and actual QA](../FEATURES_0.10.1.md). The full A01 backlog remains open.

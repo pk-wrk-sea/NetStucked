@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.0 — 2026-10-22
+
+- Use bundled Netmiko for explicit parallel Collector jobs across IOS, IOS-XE, IOS XR, NX-OS and Huawei VRP, including per-device profile overrides.
+- Confirm/save SSH keys before credentials; save usernames only, show passwords on demand and name protected captures by observed address/hostname. Guard Huawei confirmation behavior and await worker cancellation.
+- Rename Inventory and support the supplied component XLSX template with nullable fields, reviewed stable-ID/unique-serial updates, retained legacy imports and independent rows sharing IPs.
+- Replace both theme dropdowns with Dark-mode switches and remove the Terminal desktop feature/emulator assets.
+- See docs/QA_0.12.0.md for exact checks and physical vendor/AAA/Setup limitations.
+
 ## 0.11.2 - 2026-10-21
 
 - Fix Config Collector compatibility with strong Cisco AES-CTR/SHA-2 ETM combinations that the earlier SSH provider could not negotiate. Retain host-key pin checks before authentication, memory-only credentials and authentication-rejection-only fallback.

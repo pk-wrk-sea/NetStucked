@@ -17,7 +17,6 @@ public partial class MainViewModel : ObservableObject
     public UrlCheckerViewModel Url { get; }
     public MonitoringViewModel Monitoring { get; }
     public ConfigCollectorViewModel Collector { get; }
-    public TerminalWorkspaceViewModel Terminal { get; }
     public Services.EngineeringContext Engineering { get; }
     public DashboardViewModel Dashboard { get; }
     public InventoryViewModel Inventory { get; }
@@ -36,10 +35,10 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _pageSubtitle = "Ping multiple hosts or subnets and monitor response in real time";
     [ObservableProperty] private string _selectedPage = "Live Ping";
     public string Version => Updates.CurrentVersion;
-    public MainViewModel(LivePingViewModel ping, TracerouteWorkspaceViewModel trace, PortTestViewModel port, UpdatesViewModel updates, AppearanceViewModel appearance, DnsResolverViewModel dns, SubnetCalculatorViewModel subnet, MacCheckerViewModel mac, UrlCheckerViewModel url, MonitoringViewModel monitoring, ConfigCollectorViewModel collector, TerminalWorkspaceViewModel terminal, Services.EngineeringContext engineering, DashboardViewModel dashboard, InventoryViewModel inventory, TopologyViewModel topology, AdvisoryPlannerViewModel planner)
+    public MainViewModel(LivePingViewModel ping, TracerouteWorkspaceViewModel trace, PortTestViewModel port, UpdatesViewModel updates, AppearanceViewModel appearance, DnsResolverViewModel dns, SubnetCalculatorViewModel subnet, MacCheckerViewModel mac, UrlCheckerViewModel url, MonitoringViewModel monitoring, ConfigCollectorViewModel collector, Services.EngineeringContext engineering, DashboardViewModel dashboard, InventoryViewModel inventory, TopologyViewModel topology, AdvisoryPlannerViewModel planner)
     {
         Ping = ping; TraceWorkspace = trace; Port = port; Updates = updates; Appearance = appearance; _currentPage = ping; _sidebarExpanded = ping.Store.Preferences.SidebarExpanded;
-        Dns = dns; Subnet = subnet; Mac = mac; Url = url; Monitoring = monitoring; Collector = collector; Terminal = terminal;
+        Dns = dns; Subnet = subnet; Mac = mac; Url = url; Monitoring = monitoring; Collector = collector;
         Engineering = engineering; Dashboard = dashboard; Inventory = inventory; Topology = topology; Planner = planner;
         Dashboard.NavigateRequested += Navigate;
         Updates.StopDiagnosticsAsync = PrepareForUpdateAsync;
@@ -66,32 +65,30 @@ public partial class MainViewModel : ObservableObject
             "URL Checker" => Url,
             "Monitoring" => Monitoring,
             "Config Collector" => Collector,
-            "Terminal" => Terminal,
             "Updates" => Updates,
             "Settings" => Appearance,
             "Dashboard" => Dashboard,
-            "MA Inventory" => Inventory,
+            "Inventory" => Inventory,
             "Topology Explorer" => Topology,
             "CVE & Upgrade Planner" => Planner,
             _ => new PlaceholderViewModel("Pending - Coming Soon")
         };
         PageSubtitle = page switch { "Live Ping" => "Ping multiple hosts or subnets and monitor response in real time", "Traceroute" => "Trace route hops and monitor path response in real time", "Port Test" => "Test TCP ports across hosts and subnets", "DNS Resolver" => "Look up selected DNS records through system or custom resolvers", "Subnet Calculator" => "Calculate IPv4 subnet ranges as you type", "MAC Checker" => "Look up registered vendors through MACVendors.com", "URL Checker" => "VirusTotal reports and embedded Palo Alto Test A Site", "Monitoring" => "Device reachability, selected interfaces and local incidents", "Updates" => "Manage application versions", "Settings" => "Appearance and application preferences", _ => "" };
         Ping.SetPresentationActive(ReferenceEquals(CurrentPage, Ping)); TraceWorkspace.SetPresentationActive(ReferenceEquals(CurrentPage, TraceWorkspace));
-        if (page == "Terminal") PageSubtitle = "Independent SSH / Telnet sessions · verified host keys · Ctrl + wheel to zoom";
         if (page == "Config Collector") PageSubtitle = "Collect read-only device configuration through verified SSH or explicitly enabled Telnet";
         if (page == "Dashboard") { Dashboard.Update(true); PageSubtitle = "Actual local sessions, monitoring incidents and engineering records"; }
-        if (page == "MA Inventory") PageSubtitle = "Stable asset identity, maintenance contracts, versioned Excel and reviewed observations";
+        if (page == "Inventory") PageSubtitle = "Stable asset identity, maintenance contracts, versioned Excel and reviewed observations";
         if (page == "Topology Explorer") PageSubtitle = "One-hop neighbors and source-traceable facts from captured evidence";
         if (page == "CVE & Upgrade Planner") { Planner.RefreshTimeSensitiveState(force: true); PageSubtitle = "Advisory metadata, explicit applicability review and engineer-approved device change plans"; }
         Port.SetPresentationActive(ReferenceEquals(CurrentPage, Port));
     }
-    public async Task ShutdownAsync() { _activity.Stop(); await Task.WhenAll(Ping.DisposeAsync().AsTask(), TraceWorkspace.DisposeAsync().AsTask(), Port.DisposeAsync().AsTask(), Updates.DisposeAsync().AsTask(), Dns.DisposeAsync().AsTask(), Mac.DisposeAsync().AsTask(), Url.DisposeAsync().AsTask(), Monitoring.DisposeAsync().AsTask(), Collector.DisposeAsync().AsTask(), Terminal.DisposeAsync().AsTask(), Engineering.DisposeAsync().AsTask()); await Ping.Store.SaveAsync(); }
+    public async Task ShutdownAsync() { _activity.Stop(); await Task.WhenAll(Ping.DisposeAsync().AsTask(), TraceWorkspace.DisposeAsync().AsTask(), Port.DisposeAsync().AsTask(), Updates.DisposeAsync().AsTask(), Dns.DisposeAsync().AsTask(), Mac.DisposeAsync().AsTask(), Url.DisposeAsync().AsTask(), Monitoring.DisposeAsync().AsTask(), Collector.DisposeAsync().AsTask(), Engineering.DisposeAsync().AsTask()); await Ping.Store.SaveAsync(); }
     public async Task PrepareForUpdateAsync()
     {
         if (TraceWorkspace.RemoveSessionCommand.ExecutionTask is { } closing) await closing;
         await Task.WhenAll(Ping.StopForUpdateAsync(), Port.StopForUpdateAsync(), Task.WhenAll(TraceWorkspace.Sessions.ToArray().Select(s => s.StopForUpdateAsync())));
         await TraceWorkspace.StopMetadataAsync();
-        await Task.WhenAll(Dns.StopForUpdateAsync(), Mac.StopForUpdateAsync(), Url.StopForUpdateAsync(), Monitoring.StopForUpdateAsync(), Collector.StopForUpdateAsync(), Terminal.StopForUpdateAsync());
+        await Task.WhenAll(Dns.StopForUpdateAsync(), Mac.StopForUpdateAsync(), Url.StopForUpdateAsync(), Monitoring.StopForUpdateAsync(), Collector.StopForUpdateAsync());
         await Engineering.StopAsync();
         Ping.Store.Preferences.TraceTarget = Trace.Target;
         await Ping.Store.SaveAsync();

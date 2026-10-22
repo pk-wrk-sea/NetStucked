@@ -115,13 +115,13 @@ public sealed class EngineeringWorkflowDefectTests : IDisposable
             Rewrite(zip, "xl/workbook.xml", xml => xml.Root!.AddFirst(new XElement(Ns + "workbookPr", new XAttribute("date1904", "1"))));
             Rewrite(zip, "xl/worksheets/sheet1.xml", xml =>
             {
-                SetNumericDate(xml, "K3", "0");
-                SetNumericDate(xml, "L3", (new DateTime(2027, 2, 28) - new DateTime(1904, 1, 1)).TotalDays.ToString(CultureInfo.InvariantCulture));
+                SetNumericDate(xml, "W3", "0");
+                SetNumericDate(xml, "X3", (new DateTime(2027, 2, 28) - new DateTime(1904, 1, 1)).TotalDays.ToString(CultureInfo.InvariantCulture));
             });
         }
         var row = Assert.Single(await InventoryWorkbook.ReadAsync(path, [], default));
         Assert.Empty(row.Error); Assert.Equal(new DateOnly(1904, 1, 1), row.Asset!.MaStart); Assert.Equal(new DateOnly(2027, 2, 28), row.Asset.MaEnd);
-        using (var zip = ZipFile.Open(path, ZipArchiveMode.Update)) Rewrite(zip, "xl/worksheets/sheet1.xml", xml => SetNumericDate(xml, "K3", "0.5"));
+        using (var zip = ZipFile.Open(path, ZipArchiveMode.Update)) Rewrite(zip, "xl/worksheets/sheet1.xml", xml => SetNumericDate(xml, "W3", "0.5"));
         Assert.Contains("Invalid Excel date", Assert.Single(await InventoryWorkbook.ReadAsync(path, [], default)).Error);
     }
 

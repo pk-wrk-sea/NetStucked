@@ -41,9 +41,21 @@ public partial class InventoryViewModel : EngineeringPageViewModel
     public ObservableCollection<AssetPreviewRow> Preview { get; } = [];
     [ObservableProperty] private AssetRow? _selectedAsset;
     [ObservableProperty] private string _search = "";
+    [ObservableProperty] private string _number = "";
+    [ObservableProperty] private string _company = "";
+    [ObservableProperty] private string _province = "";
+    [ObservableProperty] private string _building = "";
+    [ObservableProperty] private string _floor = "";
+    [ObservableProperty] private string _room = "";
+    [ObservableProperty] private string _rack = "";
+    [ObservableProperty] private string _maType = "";
+    [ObservableProperty] private string _slaType = "";
+    [ObservableProperty] private string _remark = "";
+    [ObservableProperty] private string _remark2 = "";
+    [ObservableProperty] private string _ldos = "";
     [ObservableProperty] private string _hostname = "";
     [ObservableProperty] private string _address = "";
-    [ObservableProperty] private string _vendor = "Cisco";
+    [ObservableProperty] private string _vendor = "";
     [ObservableProperty] private string _model = "";
     [ObservableProperty] private string _serial = "";
     [ObservableProperty] private string _site = "";
@@ -67,10 +79,10 @@ public partial class InventoryViewModel : EngineeringPageViewModel
         OnPropertyChanged(nameof(AssetId)); OnPropertyChanged(nameof(EvidenceDetails));
     }
     private static string DateText(DateOnly? value) => value?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "";
-    private bool HasEditorChanges => _editingBaseline is not { } a || Hostname != a.Hostname || Address != a.Address || Vendor != a.Vendor || Model != a.Model || Serial != a.Serial || Site != a.Site || Location != a.Location || Role != a.Role || Contract != a.Contract || MaStart != DateText(a.MaStart) || MaEnd != DateText(a.MaEnd);
+    private bool HasEditorChanges => _editingBaseline is not { } a || Hostname != a.Hostname || Address != a.Address || Vendor != a.Vendor || Model != a.Model || Serial != a.Serial || Site != a.Site || Location != a.Location || Role != a.Role || Contract != a.Contract || MaStart != DateText(a.MaStart) || MaEnd != DateText(a.MaEnd) || Number != a.Number || Company != a.Company || Province != a.Province || Building != a.Building || Floor != a.Floor || Room != a.Room || Rack != a.Rack || MaType != a.MaType || SlaType != a.SlaType || Remark != a.Remark || Remark2 != a.Remark2 || Ldos != DateText(a.Ldos);
     private void LoadEditor(Asset a)
     {
-        _editingId = a.Id; _editingBaseline = a; Hostname = a.Hostname; Address = a.Address; Vendor = a.Vendor; Model = a.Model; Serial = a.Serial; Site = a.Site; Location = a.Location; Role = a.Role; Contract = a.Contract; MaStart = DateText(a.MaStart); MaEnd = DateText(a.MaEnd); OnPropertyChanged(nameof(AssetId));
+        _editingId = a.Id; _editingBaseline = a; Hostname = a.Hostname; Address = a.Address; Vendor = a.Vendor; Model = a.Model; Serial = a.Serial; Site = a.Site; Location = a.Location; Role = a.Role; Contract = a.Contract; MaStart = DateText(a.MaStart); MaEnd = DateText(a.MaEnd); Number = a.Number; Company = a.Company; Province = a.Province; Building = a.Building; Floor = a.Floor; Room = a.Room; Rack = a.Rack; MaType = a.MaType; SlaType = a.SlaType; Remark = a.Remark; Remark2 = a.Remark2; Ldos = DateText(a.Ldos); OnPropertyChanged(nameof(AssetId));
     }
     protected override void Refresh()
     {
@@ -81,7 +93,7 @@ public partial class InventoryViewModel : EngineeringPageViewModel
         _refreshingAssets = true;
         try
         {
-            Replace(Assets, Workspace.Data.Assets.Where(a => string.Join(' ', a.Hostname, a.Address, a.Serial, a.Site, a.Model, a.Contract, a.Role, a.MaStatus).Contains(Search, StringComparison.OrdinalIgnoreCase)).Select(a =>
+            Replace(Assets, Workspace.Data.Assets.Where(a => string.Join(' ', a.Hostname, a.Address, a.Serial, a.Site, a.Model, a.Contract, a.Role, a.MaStatus, a.Company, a.Location, a.Province, a.Building, a.Floor, a.Room, a.Rack, a.MaType, a.SlaType, a.Remark, a.Remark2, a.Ldos).Contains(Search, StringComparison.OrdinalIgnoreCase)).Select(a =>
             { var e = EngineeringRules.Latest(Workspace.Data, a.Id); string Field(string name) => e?.Facts.FirstOrDefault(f => f.Field == name)?.Value ?? "Unknown"; return new AssetRow(a, Field("Version"), Field("Model"), Field("Serial"), e?.CollectedAt); }));
             SelectedAsset = selected is null ? null : Assets.FirstOrDefault(a => a.Asset.Id == selected);
         }
@@ -94,11 +106,11 @@ public partial class InventoryViewModel : EngineeringPageViewModel
         }
         OnPropertyChanged(nameof(EvidenceDetails));
     }
-    [RelayCommand] private void NewAsset() { SelectedAsset = null; _editingBaseline = null; _editingId = Guid.NewGuid(); Hostname = Address = Model = Serial = Site = Location = Role = Contract = MaStart = MaEnd = ""; Vendor = "Cisco"; OnPropertyChanged(nameof(AssetId)); }
-    private static DateOnly? Date(string text) => text.Length == 0 ? null : DateOnly.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var x) ? x : throw new ArgumentException("Use MA date yyyy-MM-dd, or leave empty.");
+    [RelayCommand] private void NewAsset() { SelectedAsset = null; _editingBaseline = null; _editingId = Guid.NewGuid(); Hostname = Address = Model = Serial = Site = Location = Role = Contract = MaStart = MaEnd = ""; Vendor = Number = Company = Province = Building = Floor = Room = Rack = MaType = SlaType = Remark = Remark2 = Ldos = ""; OnPropertyChanged(nameof(AssetId)); }
+    private static DateOnly? Date(string text) => string.IsNullOrWhiteSpace(text) ? null : DateOnly.TryParseExact(text.Trim(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var x) ? x : throw new ArgumentException("Use MA date yyyy-MM-dd, or leave empty.");
     [RelayCommand] private Task SaveAsset() => Run(async token =>
     {
-        var a = new Asset(_editingId, Hostname.Trim(), Address.Trim(), Vendor.Trim(), Model.Trim(), Serial.Trim(), Site.Trim(), Location.Trim(), Role.Trim(), Contract.Trim(), Date(MaStart), Date(MaEnd), DateTimeOffset.UtcNow); EngineeringRules.Validate(a);
+        var a = new Asset(_editingId, Hostname.Trim(), Address.Trim(), Vendor.Trim(), Model.Trim(), Serial.Trim(), Site.Trim(), Location.Trim(), Role.Trim(), Contract.Trim(), Date(MaStart), Date(MaEnd), DateTimeOffset.UtcNow) { Number = Number.Trim(), Company = Company.Trim(), Province = Province.Trim(), Building = Building.Trim(), Floor = Floor.Trim(), Room = Room.Trim(), Rack = Rack.Trim(), MaType = MaType.Trim(), SlaType = SlaType.Trim(), Remark = Remark.Trim(), Remark2 = Remark2.Trim(), Ldos = Date(Ldos) }; EngineeringRules.Validate(a);
         if (a.Serial.Length > 0 && Workspace.Data.Assets.Any(x => x.Id != a.Id && x.Serial.Equals(a.Serial, StringComparison.OrdinalIgnoreCase))) throw new ArgumentException("Serial belongs to another asset. Review identity before saving.");
         await Workspace.CommitAsync(d => d with { Assets = d.Assets.Where(x => x.Id != a.Id).Append(a).ToArray() }, token); LoadEditor(a); SelectedAsset = Assets.FirstOrDefault(x => x.Asset.Id == a.Id);
     });
@@ -110,7 +122,7 @@ public partial class InventoryViewModel : EngineeringPageViewModel
         await Workspace.CommitAsync(d => d with { Assets = d.Assets.Where(x => x.Id != a.Asset.Id).ToArray() }, token); NewAsset();
     });
     [RelayCommand] private Task ExportWorkbook() => Run(async token => { string? p = Files.Save("xlsx", "NetStucked-Inventory.xlsx"); if (p is null) return; await InventoryWorkbook.WriteAsync(p, Workspace.Data.Assets, token); Workspace.Message = "Exported versioned Excel inventory. Human fields only; observations stay separate."; });
-    [RelayCommand] private Task Template() => Run(async token => { string? p = Files.Save("xlsx", "NetStucked-Inventory-template.xlsx"); if (p is null) return; await InventoryWorkbook.WriteAsync(p, [], token); Workspace.Message = "Template saved. Keep schema/header rows; blank AssetId creates a new stable identity."; });
+    [RelayCommand] private Task Template() => Run(async token => { string? p = Files.Save("xlsx", "NetStucked-Inventory-template.xlsx"); if (p is null) return; await InventoryWorkbook.WriteAsync(p, [], token); Workspace.Message = "Template saved. All fields are optional. Keep hidden AssetId when editing exported rows; blank AssetId adds a new component."; });
     [RelayCommand] private Task ImportPreview() => Run(async token =>
     {
         string? p = Files.Open("xlsx"); if (p is null) return; Preview.Clear(); _previewRevision = -1;
@@ -153,7 +165,7 @@ public partial class TopologyViewModel : EngineeringPageViewModel
     [ObservableProperty] private EvidenceDocument? _selectedDevice;
     [ObservableProperty] private TopologyLink? _selectedLink;
     [ObservableProperty] private string _configurationDiff = DiffPrompt;
-    public string Summary => SelectedDevice is { } e ? $"{e.Host} · {e.Family} · {e.CollectedAt:u}\n{e.Source}\nSHA-256 {e.Sha256}\n{string.Join("\n", e.Warnings)}" : "Import captured evidence through MA Inventory, then select a device. No discovery or collection runs from this page.";
+    public string Summary => SelectedDevice is { } e ? $"{e.Host} · {e.Family} · {e.CollectedAt:u}\n{e.Source}\nSHA-256 {e.Sha256}\n{string.Join("\n", e.Warnings)}" : "Import captured evidence through Inventory, then select a device. No discovery or collection runs from this page.";
     public string LinkDetails => SelectedLink is { } l ? $"{l.Device} [{l.LocalInterface}] ↔ {l.Neighbor} [{l.RemoteInterface}]\n{l.Classification} · {l.Freshness}\n{l.Detail}\nSource {l.Source}, line {l.Line}\nSHA-256 {l.Sha256}" : "Select a neighbor/link to inspect its supporting evidence.";
     public TopologyViewModel(EngineeringContext w, IEngineeringFiles f, IDesktopDialogs d) : base(w, f, d) { }
     private static bool SameDevice(EvidenceDocument a, EvidenceDocument b) => a.AssetId is { } asset ? b.AssetId == asset : b.AssetId is null && a.Host.Equals(b.Host, StringComparison.OrdinalIgnoreCase);
@@ -180,7 +192,7 @@ public partial class TopologyViewModel : EngineeringPageViewModel
     {
         ConfigurationDiff = DiffPrompt;
         var current = SelectedDevice ?? throw new ArgumentException("Select a captured device first.");
-        var previous = Workspace.Data.Evidence.Where(e => (current.AssetId is { } asset ? e.AssetId == asset : e.AssetId is null && e.Host.Equals(current.Host, StringComparison.OrdinalIgnoreCase)) && e.Id != current.Id && e.CollectedAt < current.CollectedAt).OrderByDescending(e => e.CollectedAt).FirstOrDefault() ?? throw new ArgumentException("No earlier capture for this asset/device. Attach another capture through MA Inventory.");
+        var previous = Workspace.Data.Evidence.Where(e => (current.AssetId is { } asset ? e.AssetId == asset : e.AssetId is null && e.Host.Equals(current.Host, StringComparison.OrdinalIgnoreCase)) && e.Id != current.Id && e.CollectedAt < current.CollectedAt).OrderByDescending(e => e.CollectedAt).FirstOrDefault() ?? throw new ArgumentException("No earlier capture for this asset/device. Attach another capture through Inventory.");
         string before = await EvidenceFile.ReadVerifiedTextAsync(previous, token), after = await EvidenceFile.ReadVerifiedTextAsync(current, token);
         string diff = await Task.Run(() => CaptureDiff.Compare(before, after, token), token);
         if (SelectedDevice?.Id != current.Id) return;
