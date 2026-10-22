@@ -28,6 +28,8 @@ Both versions virtualize 20 rows/220 realized cells: disabled virtualization was
 
 ## Remaining acceptance / release gate
 
+Post-tag QA-only follow-up: independent source/PR and frozen-installer workflows pass for immutable tag `68ca95b`. The first source job and two main attempts expose timing-sensitive Trace/Ping/SSH-buffer tests under parallel execution (raw logs retained). Bulk Inventory XML/ZIP tests and those four scheduler-sensitive classes now use an exclusive xUnit collection, preserving every assertion/deadline and all 523 tests. This changes test scheduling only; the frozen app, source tag and package bytes remain intact. Final CI and publication evidence is recorded in the release report.
+
 - NOT TESTED: the human's physical mouse/keyboard, Windows text input methods, screen readers, mixed-monitor DPI, sustained production editing and other real hardware/device acceptance. Rendered WPF images and synthetic input events do not close these gates.
 - Existing 10 MiB archive / 8 MiB workbook-part / 16 MiB store and record limits remain. Dense 5,000-row export is not claimed to fit these byte limits. Failed bounded exports retain the destination; no limits were increased.
 - Exact frozen portable/installer, CI, public updater/download verification and publication are recorded separately after they run. Setup must not execute on this machine; the installed app and real data remain intact.

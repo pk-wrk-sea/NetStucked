@@ -7,6 +7,7 @@ namespace NetStucked.Tests;
 
 // Exercise the production pre-ShellStream gate with owned byte buffers. These
 // checks complement the actual-wire pre-shell-success flood fixture.
+[Collection("Exclusive timing and bulk fixtures")]
 public sealed class CollectorSshBufferGateTests
 {
     [Fact]

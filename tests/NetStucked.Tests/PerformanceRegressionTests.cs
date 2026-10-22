@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 
 namespace NetStucked.Tests;
 
+[Collection("Exclusive timing and bulk fixtures")]
 public class PerformanceRegressionTests(ITestOutputHelper output)
 {
     [Fact]
