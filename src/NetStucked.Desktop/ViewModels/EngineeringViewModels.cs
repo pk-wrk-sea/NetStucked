@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NetStucked.Core;
 using NetStucked.Desktop.Services;
+using NetStucked.Desktop.Behaviors;
 using NetStucked.Infrastructure;
 
 namespace NetStucked.Desktop.ViewModels;
@@ -37,8 +38,11 @@ public partial class AssetPreviewRow(AssetImportRow data) : ObservableObject
 }
 public partial class InventoryViewModel : EngineeringPageViewModel
 {
-    public ObservableCollection<AssetRow> Assets { get; } = [];
-    public ObservableCollection<AssetPreviewRow> Preview { get; } = [];
+    public SnapshotObservableCollection<AssetRow> Assets { get; } = [];
+    public SnapshotObservableCollection<AssetPreviewRow> Preview { get; } = [];
+    private EngineeringData? _rowSnapshot;
+    private DateOnly _rowDate;
+    private (AssetRow Row, string Search)[] _rows = [];
     [ObservableProperty] private AssetRow? _selectedAsset;
     [ObservableProperty] private string _search = "";
     [ObservableProperty] private string _number = "";
@@ -93,8 +97,23 @@ public partial class InventoryViewModel : EngineeringPageViewModel
         _refreshingAssets = true;
         try
         {
-            Replace(Assets, Workspace.Data.Assets.Where(a => string.Join(' ', a.Hostname, a.Address, a.Serial, a.Site, a.Model, a.Contract, a.Role, a.MaStatus, a.Company, a.Location, a.Province, a.Building, a.Floor, a.Room, a.Rack, a.MaType, a.SlaType, a.Remark, a.Remark2, a.Ldos).Contains(Search, StringComparison.OrdinalIgnoreCase)).Select(a =>
-            { var e = EngineeringRules.Latest(Workspace.Data, a.Id); string Field(string name) => e?.Facts.FirstOrDefault(f => f.Field == name)?.Value ?? "Unknown"; return new AssetRow(a, Field("Version"), Field("Model"), Field("Serial"), e?.CollectedAt); }));
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (!ReferenceEquals(_rowSnapshot, Workspace.Data) || _rowDate != today)
+            {
+                // One lookup per committed revision; equal-time parser revisions prefer
+                // the last append, matching EngineeringRules.Latest.
+                var latest = new Dictionary<Guid, EvidenceDocument>();
+                foreach (var e in Workspace.Data.Evidence)
+                    if (e.AssetId is { } id && (!latest.TryGetValue(id, out var previous) || e.CollectedAt >= previous.CollectedAt)) latest[id] = e;
+                _rows = Workspace.Data.Assets.Select(a =>
+                {
+                    latest.TryGetValue(a.Id, out var e);
+                    string Field(string name) => e?.Facts.FirstOrDefault(f => f.Field == name)?.Value ?? "Unknown";
+                    return (new AssetRow(a, Field("Version"), Field("Model"), Field("Serial"), e?.CollectedAt), string.Join(' ', a.Number, a.Hostname, a.Address, a.Vendor, a.Serial, a.Site, a.Model, a.Contract, a.Role, a.MaStatus, a.Company, a.Location, a.Province, a.Building, a.Floor, a.Room, a.Rack, a.MaType, a.SlaType, a.Remark, a.Remark2, a.Ldos));
+                }).ToArray();
+                _rowSnapshot = Workspace.Data; _rowDate = today;
+            }
+            Assets.ReplaceWith(_rows.Where(r => Search.Length == 0 || r.Search.Contains(Search, StringComparison.OrdinalIgnoreCase)).Select(r => r.Row));
             SelectedAsset = selected is null ? null : Assets.FirstOrDefault(a => a.Asset.Id == selected);
         }
         finally { _refreshingAssets = false; }
@@ -126,7 +145,7 @@ public partial class InventoryViewModel : EngineeringPageViewModel
     [RelayCommand] private Task ImportPreview() => Run(async token =>
     {
         string? p = Files.Open("xlsx"); if (p is null) return; Preview.Clear(); _previewRevision = -1;
-        var rows = await InventoryWorkbook.ReadAsync(p, Workspace.Data.Assets, token); Replace(Preview, rows.Select(r => new AssetPreviewRow(r))); _previewRevision = Workspace.Data.Revision;
+        var rows = await InventoryWorkbook.ReadAsync(p, Workspace.Data.Assets, token); Preview.ReplaceWith(rows.Select(r => new AssetPreviewRow(r))); _previewRevision = Workspace.Data.Revision;
         PreviewSummary = $"{rows.Length} rows · {rows.Count(r => r.Error.Length > 0)} rejected · select rows, then Apply. No changes saved yet.";
     });
     [RelayCommand] private void SelectValid() { foreach (var row in Preview) row.Selected = row.Data.Asset is not null && row.Data.Error.Length == 0; }
@@ -136,7 +155,8 @@ public partial class InventoryViewModel : EngineeringPageViewModel
         var apply = Preview.Where(r => r.Selected && r.Data.Asset is not null && r.Data.Error.Length == 0).Select(r => r.Data.Asset!).ToArray();
         if (apply.Length == 0) throw new ArgumentException("Select valid preview rows first.");
         if (!Dialogs.Confirm("Apply inventory import", $"Apply {apply.Length} selected asset rows? Updates replace human fields shown in the preview; observed facts are preserved.")) return;
-        await Workspace.CommitAsync(d => d with { Assets = d.Assets.Where(a => !apply.Any(x => x.Id == a.Id)).Concat(apply).ToArray() }, token);
+        var ids = apply.Select(a => a.Id).ToHashSet();
+        await Workspace.CommitAsync(d => d with { Assets = d.Assets.Where(a => !ids.Contains(a.Id)).Concat(apply).ToArray() }, token);
         if (apply.FirstOrDefault(a => a.Id == _editingId) is { } imported) LoadEditor(imported);
         Preview.Clear(); _previewRevision = -1; PreviewSummary = $"Applied {apply.Length} rows atomically.";
     });

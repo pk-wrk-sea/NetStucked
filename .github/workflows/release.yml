@@ -121,6 +121,12 @@ jobs:
           if ([Version]$env:APP_VERSION -lt [Version]'0.11.0') { exit 0 }
           dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --engineering-ui-check artifacts/release/engineering-qa
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify exact scaled Inventory workflow
+        shell: pwsh
+        run: |
+          if ([Version]$env:APP_VERSION -lt [Version]'0.12.1') { exit 0 }
+          dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --inventory-performance-check artifacts/release/inventory-performance-qa
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify exact CVE expiry and Collector banner regressions
         shell: pwsh
         run: |

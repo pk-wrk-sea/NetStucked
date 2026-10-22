@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.12.1",
+    "Date": "2026-10-22",
+    "Notes": "Fix Inventory lag after import: lightweight passive cells retain selectable text on interaction, batched snapshots and indexed/cached searches reduce UI work. Coalesce live typing, retain unsaved edits, correct Brand editing, and avoid false audit changes when reimporting an unchanged workbook. Existing stable IDs, optional fields and audit history are preserved. Scaled owned WPF checks pass; physical user acceptance remains separate."
+  },
+  {
     "Version": "0.12.0",
     "Date": "2026-10-22",
     "Notes": "Bundled Netmiko parallel Collector: Cisco IOS/IOS-XE/IOS XR/NX-OS and Huawei VRP. Interactive SSH host trust, saved usernames only, password reveal and observed address/hostname capture names. Inventory component Excel template, optional fields and reviewed import/edit/export. Dark-mode switches; Terminal feature removed."

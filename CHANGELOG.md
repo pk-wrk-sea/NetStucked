@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.12.1 — 2026-10-22
+
+- Fix Inventory lag after import with deferred selectable cell editors, batched snapshots, cached search/evidence projections and delayed live search.
+- Index bulk identity matching; retain original timestamps/audit for unchanged Excel roundtrips and preserve real before/after edits.
+- Fix the Brand editor binding; retain existing data/schema, explicit import preview/selection and stable component identities.
+- See docs/QA_0.12.1.md for measured performance, correctness and remaining manual acceptance.
+
 ## 0.12.0 — 2026-10-22
 
 - Use bundled Netmiko for explicit parallel Collector jobs across IOS, IOS-XE, IOS XR, NX-OS and Huawei VRP, including per-device profile overrides.
