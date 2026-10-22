@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.2 — 2026-10-22
+
+- Retain the Inventory responsiveness, unchanged-import audit and Brand fixes from 0.12.1.
+- Keep Collector's Python bundle out of the restart helper while preserving its private .NET runtime, file/byte/link/trust bounds and cancellation. The full application retains its Collector bundle.
+- Installed 0.12.0/0.12.1 clients need a one-time manual Setup upgrade because their old helper-copy code cannot stage the bundled payload. See docs/FEATURES_0.12.2.md and docs/QA_0.12.2.md.
+
 ## 0.12.1 — 2026-10-22
 
 - Fix Inventory lag after import with deferred selectable cell editors, batched snapshots, cached search/evidence projections and delayed live search.

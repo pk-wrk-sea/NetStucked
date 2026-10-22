@@ -1,5 +1,7 @@
 # Milestone index — 2026-10-09
 
+**2026-10-22 / update compatibility:** actual 0.12.0 staging of the Inventory patch is blocked by the old helper file-count limit. [0.12.2 correction](FEATURES_0.12.2.md) retains bounded helper safety; already installed old clients require a manual Setup upgrade. [Verification](QA_0.12.2.md).
+
 **2026-10-22 / Inventory responsiveness:** the current human defect request authorizes the correction in [0.12.1](FEATURES_0.12.1.md), with [measured QA](QA_0.12.1.md). A03 physical/manual and broader historical criteria remain open.
 
 **2026-10-22 / 0.12.0 published as GitHub Latest:** bundled Netmiko Collector, interactive host trust, bounded mixed-profile parallel jobs, nullable component Inventory XLSX, Dark switches and Terminal retirement. 520 unit tests, exact WPF/worker/native checks, four CI runs, public downloads and real 0.11.2 updater discovery/staging pass. [Scope](FEATURES_0.12.0.md), [immutable publication evidence](GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md), [QA/open acceptance](QA_0.12.0.md). Physical vendor/AAA, human DPI/accessibility and Setup acceptance remain open.
