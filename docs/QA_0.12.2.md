@@ -1,4 +1,4 @@
-# 0.12.2 verification — 2026-10-22
+# 0.12.2 verification โ€” 2026-10-22
 
 Scope: [bounded helper correction and retained Inventory fixes](FEATURES_0.12.2.md). Production profile and installed process remain intact. Isolated profiles and owned fixtures only.
 
@@ -18,4 +18,4 @@ Development Release solution build passes with zero warnings/errors; the complet
 - Actual new-client public staging must acknowledge its bounded helper while the owned QA parent remains alive; stop that helper before parent exit, never run Setup, and retain isolated settings.
 - Old-client discovery is rechecked against the final public version. Old-client installation remains BLOCKED by its immutable executing code; do not report server-side publication as a fix to that already installed code.
 
-Results and immutable source/assets/CI are added after execution in the publication report. Physical user input/DPI/accessibility, real vendor/AAA/soak and actual install/recovery/uninstall acceptance remain NOT TESTED.
+Final result: Release build and 527 unit tests, exact 29-assertion scaled Inventory/native startup, all four source/PR/main/frozen-installer CI runs, six downloaded asset digests/manifests/2,738 ZIP entries and both anonymous public downloads PASS. Old-client discovery (8), current Reinstall/Recovery (9) and actual current public staging/native helper (11) PASS. No Setup executes. Old-client installation remains BLOCKED by the unchanged old helper; manual Setup is required once. [Immutable publication evidence](GITHUB_RELEASE_0.12.2_REPORT_2026-10-22.md). Physical user input/DPI/accessibility, real vendor/AAA/soak and actual install/recovery/uninstall acceptance remain NOT TESTED.

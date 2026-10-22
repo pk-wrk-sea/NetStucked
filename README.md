@@ -1,12 +1,16 @@
-# NetStucked 0.11.2
+# NetStucked 0.12.2
 
-Latest verified release: [0.12.0](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.12.0). Bundled parallel Netmiko Collector, nullable component Inventory Excel, Dark switches and Terminal retirement; [verification and real-device limits](docs/GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md).
+Latest verified release: [0.12.2](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.12.2). Inventory import/search/scroll and audit/Brand corrections, plus bounded restart-helper compatibility for the bundled Netmiko runtime. [Measured verification and limits](docs/GITHUB_RELEASE_0.12.2_REPORT_2026-10-22.md).
+
+**Existing 0.12.0/0.12.1 installations: exit through System Tray → Exit and run the Setup download directly once. Their old helper-copy code can block in-app installation.** The corrected helper applies after that upgrade.
+
+The paragraphs below record earlier releases; Terminal and Wi-Fi desktop features are retired in the current application.
 
 0.11.2 fixes Config Collector strong AES-CTR/SHA-2 SSH compatibility, console Enter framing, separate shell setup timeouts and bounded cancellation/cleanup. [Scope](docs/FEATURES_0.11.2.md) - [QA](docs/QA_0.11.2.md) - [verified source/assets/CI/public updater](docs/GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md). Real Cisco/AAA acceptance remains separate.
 
 Includes the 0.11.0 integrated workflows: actual-state Dashboard, stable-ID MA Inventory/versioned Excel/audit, offline Cisco evidence/one-hop Topology/config comparison and engineer-reviewed CVE/device change plans. [Integrated scope](docs/FEATURES_0.11.0.md) - [review guide](docs/QA_0.11.0.md).
 
-Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.11.2 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.11.2).
+Windows x64 network toolkit built with C# / WPF / .NET 10 / MVVM. [Download 0.12.2 — GitHub Latest](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.12.2).
 
 <img src="docs/branding/NetStuckedBanner.png" width="480" alt="NetStucked — Network Engineer's Toolkit" />
 

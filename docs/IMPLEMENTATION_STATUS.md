@@ -1,5 +1,7 @@
 # Implementation status — 2026-10-09
 
+**0.12.2 is published as GitHub Latest (2026-10-22).** Inventory performance/Brand/unchanged-audit corrections and bounded helper compatibility pass 527 unit tests, exact WPF/native helper, all four CI runs, public assets/downloads and actual new-client staging. Existing 0.12.0/0.12.1 clients need one manual Setup upgrade; old-client discovery alone is not installation acceptance. [Immutable publication and remaining gates](GITHUB_RELEASE_0.12.2_REPORT_2026-10-22.md).
+
 **2026-10-22 / 0.12.2 helper correction:** the real old-client public staging check exposed the bundled Python file count exceeding the existing helper bound. The new helper excludes only the unnecessary root Collector runtime while retaining .NET, trust/path/size bounds and cancellation. [Scope](FEATURES_0.12.2.md), [QA and one-time manual upgrade limitation](QA_0.12.2.md). All 0.12.1 Inventory fixes and immutable published assets are retained.
 
 **2026-10-22 / 0.12.1 Inventory correction:** imported-list lag is reproduced and corrected in the existing UI. Real 708-row store validates read-only; isolated 708/2,708-row WPF measurements and 523 unit/46 engineering assertions pass. [Scope](FEATURES_0.12.1.md), [QA/remaining acceptance](QA_0.12.1.md). Publication follows exact-package checks; the production process/data and released assets are retained.

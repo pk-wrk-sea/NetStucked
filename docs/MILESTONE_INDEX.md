@@ -1,5 +1,7 @@
 # Milestone index — 2026-10-09
 
+**0.12.2 delivery:** [published source/assets/CI and measured verification](GITHUB_RELEASE_0.12.2_REPORT_2026-10-22.md). A03/M07 remain open for physical/manual and real installed Setup/recovery acceptance. Existing old clients require one manual Setup upgrade.
+
 **2026-10-22 / update compatibility:** actual 0.12.0 staging of the Inventory patch is blocked by the old helper file-count limit. [0.12.2 correction](FEATURES_0.12.2.md) retains bounded helper safety; already installed old clients require a manual Setup upgrade. [Verification](QA_0.12.2.md).
 
 **2026-10-22 / Inventory responsiveness:** the current human defect request authorizes the correction in [0.12.1](FEATURES_0.12.1.md), with [measured QA](QA_0.12.1.md). A03 physical/manual and broader historical criteria remain open.

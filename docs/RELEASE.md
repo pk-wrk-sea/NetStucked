@@ -1,5 +1,7 @@
 # Release operations
 
+**Current GitHub Latest: 0.12.2 (2026-10-22).** [Source/assets, 527 tests, exact/public/native results and old-client limitation](GITHUB_RELEASE_0.12.2_REPORT_2026-10-22.md). After any runtime/dependency layout change, verify the full installed baseline helper staging, not only release discovery/download. Preserve failing evidence; do not run Setup without the separately authorized machine acceptance environment.
+
 **0.12.0 is published as GitHub Latest (2026-10-22).** [Source/assets, 520 tests, exact checks, four CI runs and public updater evidence](GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md). No Setup ran; physical vendor/AAA and manual acceptance remain open. Older version statements below are historical.
 
 **0.11.2 is published as GitHub Latest (2026-10-21).** Collector SSH compatibility/cancellation correction, 512 tests, exact portable/installer CI, both public downloads and actual 0.11.1 updater discovery/staging pass. [Publication evidence and limits](GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md). No Setup was executed; real Cisco/manual/clean-machine acceptance remains open. Version statements below are historical snapshots.

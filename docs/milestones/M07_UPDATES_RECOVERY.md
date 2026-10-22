@@ -1,5 +1,7 @@
 # M07 — GitHub selected-build installation and recovery acceptance
 
+**2026-10-22 / 0.12.2:** the full bundled baseline exposed an old 1,000-file helper-copy failure after successful discovery/download. [Correction and actual helper/public evidence](../GITHUB_RELEASE_0.12.2_REPORT_2026-10-22.md) retain every bound/trust/path/cancellation safeguard. Old installed clients need one manual Setup upgrade; new-client native staging passes without running Setup. Full installed-machine DoD remains open.
+
 ## 1. Milestone and version
 
 **M07** / Implemented in 0.3.0+; remaining validation on 0.4.0 (brief proposed 0.8.0). Planning snapshot 2026-10-09; not a version bump or publication instruction. [Milestone index](../MILESTONE_INDEX.md).

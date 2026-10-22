@@ -1,4 +1,4 @@
-# 0.12.1 Inventory verification — 2026-10-22
+# 0.12.1 Inventory verification โ€” 2026-10-22
 
 ## Observed installation and data
 
@@ -32,4 +32,4 @@ Post-tag QA-only follow-up: independent source/PR and frozen-installer workflows
 
 - NOT TESTED: the human's physical mouse/keyboard, Windows text input methods, screen readers, mixed-monitor DPI, sustained production editing and other real hardware/device acceptance. Rendered WPF images and synthetic input events do not close these gates.
 - Existing 10 MiB archive / 8 MiB workbook-part / 16 MiB store and record limits remain. Dense 5,000-row export is not claimed to fit these byte limits. Failed bounded exports retain the destination; no limits were increased.
-- Exact frozen portable/installer, CI, public updater/download verification and publication are recorded separately after they run. Setup must not execute on this machine; the installed app and real data remain intact.
+- Exact frozen/CI/publication evidence and the actual old-client staging FAILURE are recorded in [the 0.12.1 report](GITHUB_RELEASE_0.12.1_REPORT_2026-10-22.md); [0.12.2](GITHUB_RELEASE_0.12.2_REPORT_2026-10-22.md) corrects future helper staging. Setup must not execute on this machine; the installed app and real data remain intact.

@@ -1,5 +1,7 @@
 # Release and versioning register
 
+**0.12.2 is published as GitHub Latest (2026-10-22).** [Immutable source/assets and actual updater evidence](GITHUB_RELEASE_0.12.2_REPORT_2026-10-22.md). 0.12.1 and older tags/assets are preserved. Old 0.12.0/0.12.1 helper code requires one manual Setup upgrade; no Setup executes in QA.
+
 **0.12.0 is published as GitHub Latest (2026-10-22).** [Source/assets, 520 tests, exact checks, four CI runs and public updater evidence](GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md). No Setup ran; physical vendor/AAA and manual acceptance remain open. Older version statements below are historical.
 
 **0.11.2 is published as GitHub Latest (2026-10-21).** Directory.Build.props and immutable tag v0.11.2 identify the released correction; [exact source/assets/CI/public download and old/current updater evidence](GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md). Older tags/assets remain unchanged. Installers are unsigned; actual Cisco/manual/clean-machine Setup acceptance remains open. Older version/Latest statements below are dated historical snapshots.
