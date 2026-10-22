@@ -8,4 +8,4 @@ Collector design: WPF owns bounded jobs and protected captures; one packaged iso
 
 Inventory template columns follow the supplied image: No, Company, Location, Province, Building, Floor, Room, Rack, Hostname, IP Address, Brand, Partnumber, SerialNumber, Device Type, MA Type, SLA Type, Remark, Remark2, LDoS. A retained AssetId identifies edits; existing schema-1 files remain importable. Blank optional fields and component rows without addresses are allowed; wholly blank worksheet rows are skipped. Import previews before atomic apply and retains observed evidence separately. Duplicate IDs remain errors; duplicate IP/hostname alone are valid.
 
-Status: implementation in progress; no build, real-device or release success is implied by this document.
+Status: implemented and published as 0.12.0. See [actual verification and open real-device acceptance](GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md).

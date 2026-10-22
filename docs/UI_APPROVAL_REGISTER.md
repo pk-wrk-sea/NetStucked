@@ -1,6 +1,6 @@
 # UI approval register
 
-**2026-10-22 / 0.12.0 approved revision in progress:** bundled Netmiko Collector, interactive trust, bounded parallel vendor profiles, optional component Inventory XLSX, Dark switches and Terminal retirement. [Scope](FEATURES_0.12.0.md), [QA and remaining gates](QA_0.12.0.md). Development checks do not establish publication or physical vendor acceptance.
+**2026-10-22 / 0.12.0 published as GitHub Latest:** bundled Netmiko Collector, interactive host trust, bounded mixed-profile parallel jobs, nullable component Inventory XLSX, Dark switches and Terminal retirement. 520 unit tests, exact WPF/worker/native checks, four CI runs, public downloads and real 0.11.2 updater discovery/staging pass. [Scope](FEATURES_0.12.0.md), [immutable publication evidence](GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md), [QA/open acceptance](QA_0.12.0.md). Physical vendor/AAA, human DPI/accessibility and Setup acceptance remain open.
 
 **2026-10-21 / 0.11.2 incident follow-up:** The reported Collector failure authorizes correcting its existing explicit-start SSH workflow in the same theme. [Scope](FEATURES_0.11.2.md), [verification](QA_0.11.2.md). No new menu, discovery, trust bypass, algorithm weakening or automatic retry is authorized; real-device/human acceptance stays open.
 

@@ -1,5 +1,7 @@
 # A03 — MA Inventory and versioned Excel import/export
 
+**0.12.0 publication:** the named Collector/Inventory revision is implemented and published, and Terminal is retired. [Verification and remaining acceptance](../GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md). Broader historical DoD is not closed by owned software fixtures.
+
 **2026-10-22 superseding human scope:** [0.12.0](../FEATURES_0.12.0.md) moves Collector to bundled Netmiko, adds the supplied nullable component Inventory layout and retires the Terminal desktop feature. [Scoped QA](../QA_0.12.0.md); broad historical acceptance is not closed by software fixtures.
 
 **2026-10-21 / 0.11.1:** Actual WPF/native dirty-editor regression, all-row duplicate rejection and real Collector-produced evidence/Excel workflow are tracked in [QA](../QA_0.11.1.md). Stable identity, separate human/observed fields and original audit history remain intact; broader inventory criteria remain open.

@@ -1,5 +1,7 @@
 # NetStucked 0.11.2
 
+Latest verified release: [0.12.0](https://github.com/pk-wrk-sea/NetStucked/releases/tag/v0.12.0). Bundled parallel Netmiko Collector, nullable component Inventory Excel, Dark switches and Terminal retirement; [verification and real-device limits](docs/GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md).
+
 0.11.2 fixes Config Collector strong AES-CTR/SHA-2 SSH compatibility, console Enter framing, separate shell setup timeouts and bounded cancellation/cleanup. [Scope](docs/FEATURES_0.11.2.md) - [QA](docs/QA_0.11.2.md) - [verified source/assets/CI/public updater](docs/GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md). Real Cisco/AAA acceptance remains separate.
 
 Includes the 0.11.0 integrated workflows: actual-state Dashboard, stable-ID MA Inventory/versioned Excel/audit, offline Cisco evidence/one-hop Topology/config comparison and engineer-reviewed CVE/device change plans. [Integrated scope](docs/FEATURES_0.11.0.md) - [review guide](docs/QA_0.11.0.md).

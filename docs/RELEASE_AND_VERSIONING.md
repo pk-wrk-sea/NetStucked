@@ -1,5 +1,7 @@
 # Release and versioning register
 
+**0.12.0 is published as GitHub Latest (2026-10-22).** [Source/assets, 520 tests, exact checks, four CI runs and public updater evidence](GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md). No Setup ran; physical vendor/AAA and manual acceptance remain open. Older version statements below are historical.
+
 **0.11.2 is published as GitHub Latest (2026-10-21).** Directory.Build.props and immutable tag v0.11.2 identify the released correction; [exact source/assets/CI/public download and old/current updater evidence](GITHUB_RELEASE_0.11.2_REPORT_2026-10-21.md). Older tags/assets remain unchanged. Installers are unsigned; actual Cisco/manual/clean-machine Setup acceptance remains open. Older version/Latest statements below are dated historical snapshots.
 
 **0.8.0 is published as GitHub Latest (2026-10-15).** Local Monitoring/SNMP/tray/auto-resume and utility/URL/result-zoom refinements passed 354 tests, exact portable/installer Windows CI, native saved-monitor resume/instance restoration and the actual public 0.7.0 updater/preparation path. See [publication evidence and limits](GITHUB_RELEASE_0.8.0_REPORT_2026-10-15.md), [scope](FEATURES_0.8.0.md) and [usage/QA](QA_0.8.0.md). Real Cisco/key/captcha/manual/clean-machine acceptance remains open; earlier snapshots below are historical.
