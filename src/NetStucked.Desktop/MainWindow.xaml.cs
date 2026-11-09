@@ -19,7 +19,7 @@ public partial class MainWindow : Window
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
     public void EnableTray(bool enabled)
     {
-        if (enabled && _tray is null && DataContext is MainViewModel main) _tray = new(this, main.Monitoring);
+        if (enabled && _tray is null) _tray = new(this);
         else if (!enabled) { _tray?.Dispose(); _tray = null; }
     }
     public void RequestExit() { _exitRequested = true; Close(); }

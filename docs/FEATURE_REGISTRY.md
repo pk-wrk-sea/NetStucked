@@ -1,5 +1,9 @@
 # Feature and navigation registry
 
+**2026-11-09 / release authorized:** the current CVE Checker | IPS slice is assigned 0.13.0 under the explicit follow-up publication instruction. [Release scope](FEATURES_0.13.0.md), [QA](QA_0.13.0.md). Older local-only statements below describe the preceding implementation stage.
+
+**2026-11-09 / current desktop revision (unreleased):** exact menu **CVE Checker | IPS** is approved and implemented as signature/catalog coverage for imported VA reports. [Scope](CVE_IPS_2026-11-09.md), [setup](CVE_IPS_SETUP.md), [QA](QA_CVE_IPS_2026-11-09.md). Monitoring, Topology Explorer, Inventory, URL Checker and the former CVE & Upgrade Planner routes are retired; Dashboard is Coming soon. Older registry entries below describe historical implementations, not current navigation. Existing data/protected credentials remain; no automatic Monitoring resume or firewall changes.
+
 **2026-10-22 / 0.12.2:** preserve Inventory performance fixes and exclude only the unnecessary Python bundle from the bounded restart helper. [Scope](FEATURES_0.12.2.md), [QA/manual-upgrade limitation](QA_0.12.2.md).
 
 **2026-10-22 / Inventory correction:** [0.12.1](FEATURES_0.12.1.md) implements measured import/search/scroll improvements, no-op audit preservation and the Brand binding fix. [Verification/open acceptance](QA_0.12.1.md). Existing schema and published assets remain intact.

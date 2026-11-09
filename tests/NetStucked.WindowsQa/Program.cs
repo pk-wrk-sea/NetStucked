@@ -35,6 +35,7 @@ internal static partial class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        if (args.FirstOrDefault() == "--ips-coverage-ui-check") return RunIpsCoverageQa(args);
         if (args.FirstOrDefault() == "--netmiko-check") return CheckNetmikoAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--collector-cisco-ssh-check") return CheckCollectorCiscoSshAsync(Path.GetFullPath(args[1]), Path.GetFullPath(args[2])).GetAwaiter().GetResult();
         if (args.FirstOrDefault() == "--cve-regression-check") return CheckCveRegressionAsync(Path.GetFullPath(args[1])).GetAwaiter().GetResult();
@@ -183,7 +184,7 @@ internal static partial class Program
         window.UpdateLayout();
         Require(Descendants<DataGridColumnHeader>(restoredGrid).Any(h => Equals(h.Column?.Header, "Lost") && h.IsVisible), "Visible Lost column remains realized after configuring columns and resizing");
         Render(window, output, "LivePing-configured-settled", 1536, 1024, 1);
-        vm.NavigateCommand.Execute("Dashboard"); Require(vm.CurrentPage is DashboardViewModel, "Dashboard shows actual operational state");
+        vm.NavigateCommand.Execute("Dashboard"); Require(vm.CurrentPage is PlaceholderViewModel placeholder && placeholder.Message.Contains("Coming soon"), "Dashboard retains only the authorized Coming soon page");
         await CheckDnsHttpAsync(window, vm, dialogs, output);
         await CheckToolsAsync(window, vm, output);
 

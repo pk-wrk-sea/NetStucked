@@ -95,7 +95,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --collector-ssh-check artifacts/release/collector-ssh-qa tests/fixtures/collector_ssh_server.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Verify exact Netmiko and Collector/Inventory workflows
+      - name: Verify exact Netmiko and Collector/current navigation workflows
         shell: pwsh
         run: |
           if ([Version]$env:APP_VERSION -lt [Version]'0.12.0') { exit 0 }
@@ -115,16 +115,21 @@ jobs:
           dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --collector-real-ui-check artifacts/release/collector-real-ctr-qa tests/fixtures/collector_cisco_lab_server.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Remove-Item Env:NETSTUCKED_QA_SSH_CTR
-      - name: Verify exact integrated engineering menu workflows
+      - name: Verify exact current CVE IPS or historical engineering workflows
         shell: pwsh
         run: |
           if ([Version]$env:APP_VERSION -lt [Version]'0.11.0') { exit 0 }
+          if ([Version]$env:APP_VERSION -ge [Version]'0.13.0') {
+            dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --ips-coverage-ui-check artifacts/release/ips-coverage-qa - artifacts/release/publish
+            exit $LASTEXITCODE
+          }
           dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --engineering-ui-check artifacts/release/engineering-qa
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify exact scaled Inventory workflow
         shell: pwsh
         run: |
           if ([Version]$env:APP_VERSION -lt [Version]'0.12.1') { exit 0 }
+          if ([Version]$env:APP_VERSION -ge [Version]'0.13.0') { exit 0 }
           dotnet artifacts/release/qa-runtime/NetStucked.WindowsQa.dll --inventory-performance-check artifacts/release/inventory-performance-qa
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify exact CVE expiry and Collector banner regressions
@@ -158,6 +163,7 @@ jobs:
           path: |
             artifacts/release/test-results
             artifacts/release/windows-qa
+            artifacts/release/ips-coverage-qa
             artifacts/release/native-monitor-qa
             artifacts/release/collector-cisco-ssh-qa
             artifacts/release/collector-real-ctr-qa

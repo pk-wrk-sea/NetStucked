@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.13.0 — 2026-11-09
+
+- Replace the desktop CVE & Upgrade Planner route with approved **CVE Checker | IPS**: bounded read-only XLSX/CSV import, sheet/header/column mapping, unique CVE lookup, Threat Vault Vulnerability Protection adapter, local Check Point IPS CSV snapshots, source-keyed cache, traceable signatures/freshness, grouping and fresh multi-sheet Excel reports.
+- Store explicitly saved Threat Vault keys through the existing Windows Credential Manager vault. Keep authorization/timeout/rate-limit failures Unknown; Antivirus does not establish IPS coverage. No automatic firewall configuration or protection verdict.
+- Remove Monitoring, Topology Explorer, Inventory and URL Checker navigation and automatic Monitoring startup/tray actions. Dashboard remains Coming soon. Preserve legacy stores/secrets and dormant recovery adapters.
+- Preserve existing data and immutable older releases. See `docs/QA_CVE_IPS_2026-11-09.md` for implementation checks and `docs/QA_0.13.0.md` for exact release verification and separate live/manual gates.
+
 ## 0.12.2 — 2026-10-22
 
 - Retain the Inventory responsiveness, unchanged-import audit and Brand fixes from 0.12.1.

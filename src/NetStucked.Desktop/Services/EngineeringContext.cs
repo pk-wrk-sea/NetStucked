@@ -12,7 +12,7 @@ public interface IEngineeringFiles
 }
 public sealed class EngineeringFiles : IEngineeringFiles
 {
-    private static string Filter(string kind) => kind switch { "xlsx" => "Excel workbook (*.xlsx)|*.xlsx", "evidence" => "Collector JSON or UTF-8 transcript (*.json;*.txt)|*.json;*.txt", "html" => "HTML report (*.html)|*.html", _ => "CSV report (*.csv)|*.csv" };
+    private static string Filter(string kind) => kind switch { "coverage" => "VA report (*.xlsx;*.csv)|*.xlsx;*.csv", "xlsx" => "Excel workbook (*.xlsx)|*.xlsx", "evidence" => "Collector JSON or UTF-8 transcript (*.json;*.txt)|*.json;*.txt", "html" => "HTML report (*.html)|*.html", _ => "CSV report (*.csv)|*.csv" };
     public string? Open(string kind) { var d = new OpenFileDialog { Filter = Filter(kind), CheckFileExists = true }; return d.ShowDialog(Application.Current.MainWindow) == true ? d.FileName : null; }
     public string? Save(string kind, string name) { var d = new SaveFileDialog { Filter = Filter(kind), FileName = name, OverwritePrompt = true, AddExtension = true }; return d.ShowDialog(Application.Current.MainWindow) == true ? d.FileName : null; }
 }

@@ -10,6 +10,8 @@ internal static partial class Program
 {
     private static async Task<int> CheckNativeMonitoringAsync(string output,string executable)
     {
+        string version = FileVersionInfo.GetVersionInfo(executable).ProductVersion!.Split('+')[0];
+        if (Version.Parse(version) >= new Version(0, 13, 0)) return await CheckNativeRetiredMonitoringAsync(output, executable);
         Directory.CreateDirectory(output);
         try
         {
