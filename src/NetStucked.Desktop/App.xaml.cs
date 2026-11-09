@@ -81,6 +81,17 @@ public partial class App : Application
         services.AddSingleton<IEngineeringStore, EngineeringStore>(); services.AddSingleton<IEngineeringFiles, EngineeringFiles>();
         services.AddSingleton<IAdvisoryLookup, AdvisoryLookup>(); services.AddSingleton<EngineeringContext>();
         services.AddSingleton<InventoryViewModel>(); services.AddSingleton<TopologyViewModel>(); services.AddSingleton<AdvisoryPlannerViewModel>(); services.AddSingleton<DashboardViewModel>();
+        // Retired workflows stay cold; legacy data/adapters remain available for offline recovery QA.
+        services.AddSingleton(sp => new Lazy<EngineeringContext>(sp.GetRequiredService<EngineeringContext>));
+        services.AddSingleton(sp => new Lazy<MonitoringViewModel>(sp.GetRequiredService<MonitoringViewModel>));
+        services.AddSingleton(sp => new Lazy<UrlCheckerViewModel>(sp.GetRequiredService<UrlCheckerViewModel>));
+        services.AddSingleton(sp => new Lazy<DashboardViewModel>(sp.GetRequiredService<DashboardViewModel>));
+        services.AddSingleton(sp => new Lazy<InventoryViewModel>(sp.GetRequiredService<InventoryViewModel>));
+        services.AddSingleton(sp => new Lazy<TopologyViewModel>(sp.GetRequiredService<TopologyViewModel>));
+        services.AddSingleton(sp => new Lazy<AdvisoryPlannerViewModel>(sp.GetRequiredService<AdvisoryPlannerViewModel>));
+        services.AddSingleton<IIpsProviderFactory, ThreatVaultProviderFactory>();
+        services.AddSingleton<IIpsCoverageCache>(new IpsCoverageCache(System.IO.Path.Combine(store.DirectoryPath, "ips-coverage-cache")));
+        services.AddSingleton<IpsCoverageViewModel>();
         services.AddSingleton<DnsResolverViewModel>(); services.AddSingleton<SubnetCalculatorViewModel>();
         services.AddSingleton<MacCheckerViewModel>(); services.AddSingleton<UrlCheckerViewModel>();
         services.AddSingleton<MultiTargetPortService>();
@@ -116,14 +127,9 @@ public partial class App : Application
         window.Show();
         _pipeStop = new(); _restorePipe = ListenForRestoreAsync("NetStucked.Restore." + identity, window, _pipeStop.Token);
         window.EnableTray(Environment.GetEnvironmentVariable("NETSTUCKED_QA_DATA_DIRECTORY") is null);
-        if (Environment.GetEnvironmentVariable("NETSTUCKED_QA_DATA_DIRECTORY") is null && !System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable()) main.Monitoring.Engine.SetSuspended(true, "Local network unavailable at startup; no device downtime inferred");
-        _ = main.Monitoring.ResumeSavedAsync();
-        _ = main.Engineering.InitializeAsync();
-        Microsoft.Win32.SystemEvents.PowerModeChanged += PowerChanged;
-        System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += NetworkChanged;
+        // Retired Monitoring/engineering pages never auto-resume or initialize stores.
         var store = _provider.GetRequiredService<UserSettingsStore>();
         if (store.LoadError is not null) _provider.GetRequiredService<IDesktopDialogs>().ShowError(store.LoadError);
-        if (_provider.GetService<IMonitorStore>() is MonitorStore monitoringStore && monitoringStore.LoadError is not null) main.Monitoring.Message = monitoringStore.LoadError;
         _ = main.Updates.RefreshLocalStateAsync();
     }
     private async Task RunUpdateHelperAsync(string jobPath)

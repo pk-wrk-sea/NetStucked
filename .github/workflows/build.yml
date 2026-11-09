@@ -30,12 +30,10 @@ jobs:
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --collector-cisco-ssh-check artifacts/collector-cisco-ssh-qa tests/fixtures/collector_ssh_compat_server.py
       - name: Verify bundled Netmiko, five owned drivers, trust, cancellation and parallel jobs
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --netmiko-check artifacts/netmiko-qa tests/fixtures/netmiko_devices.py
-      - name: Verify actual Collector and Inventory WPF workflows
+      - name: Verify actual Collector and current navigation WPF workflows
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --collector-revision-ui-check artifacts/collector-revision-qa tests/fixtures/netmiko_devices.py
-      - name: Verify integrated engineering menus with owned offline fixtures
-        run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --engineering-ui-check artifacts/engineering-qa
-      - name: Verify scaled Inventory import, search, selectable cells and audit stability
-        run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --inventory-performance-check artifacts/inventory-performance-qa
+      - name: Verify current CVE IPS coverage and retired navigation with owned offline fixtures
+        run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --ips-coverage-ui-check artifacts/ips-coverage-qa
       - name: Verify CVE expiry and editor preservation without external providers
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --cve-regression-check artifacts/cve-regression-qa
       - name: Verify Collector banners through owned SSH
@@ -45,7 +43,7 @@ jobs:
           NETSTUCKED_QA_SSH_CTR: '1'
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --collector-real-ui-check artifacts/collector-real-ctr-qa tests/fixtures/collector_cisco_lab_server.py
       - run: dotnet publish src/NetStucked.Desktop/NetStucked.Desktop.csproj -c Release -r win-x64 --self-contained true -o artifacts/publish/win-x64
-      - name: Verify native monitoring auto-resume and profile instance restoration
+      - name: Verify native monitoring retirement and profile instance restoration
         run: dotnet tests/NetStucked.WindowsQa/bin/Release/net10.0-windows/NetStucked.WindowsQa.dll --native-monitor-check artifacts/native-monitor-qa artifacts/publish/win-x64/NetStucked.exe
       - uses: actions/upload-artifact@v4
         with:

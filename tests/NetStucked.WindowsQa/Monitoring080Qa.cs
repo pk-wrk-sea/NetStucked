@@ -27,18 +27,7 @@ internal static partial class Program
         Require(!vm.Dns.IncludeIpv6Dns&&Descendants<CheckBox>((DependencyObject)window.Content).Any(c=>Equals(c.Content,"Include IPv6 DNS servers")),"Optional active-adapter IPv6 DNS checkbox defaults off; AAAA is independent");
         var dnsGrid=Descendants<DataGrid>((DependencyObject)window.Content).Single(g=>AutomationProperties.GetName(g)=="DNS resolver results");Require(double.IsNaN(dnsGrid.RowHeight)&&dnsGrid.Columns.OfType<CopyableTextColumn>().Single(c=>Equals(c.Header,"Answer data")).Wrap,"DNS answer rows wrap and grow automatically");
         var column=dnsGrid.Columns.Single(c=>Equals(c.Header,"Answer data"));column.Width=1500;ColumnLayout.Capture(dnsGrid);Require(vm.Ping.Store.Preferences.Columns["DnsTest"].Any(c=>c.Key=="Answers"&&c.Width>1200),"Expanded DNS answer column width is retained");
-        vm.NavigateCommand.Execute("Monitoring");await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);var monitor=vm.Monitoring;Require(vm.CurrentPage==monitor,"Monitoring is a functional page rather than a placeholder");
-        monitor.Name="Owned QA monitor";monitor.Host="127.0.0.1";monitor.UseSnmp=true;monitor.Username="owned-user";monitor.Notifications=false;
-        foreach(var version in Enum.GetValues<SnmpVersion>()) { monitor.SnmpVersion=version;await monitor.TestSnmpAsync("owned-community","owned-auth-password","owned-privacy-password");Require(monitor.DiscoveredInterfaces.Count==2&&monitor.Message.Contains("succeeded"),"SNMP Test UI supports explicit "+version+" (test-only adapter)"); }
-        monitor.DiscoveredInterfaces[0].Watched=true;monitor.SaveCredentials("owned-community","owned-auth-password","owned-privacy-password");await monitor.SaveCommand.ExecuteAsync(null);
-        Require(monitor.SelectedDevice?.Device.SnmpSettings.InterfaceIndexes.SequenceEqual([1])==true,"Selected interfaces and monitor settings are saved independently of secrets");
-        await monitor.StartCommand.ExecuteAsync(null);await Until(()=>{monitor.Refresh();return monitor.SelectedDevice?.Snapshot is not null;});Require(monitor.Engine.ActiveCount==1&&monitor.SelectedDevice!.Device.Started,"Explicit Start persists auto-resume intent and begins owned fixture polling");
-        foreach(string theme in new[]{"Light","Dark"}) {vm.Appearance.SelectedTheme=theme;Render(window,output,"Monitoring-"+theme.ToLowerInvariant(),1280,800,1);}
-        window.EnableTray(true);window.Close();await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);Require(!window.IsVisible&&monitor.Engine.ActiveCount==1,"X hides the owned window while monitoring continues");
-        window.RestoreFromTray();await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);Require(window.IsVisible&&monitor.Engine.ActiveCount==1,"Restore brings back the same live monitoring session");window.EnableTray(false);window.ShowInTaskbar=false;
-        await monitor.StopCommand.ExecuteAsync(null);Require(monitor.Engine.ActiveCount==0&&monitor.SelectedDevice?.Device.Started==false,"Explicit Stop drains collection and clears future auto-resume");
-        await monitor.StartCommand.ExecuteAsync(null);await vm.PrepareForUpdateAsync();Require(monitor.Engine.ActiveCount==0&&monitor.Engine.Devices.Single().Started,"Update preparation drains Monitoring while preserving requested auto-resume");
-        string json=await File.ReadAllTextAsync(Path.Combine(vm.Ping.Store.DirectoryPath,"monitoring.json"));Require(!json.Contains("owned-community")&&!json.Contains("owned-auth-password"),"Monitoring JSON/export state contains no SNMP secrets");
+        vm.NavigateCommand.Execute("Monitoring"); Require(vm.SelectedPage=="DNS Resolver", "Retired Monitoring route cannot instantiate or navigate to the former UI");
         vm.Appearance.SelectedTheme="Light";vm.NavigateCommand.Execute("Live Ping");
     }
     private sealed class QaSecretVault:ISecretVault

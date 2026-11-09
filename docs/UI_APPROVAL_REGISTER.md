@@ -1,5 +1,9 @@
 # UI approval register
 
+**2026-11-09 release extension:** the human authorized 0.13.0 publication of the reviewed CVE Checker | IPS implementation and named menu retirements. See [release scope](FEATURES_0.13.0.md) and [release QA](QA_0.13.0.md); this does not close live-provider, physical DPI/accessibility or actual Setup acceptance.
+
+**2026-11-09 / approved mock-up and explicit implementation:** human reviewed the interactive CVE-to-IPS concept and selected exact menu **CVE Checker | IPS**. Four-stage import/mapping → sources → results/evidence/grouping → export uses the existing WPF Light/Dark theme. Retire Monitoring, Topology Explorer, Inventory and URL Checker routes, retain Dashboard with Coming soon. This supersedes old desktop exposure only; retain legacy data/secrets and immutable references. [Approved scope](CVE_IPS_2026-11-09.md), [verification](QA_CVE_IPS_2026-11-09.md). Automated actual WPF renders are not human physical-DPI/accessibility or live-provider acceptance.
+
 **2026-10-22 compatibility follow-up:** [0.12.2](FEATURES_0.12.2.md) corrects restart-helper packaging discovered during the authorized real update check. No UI/layout or canonical reference change; 0.12.1 Inventory scope is retained. [QA](QA_0.12.2.md).
 
 **2026-10-22 human defect follow-up:** correct Inventory responsiveness after import within the approved layout. [0.12.1 scope](FEATURES_0.12.1.md), [QA](QA_0.12.1.md). Passive cells defer selectable editors until interaction; retained theme/columns/copy/zoom and dirty-editor contracts remain. No new page or canonical reference replacement is authorized.

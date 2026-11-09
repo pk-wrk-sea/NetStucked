@@ -1,5 +1,10 @@
 [
   {
+    "Version": "0.13.0",
+    "Date": "2026-11-09",
+    "Notes": "CVE Checker | IPS: import VA Excel/CSV, map source columns, compare Palo Alto Vulnerability Protection and local Check Point IPS CSV snapshots, inspect signatures/source freshness/raw rows and export traceable multi-sheet Excel. Protect explicitly saved Threat Vault keys in Windows Credential Manager; errors remain Unknown and Antivirus alone does not count as IPS coverage. Remove Monitoring, Topology Explorer, Inventory and URL Checker desktop routes; Dashboard is Coming soon. Preserve legacy data and disable Monitoring auto-resume. Catalog coverage does not confirm firewall enforcement, device applicability or exploit success. Live API/real SmartConsole, physical DPI/accessibility and actual Setup acceptance remain NOT TESTED."
+  },
+  {
     "Version": "0.12.2",
     "Date": "2026-10-22",
     "Notes": "Retain the Inventory performance/audit/Brand corrections. Fix future update staging by excluding Collector's unnecessary Python bundle from the bounded restart helper, preserving its .NET runtime and existing trust/path/cancellation limits. Already installed 0.12.0/0.12.1 clients need a one-time manual Setup upgrade to obtain this correction. No automatic installation or device operation."

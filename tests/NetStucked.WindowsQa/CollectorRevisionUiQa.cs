@@ -74,6 +74,8 @@ internal static partial class Program
                 Render(window, output, "Collector-auth-" + theme, 1280, 800, 1); tabs.SelectedIndex = 0;
             }
             Require(!File.ReadAllText(Path.Combine(store.DirectoryPath, "settings.json")).Contains("fixture-password"), "Saved settings contain no Collector password");
+            if (Version.Parse(vm.Version) < new Version(0, 13, 0))
+            {
             await vm.Engineering.InitializeAsync(); vm.NavigateCommand.Execute("Inventory");
             vm.Inventory.NewAssetCommand.Execute(null); vm.Inventory.Company = "OWNED fixture"; vm.Inventory.Remark = "Optional component with no hostname/IP";
             await vm.Inventory.SaveAssetCommand.ExecuteAsync(null);
@@ -92,13 +94,19 @@ internal static partial class Program
             var grid = Descendants<DataGrid>((DependencyObject)window.Content).Single(g => AutomationProperties.GetName(g) == "Inventory assets");
             Require(grid.Columns.Any(c => Equals(c.Header, "LDoS")) && grid.Columns.Any(c => Equals(c.Header, "Company")) && grid.CanUserResizeColumns, "Actual Inventory presents image columns with resizing");
             foreach (string theme in new[] { "Light", "Dark" }) { vm.Appearance.SelectedTheme = theme; Render(window, output, "Inventory-" + theme, 1536, 1024, 1); Render(window, output, "Inventory-narrow-" + theme, 1280, 800, 1); }
+            }
+            else
+            {
+                vm.NavigateCommand.Execute("Inventory");
+                Require(vm.SelectedPage == "Config Collector" && !provider.GetRequiredService<Lazy<EngineeringContext>>().IsValueCreated, "Retired Inventory cannot be opened and its data workspace stays cold during actual Collector use");
+            }
             vm.NavigateCommand.Execute("Settings"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
             var toggle = Descendants<ToggleButton>((DependencyObject)window.Content).Single(t => AutomationProperties.GetName(t) == "Dark mode");
             vm.Appearance.SelectedTheme = "Light"; ((IToggleProvider)new ToggleButtonAutomationPeer(toggle).GetPattern(PatternInterface.Toggle)).Toggle();
             Require(vm.Appearance.IsDarkMode && vm.Appearance.SelectedTheme == "Dark", "Actual Dark-mode switch applies theme immediately");
             Render(window, output, "Settings-Dark-switch", 1280, 800, 1);
-            Require(errors.Messages.Count == 0, "Collector/Inventory/appearance actual WPF have no binding errors: " + string.Join("; ", errors.Messages));
-            await File.WriteAllTextAsync(Path.Combine(output, "result.txt"), "PASS: actual WPF + bundled Netmiko + owned SSH devices + trust dialog + secret controls + Inventory optional template roundtrip + Dark switch + Terminal removal. Physical vendor/manual DPI/Setup NOT TESTED.");
+            Require(errors.Messages.Count == 0, "Collector/current navigation/appearance actual WPF have no binding errors: " + string.Join("; ", errors.Messages));
+            await File.WriteAllTextAsync(Path.Combine(output, "result.txt"), "PASS: actual WPF + bundled Netmiko + owned SSH devices + trust dialog + secret controls + current navigation retirement + Dark switch + Terminal removal. Legacy Inventory checks run only below 0.13.0. Physical vendor/manual DPI/Setup NOT TESTED.");
         }
         finally
         {

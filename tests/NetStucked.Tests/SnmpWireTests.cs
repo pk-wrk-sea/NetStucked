@@ -54,6 +54,7 @@ public sealed class SnmpWireTests
                 var results=new List<Variable>();foreach(var variable in request.Pdu().Variables) { string key=variable.Id.ToString().TrimStart('.');if(request.TypeCode()==SnmpType.GetNextRequestPdu) { NextRequests++;key=key=="1.3.6.1.2.1.2.2.1.2"?"1.3.6.1.2.1.2.2.1.2.1":"1.3.6.1.2.1.2.2.1.3.1"; }results.Add(new(new ObjectIdentifier(key),_values.GetValueOrDefault(key)??new Integer32(1))); }
                 var response=new ResponseMessage(request.Pdu().RequestId.ToInt32(),request.Version,new OctetString("owned-community"),ErrorCode.NoError,0,results);await _udp.SendAsync(response.ToBytes(),packet.RemoteEndPoint,_stop.Token);
             }}catch(OperationCanceledException) when(_stop.IsCancellationRequested){}catch(ObjectDisposedException) when(_stop.IsCancellationRequested){}
+            catch(SocketException e) when(_stop.IsCancellationRequested && e.SocketErrorCode is SocketError.OperationAborted or SocketError.Interrupted){}
         }
         public async ValueTask DisposeAsync(){_stop.Cancel();_udp.Dispose();await _loop;_stop.Dispose();}
     }

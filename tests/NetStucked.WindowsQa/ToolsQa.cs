@@ -26,8 +26,8 @@ internal static partial class Program
     private static async Task CheckToolsAsync(Window window, MainViewModel vm, string output)
     {
         var names = Descendants<RadioButton>((DependencyObject)window.Content).Select(AutomationProperties.GetName).ToArray();
-        Require(new[] { "Subnet Calculator", "DNS Resolver", "MAC Checker", "URL Checker" }.All(names.Contains), "All approved utility menus exist");
-        Require(new[] { "Diagnostics", "DNS Test", "HTTP / HTTPS Test", "Network Info" }.All(n => !names.Contains(n)), "Retired diagnostics and Wi-Fi menus are absent");
+        Require(new[] { "Subnet Calculator", "DNS Resolver", "MAC Checker", "CVE Checker | IPS" }.All(names.Contains), "Current approved utility/security menus exist");
+        Require(new[] { "Diagnostics", "DNS Test", "HTTP / HTTPS Test", "Network Info", "URL Checker", "Monitoring", "Topology Explorer", "Inventory" }.All(n => !names.Contains(n)), "Retired menus are absent");
         vm.NavigateCommand.Execute("Subnet Calculator"); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
         var view = Descendants<NetStucked.Desktop.Views.SubnetCalculatorView>((DependencyObject)window.Content).Single();
         var input = (TextBox)view.FindName("SubnetInputBox"); var status = (TextBlock)view.FindName("SyntaxMessage");
@@ -51,9 +51,6 @@ internal static partial class Program
             await vm.Mac.StartCommand.ExecuteAsync(null);
             Require(vm.Mac.Results.Count == 2 && vm.Mac.Results[1].Vendor is null, "MAC table displays deterministic test-only provider results without inventing local-address vendor identity");
             Render(window, output, "MAC-" + theme.ToLowerInvariant(), 1280, 800, 1);
-            vm.NavigateCommand.Execute("URL Checker"); vm.Url.Target = "https://example.com"; vm.Url.CheckCommand.Execute(null);
-            Require(vm.Url.Message.Contains("No request was sent"), "URL Checker truthfully blocks API lookup until provider access is configured");
-            Render(window, output, "URL-" + theme.ToLowerInvariant(), 1280, 800, 1);
             vm.NavigateCommand.Execute("Subnet Calculator");
         }
         vm.NavigateCommand.Execute("DNS Resolver"); Require(vm.Dns.QueryNs == false && vm.Dns.QuerySoa == false, "DNS Resolver exposes optional NS/SOA records");
