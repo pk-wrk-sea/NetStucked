@@ -1,5 +1,7 @@
 # Release operations
 
+**Current GitHub Latest: 0.13.0 (2026-11-09).** [Immutable source/assets, four Windows CI runs, public downloads and real updater/helper verification](GITHUB_RELEASE_0.13.0_REPORT_2026-11-09.md). Installed 0.12.0/0.12.1 still require one explicit manual Setup upgrade; no Setup ran in QA. Live Threat Vault/real SmartConsole, physical DPI/accessibility and actual installation acceptance remain open. Older Latest statements below are dated history.
+
 **Current GitHub Latest: 0.12.2 (2026-10-22).** [Source/assets, 527 tests, exact/public/native results and old-client limitation](GITHUB_RELEASE_0.12.2_REPORT_2026-10-22.md). After any runtime/dependency layout change, verify the full installed baseline helper staging, not only release discovery/download. Preserve failing evidence; do not run Setup without the separately authorized machine acceptance environment.
 
 **0.12.0 is published as GitHub Latest (2026-10-22).** [Source/assets, 520 tests, exact checks, four CI runs and public updater evidence](GITHUB_RELEASE_0.12.0_REPORT_2026-10-22.md). No Setup ran; physical vendor/AAA and manual acceptance remain open. Older version statements below are historical.

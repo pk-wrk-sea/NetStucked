@@ -2,6 +2,8 @@
 
 The human instruction of 2026-11-09 explicitly authorizes the proposed 0.13.0 release, including source commit/push/reviewed merge, immutable tag, exact Portable/Installer workflow and public GitHub download/updater validation. This supersedes the initial attachment's no-publication boundary for this release. Do not execute Setup or change device/firewall configuration. Preserve all previous published assets/tags and the installed process/data.
 
+Published as GitHub Latest; [immutable source/assets, four CI runs and actual public updater/helper evidence](GITHUB_RELEASE_0.13.0_REPORT_2026-11-09.md). All release checklist items below passed; separate live/human/Setup gates remain open.
+
 ## Approved behavior
 
 - Exact menu **CVE Checker | IPS**, replacing the former planner desktop route; existing Light/Dark WPF theme.
@@ -15,13 +17,13 @@ Full implementation contract: [approved scope](CVE_IPS_2026-11-09.md), [setup](C
 
 ## Release acceptance (actual evidence only)
 
-- [ ] Version/source/tag and bundled release notes agree.
-- [ ] Release build, unit tests and owned Collector fixtures pass.
-- [ ] Exact portable WPF coverage/current-menu and native startup/retired-monitor checks pass.
-- [ ] Frozen portable ZIP and hashes verified; installer CI compiles those same bytes.
-- [ ] Source/PR/main/frozen-installer Windows CI pass.
-- [ ] Public Portable/Installer downloads match immutable hashes and sizes.
-- [ ] Actual 0.12.2 updater discovers 0.13.0; current Reinstall/Recovery and helper staging verified without Setup.
-- [ ] Prior release assets/tags and canonical reference bytes unchanged.
+- [x] Version/source/tag and bundled release notes agree.
+- [x] Release build, unit tests and owned Collector fixtures pass.
+- [x] Exact portable WPF coverage/current-menu and native startup/retired-monitor checks pass.
+- [x] Frozen portable ZIP and hashes verified; installer CI compiles those same bytes.
+- [x] Source/PR/main/frozen-installer Windows CI pass.
+- [x] Public Portable/Installer downloads match immutable hashes and sizes.
+- [x] Actual 0.12.2 updater discovers 0.13.0; current Reinstall/Recovery and helper staging verified without Setup.
+- [x] Prior release assets/tags and canonical reference bytes unchanged.
 
 Live Threat Vault, real SmartConsole export completeness, real vendor/AAA, physical/mixed-DPI/accessibility, long-soak capacity and actual Setup acceptance remain **NOT TESTED**; no blanket live/real-device DoD closure. Unsigned installer acknowledgement and Windows UAC/SmartScreen remain enforced.

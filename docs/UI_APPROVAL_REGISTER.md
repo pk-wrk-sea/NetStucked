@@ -1,5 +1,7 @@
 # UI approval register
 
+**0.13.0 published (2026-11-09):** [source/assets, four Windows CI runs, exact public download/updater/helper checks and remaining acceptance](GITHUB_RELEASE_0.13.0_REPORT_2026-11-09.md). Existing tags/assets/data retained; no live-provider, physical-DPI or actual Setup PASS is inferred.
+
 **2026-11-09 release extension:** the human authorized 0.13.0 publication of the reviewed CVE Checker | IPS implementation and named menu retirements. See [release scope](FEATURES_0.13.0.md) and [release QA](QA_0.13.0.md); this does not close live-provider, physical DPI/accessibility or actual Setup acceptance.
 
 **2026-11-09 / approved mock-up and explicit implementation:** human reviewed the interactive CVE-to-IPS concept and selected exact menu **CVE Checker | IPS**. Four-stage import/mapping → sources → results/evidence/grouping → export uses the existing WPF Light/Dark theme. Retire Monitoring, Topology Explorer, Inventory and URL Checker routes, retain Dashboard with Coming soon. This supersedes old desktop exposure only; retain legacy data/secrets and immutable references. [Approved scope](CVE_IPS_2026-11-09.md), [verification](QA_CVE_IPS_2026-11-09.md). Automated actual WPF renders are not human physical-DPI/accessibility or live-provider acceptance.

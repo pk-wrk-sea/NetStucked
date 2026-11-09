@@ -1,6 +1,6 @@
 # Release and versioning register
 
-**2026-11-09 / authorized 0.13.0:** `Directory.Build.props` now identifies 0.13.0 for CVE Checker | IPS and the approved desktop retirements. The human explicitly authorizes commit/push/reviewed merge/tag/Portable/Installer/publication and real download/updater checks. [Scope](FEATURES_0.13.0.md), [QA](QA_0.13.0.md). This is preparation, not a claim of publication; preserve all previous public tags/assets and separate untested live/Setup gates.
+**2026-11-09 / GitHub Latest 0.13.0:** current central version and immutable tag identify CVE Checker | IPS and the approved desktop retirements. [Published source/assets, four Windows CI runs, public hashes and real updater/helper checks](GITHUB_RELEASE_0.13.0_REPORT_2026-11-09.md). All older release assets/tags remain unchanged. No Setup ran; 0.12.0/0.12.1 executing helpers still require the documented one-time manual Setup upgrade. Live-provider/manual acceptance is separate.
 
 **0.12.2 is published as GitHub Latest (2026-10-22).** [Immutable source/assets and actual updater evidence](GITHUB_RELEASE_0.12.2_REPORT_2026-10-22.md). 0.12.1 and older tags/assets are preserved. Old 0.12.0/0.12.1 helper code requires one manual Setup upgrade; no Setup executes in QA.
 

@@ -1,5 +1,7 @@
 # Milestone index — 2026-10-09
 
+**0.13.0 published (2026-11-09):** [source/assets, four Windows CI runs, exact public download/updater/helper checks and remaining acceptance](GITHUB_RELEASE_0.13.0_REPORT_2026-11-09.md). Existing tags/assets/data retained; no live-provider, physical-DPI or actual Setup PASS is inferred.
+
 **2026-11-09 / 0.13.0 publication extension:** human explicitly authorized version assignment, source/reviewed merge, immutable tag, distributables and public updater verification for [the approved coverage slice](FEATURES_0.13.0.md). The previous no-publication statement below is historical. [Release QA](QA_0.13.0.md) tracks actual results; real-provider/human acceptance remains separate.
 
 **2026-11-09 / current approved slice:** [CVE Checker | IPS](CVE_IPS_2026-11-09.md) replaces the old planner desktop route. Its catalog-only acceptance is tracked separately from historical A06 device-applicability/change-plan criteria. [QA and open live/manual gates](QA_CVE_IPS_2026-11-09.md). Monitoring/Topology/Inventory/URL desktop exposure is retired; Dashboard is Coming soon. No version assignment/publication.
